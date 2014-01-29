@@ -1,0 +1,15 @@
+<launch>
+
+<!--
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find groundcontrol_gui)/view.rviz"
+     required="true" />
+-->
+
+  <!-- Gmapping node: -->
+  <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" output="screen" args="scan:=/x80sv/laser/scan">
+  </node>
+
+  <!-- Own odometry emission: -->
+  <node name="odom_emitter" pkg="groundcontrol_gui" type="odom_emitter.py" />
+
+</launch>

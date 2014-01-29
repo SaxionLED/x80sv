@@ -1,0 +1,17 @@
+<launch>
+
+ <param name="robot_description" command="$(find xacro)/xacro.py '$(find x80sv_description)/urdf/x80sv.xacro'" />
+
+ <include file="$(find gazebo_ros)/launch/empty_world.launch">
+   <arg name="world_name" value="$(find x80sv_simulation)/worlds/testarea.world" />
+ </include>
+
+ <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model x80sv" />
+ <rosparam file="$(find x80sv_simulation)/config/x80sv_control.yaml" command="load"/>
+ <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+ <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+ <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" ns="/x80sv" args="left_controller right_controller joint_state_controller" />
+ <node name="control_node" pkg="x80sv_simulation" type="control_node.py"/>
+
+</launch>

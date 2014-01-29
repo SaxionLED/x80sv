@@ -10,6 +10,6 @@
   </node>
 
   <!-- Own odometry emission: -->
-  <node name="odom_emitter" pkg="groundcontrol_gui" type="odom_emitter.py" />
+  <node name="odom_emitter" pkg="x80sv_nerves" type="odom_emitter.py" />
 
 </launch>

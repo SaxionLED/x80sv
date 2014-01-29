@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package>
+  <name>x80sv_description</name>
+  <version>0.0.0</version>
+  <description>Robot description files for the x80sv robot.</description>
+  <maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>gazebo_ros_control</run_depend>
+</package>

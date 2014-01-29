@@ -1,0 +1,91 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+
+
+
+
+  <world name="testarea">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://coke_can</uri>
+      <name>can1</name>
+      <pose>2 -1 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://coke_can</uri>
+      <name>can2</name>
+      <pose>2 1 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet1</name>
+      <pose>-2 -1 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet2</name>
+      <pose>1.2 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet3</name>
+      <pose>2.2 0 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet4</name>
+      <pose>2.2 1 0 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet5</name>
+      <pose>3.2 -1 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet6</name>
+      <pose>1 -1 0 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet7</name>
+      <pose>-2 1 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet8</name>
+      <pose>-2 3 0 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://cabinet</uri>
+      <name>cabinet9</name>
+      <pose>-2 4 0 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://gas_station</uri>
+      <name>tango</name>
+      <pose>8 10 0 0 0 0</pose>
+    </include>
+
+    <include>
+      <uri>model://house_1</uri>
+      <name>home</name>
+      <pose>-8 -10 0 0 0 0</pose>
+    </include>
+
+<physics type='ode'>
+  <max_step_size>0.004</max_step_size>
+  <real_time_update_rate>250.0</real_time_update_rate>
+</physics>
+
+
+  </world>
+</sdf>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <name>x80sv</name>
+  <version>0.0.1</version>
+  <description>x80sv metapackage containing simulation, description and drivers.</description>
+  <maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>x80sv_description</run_depend>
+  <run_depend>x80sv_simulation</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

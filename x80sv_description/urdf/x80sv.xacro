@@ -1,0 +1,224 @@
+<?xml version='1.0' ?>
+
+<robot name="x80sv" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+ <!--
+  Wheel inertia:
+   Assuming solid cylinder:
+   Izz = (1/2)*m*r^2
+   Ixx = Iyy = (1/12)*m*(3*r^2 + h^2)
+   Using m = 0.05 [kg] (wheel weight 50 gr.)
+   r = 0.05 [m] (wheel radius)
+   h = 0.01 [m] (wheel width)
+   Ixx = Iyy = 3.17e-5
+   Izz = 6.25e-5
+ -->
+ <xacro:property name="wheel_base" value="0.2" />
+ <xacro:property name="wheel_diameter" value="0.1" />
+ <xacro:property name="axis_height" value="0.05" />
+ <xacro:property name="wheel_mass" value="0.05" />
+ <xacro:property name="wheel_Ixx" value="0.0000317" />
+ <xacro:property name="wheel_Izz" value="0.0000625" />
+ <xacro:property name="M_PI" value="3.1415926535" />
+
+ <link name="base_link">
+  <collision>
+   <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+     <box size="0.4 0.2 0.01" />
+    </geometry>
+  </collision>
+  <visual>
+   <origin xyz="0 0 -0.20" rpy="0 0 0"/>
+   <geometry>
+     <mesh filename="package://x80sv_description/meshes/x80sv.stl" />
+    </geometry>
+  </visual>
+  <inertial>
+   <mass value="2" />
+   <inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003" />
+  </inertial>
+ </link>
+
+ <link name="left_wheel">
+  <collision>
+   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
+   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
+  </collision>
+  <visual>
+   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
+   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
+  </visual>
+  <inertial>
+   <mass value="${wheel_mass}" />
+   <inertia ixx="${wheel_Ixx}" ixy="0" ixz="0" iyy="${wheel_Ixx}" iyz="0" izz="${wheel_Izz}" />
+  </inertial>
+ </link>
+
+ <link name="right_wheel">
+  <collision>
+   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
+   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
+  </collision>
+  <visual>
+   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
+   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
+  </visual>
+  <inertial>
+   <mass value="${wheel_mass}" />
+   <inertia ixx="${wheel_Ixx}" ixy="0" ixz="0" iyy="${wheel_Ixx}" iyz="0" izz="${wheel_Izz}" />
+  </inertial>
+ </link>
+
+ <link name="zwenk_wiel_flens">
+  <collision>
+   <origin xyz="0 0 0" rpy="0 0 0"/>
+   <geometry><box size="${wheel_diameter/2} 0.01 0.01" /></geometry>
+  </collision>
+  <visual>
+   <origin xyz="0 0 0" rpy="0 0 0"/>
+   <geometry><box size="${wheel_diameter/2} 0.01 0.01" /></geometry>
+  </visual>
+  <inertial>
+   <mass value="0.1" />
+   <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+  </inertial>
+ </link>
+
+ <link name="zwenk_wiel">
+  <collision>
+   <origin xyz="0 0 0" rpy="0 1.57 ${M_PI/2}"/>
+   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
+  </collision>
+  <visual>
+   <origin xyz="0 0 0" rpy="0 1.57 ${M_PI/2}"/>
+   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
+  </visual>
+  <inertial>
+   <mass value="${wheel_mass}" />
+   <inertia ixx="${wheel_Ixx}" ixy="0" ixz="0" iyy="${wheel_Ixx}" iyz="0" izz="${wheel_Izz}" />
+  </inertial>
+ </link>
+
+
+ <link name="laser_scanner">
+  <collision>
+   <origin xyz="0 0 0" rpy="0 0 0"/>
+   <geometry><cylinder radius="0.07" length="0.01" /></geometry>
+  </collision>
+  <visual>
+   <origin xyz="0 0 0" rpy="0 0 0"/>
+   <geometry><cylinder radius="0.07" length="0.01" /></geometry>
+  </visual>
+  <inertial>
+   <mass value="0.1" />
+   <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
+  </inertial>
+ </link>
+
+<!-- Joints -->
+  <joint type="continuous" name="left_wheel_as">
+   <origin xyz="0.1 0.13 -${axis_height}" rpy="0 0 0"/>
+  <child link="left_wheel"/>
+  <parent link="base_link" />
+  <axis xyz="0 1 0" />
+  <limit effort="10.0" velocity="5.0" />
+  </joint>
+
+  <joint type="continuous" name="right_wheel_as">
+   <origin xyz="0.1 -0.13 -${axis_height}" rpy="0 0 0"/>
+  <child link="right_wheel"/>
+  <parent link="base_link" />
+  <axis xyz="0 1 0" />
+  <limit effort="10.0" velocity="5.0" />
+  </joint>
+
+  <joint type="continuous" name="zwenk_wiel_as">
+   <origin xyz="-${wheel_diameter/2} 0 ${-axis_height+0.02}" rpy="0 0 0"/>
+  <child link="zwenk_wiel"/>
+  <parent link="zwenk_wiel_flens" />
+  <axis xyz="0 1 0" />
+  </joint>
+
+  <joint type="continuous" name="zwenk_wiel_stuur_as">
+   <origin xyz="-0.2 0 -0.02" rpy="0 0 0"/>
+  <parent link="base_link" />
+  <child link="zwenk_wiel_flens"/>
+  <axis xyz="0 0 1" />
+  </joint>
+
+  <joint type="fixed" name="laser_scanner_glue">
+   <origin xyz="0 0 0.15" rpy="0 0 0"/>
+  <child link="laser_scanner"/>
+  <parent link="base_link" />
+  </joint>
+
+<!-- transmissions -->
+
+<transmission name="left_gearbox">
+ <type>transmission_interface/SimpleTransmission</type>
+ <joint name="left_wheel_as" />
+ <actuator name="left_motor">
+  <hardwareInterface>EffortJointInterface</hardwareInterface>
+  <mechanicalReduction>10</mechanicalReduction>
+ </actuator>
+</transmission>
+
+<transmission name="right_gearbox">
+ <type>transmission_interface/SimpleTransmission</type>
+ <joint name="right_wheel_as" />
+ <actuator name="right_motor">
+  <hardwareInterface>EffortJointInterface</hardwareInterface>
+  <mechanicalReduction>10</mechanicalReduction>
+ </actuator>
+</transmission>
+
+ <!-- plugins -->
+
+  <!-- hokuyo -->
+   <gazebo reference="laser_scanner">
+    <sensor type="gpu_ray" name="laser_scanner_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>300</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.1</min_angle>
+            <max_angle>3.1</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.50</min>
+          <max>5.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters based on published spec for Hokuyo laser
+               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+               reading. -->
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_gpu_laser.so">
+        <topicName>/x80sv/laser/scan</topicName>
+        <frameName>laser_scanner</frameName>
+      </plugin>
+    </sensor>
+   </gazebo>
+
+  <gazebo>
+
+   <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    <robotNamespace>/x80sv</robotNamespace>
+   </plugin>
+
+  </gazebo>
+
+</robot>
+

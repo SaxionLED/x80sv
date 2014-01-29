@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package>
+  <name>x80sv_nerves</name>
+  <version>0.0.0</version>
+  <description>The x80sv nerval system which achieves complex tasks.</description>
+  <license>BSD</license>
+  <maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>x80sv_simulation</run_depend>
+</package>

@@ -1,9 +1,10 @@
 #!/usr/bin/python
-import rospy
-from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64
-from collections import namedtuple
 import math
+from collections import namedtuple
+import rospy
+from geometry_msgs.msg import Twist, PoseStamped
+from std_msgs.msg import Float64
+import tf
 
 Point = namedtuple('Point', ['x', 'y'])
 def distance(p1, p2):
@@ -19,8 +20,8 @@ def clipangle(a):
 
 class Driver:
     def __init__(self):
-        rospy.init_node('steer_x80sv')
-        rospy.Subscriber()
+        rospy.init_node('steer_node')
+        # rospy.Subscriber()
         self.cmd_vel = rospy.Publisher('/cmd_vel', Twist)
 
     def handle_pose_estimage(self, pose):
@@ -38,7 +39,7 @@ class Driver:
             t_angle = math.arctan2(dy, dx)
             dangle = clipangle(t_angle - theta)
             u = 0.1*np.matrix([3.0, 4.0 * dangle]).transpose()
-            if dist < 0.7:
+            if dist < 0.1:
                 print('At waypoint!', self.waypoints.pop(0))
         else:
             u = np.matrix([[0.0], [0.0]])
@@ -46,7 +47,15 @@ class Driver:
         return u
 
     def steer(self):
-        rospy.spin()
+        listener = tf.TransformListener()
+        rate = rospy.Rate(10.0)
+        while not rospy.is_shutdown():
+            try:
+                (trans, rot) = listener.lookupTransform('/base_link', '/nav_target', rospy.Time(0))
+            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                continue
+            print trans, rot
+            rate.sleep()
 
 if __name__ == '__main__':
     driver = Driver()

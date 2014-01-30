@@ -8,6 +8,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <run_depend>x80sv_description</run_depend>
   <run_depend>x80sv_simulation</run_depend>
+  <run_depend>x80sv_nerves</run_depend>
 
   <export>
     <metapackage/>

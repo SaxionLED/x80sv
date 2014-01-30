@@ -12,4 +12,14 @@
   <!-- Own odometry emission: -->
   <node name="odom_emitter" pkg="x80sv_nerves" type="odom_emitter.py" />
 
+
+  <!-- Node that does planning navigation -->
+  <node name="move_base1" pkg="move_base" type="move_base" output="screen" respawn="false">
+    <rosparam file="$(find x80sv_nerves)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find x80sv_nerves)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find x80sv_nerves)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find x80sv_nerves)/global_costmap_params.yaml" command="load" />
+
+  </node>
+
 </launch>

@@ -1,15 +1,6 @@
 
 This package controls the x80sv robot
 
-To launch the simulation of the x80sv run:
-
-  roslaunch groundcontrol_gui simulation.launch
-
-You will then see this:
-
-
-.. image:: gazebo_gmapping.png
-
 
 To launch the gmapping run:
 

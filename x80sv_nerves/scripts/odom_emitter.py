@@ -44,8 +44,8 @@ class OdomEmitter:
         vth = (v_r - v_l) / (self.wheel_base) # Rotation
 
         # Integrate:
-        delta_x = (vx * math.cos(self.th) - vy * math.sin(self.th)) * dt
-        delta_y = (vx * math.sin(self.th) + vy * math.cos(self.th)) * dt
+        delta_x = (vx * math.cos(self.th)) * dt
+        delta_y = (vx * math.sin(self.th)) * dt
         delta_th = vth * dt
 
         # Update angles:

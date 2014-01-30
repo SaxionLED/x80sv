@@ -153,26 +153,6 @@
   <parent link="base_link" />
   </joint>
 
-<!-- transmissions -->
-
-<transmission name="left_gearbox">
- <type>transmission_interface/SimpleTransmission</type>
- <joint name="left_wheel_as" />
- <actuator name="left_motor">
-  <hardwareInterface>EffortJointInterface</hardwareInterface>
-  <mechanicalReduction>10</mechanicalReduction>
- </actuator>
-</transmission>
-
-<transmission name="right_gearbox">
- <type>transmission_interface/SimpleTransmission</type>
- <joint name="right_wheel_as" />
- <actuator name="right_motor">
-  <hardwareInterface>EffortJointInterface</hardwareInterface>
-  <mechanicalReduction>10</mechanicalReduction>
- </actuator>
-</transmission>
-
  <!-- plugins -->
 
   <!-- hokuyo -->
@@ -212,13 +192,21 @@
     </sensor>
    </gazebo>
 
-  <gazebo>
-
-   <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-    <robotNamespace>/x80sv</robotNamespace>
-   </plugin>
-
-  </gazebo>
+<gazebo>
+  <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+    <alwaysOn>true</alwaysOn>
+    <updateRate>10</updateRate>
+    <leftJoint>left_wheel_as</leftJoint>
+    <rightJoint>right_wheel_as</rightJoint>
+    <wheelSeparation>${wheel_base}</wheelSeparation>
+    <wheelDiameter>${wheel_diameter}</wheelDiameter>
+    <torque>20</torque>
+    <commandTopic>cmd_vel</commandTopic>
+    <odometryTopic>odom</odometryTopic>
+    <odometryFrame>odom</odometryFrame>
+    <robotBaseFrame>base_link</robotBaseFrame>
+  </plugin>
+</gazebo>
 
 </robot>
 

@@ -1,0 +1,10 @@
+<launch>
+  <group ns="skynav_default">
+    <rosparam file="$(find skynav_x80sv)/x80_config.yaml" command="load"/>
+    <node pkg="skynav_x80sv" name="x80_robot" type="x80_robot" output="screen"/>	
+    <node pkg="skynav_x80sv" name="input_keyboard" type="input_keyboard" output="screen"/>
+    <!-- <node pkg="skynav_x80sv" name="neato_laser_publisher" type="neato_laser_publisher" output="screen"/> -->
+    <!-- <node pkg="skynav_x80sv" name="robot_wrapper" type="robot_wrapper" output="screen"/> -->
+  </group>
+</launch>
+

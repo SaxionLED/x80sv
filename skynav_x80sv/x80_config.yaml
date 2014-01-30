@@ -1,0 +1,3 @@
+x80_config: {RobotCommMethod: Serial, RobotID: drrobot1, RobotBaseIP: 192.168.0.201,
+  RobotPortNum: 10001, RobotSerialPort: /dev/ttyUSB0, RobotType: X80, MotorDir: 1, WheelRadius: 0.080, WheelDistance: 0.305,
+  EncoderCircleCnt: 756, MinSpeed: 0.1, MaxSpeed: 1.0, Enable_IR: true, Enable_US: true}

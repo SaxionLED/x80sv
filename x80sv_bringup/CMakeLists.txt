@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(x80sv_nerves)
+project(x80sv_bringup)
 
 find_package(catkin REQUIRED)
 

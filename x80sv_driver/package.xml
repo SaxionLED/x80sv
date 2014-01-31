@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-	<name>skynav_x80sv</name>
+	<name>x80sv_driver</name>
 	<version>0.0.0</version>
-	<description>skynav_x80sv</description>
+	<description>x80sv_driver</description>
 	<maintainer email="a@a.com">DrRobot</maintainer>
 	<license>BSD</license>
 	
@@ -22,22 +22,8 @@
 	<run_depend>boost</run_depend>
 	
 	
+	<!-- note: missing player package, no longer available for Hydro -->
 	
-	
-<!--   <depend package="roscpp"/>
-  <depend package="rospy"/>
-  <depend package="tf"/>
-  <depend package="geometry_msgs"/>
-  <depend package="roslib"/>
-  <depend package="nav_msgs"/>
-  <depend package="std_msgs"/>
-  <depend package="sensor_msgs"/>
-  <depend package="player"/>
-  <depend package="joy"/>
-  
-  <depend package="skynav_msgs"/>
-  
-  <rosdep name="boost" /> -->
 </package>
 
 

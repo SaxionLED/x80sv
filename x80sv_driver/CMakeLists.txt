@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(skynav_x80sv)
+project(x80sv_driver)
 
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp skynav_msgs tf joy)
 find_package(Boost REQUIRED)

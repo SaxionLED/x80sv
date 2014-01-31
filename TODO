@@ -1,0 +1,1 @@
+drrobot_player.cpp depends on skynav_msgs, should be independant

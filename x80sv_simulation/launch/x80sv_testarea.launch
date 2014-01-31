@@ -3,9 +3,10 @@
  <param name="robot_description" command="$(find xacro)/xacro.py '$(find x80sv_description)/urdf/x80sv.xacro'" />
 
  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-   <arg name="world_name" value="$(find x80sv_simulation)/worlds/testarea.world" />
+	<!-- <arg name="debug" value="true"/> -->
+    <arg name="world_name" value="$(find x80sv_simulation)/worlds/testarea.world"/>
  </include>
-
+ 
  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model x80sv" />
  <rosparam file="$(find x80sv_simulation)/config/x80sv_control.yaml" command="load"/>
  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />

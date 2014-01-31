@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>x80sv_nerves</name>
+  <name>x80sv_bringup</name>
   <version>0.0.0</version>
   <description>The x80sv nerval system which achieves complex tasks.</description>
   <license>BSD</license>

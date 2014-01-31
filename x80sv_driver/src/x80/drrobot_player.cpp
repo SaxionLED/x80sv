@@ -1,5 +1,5 @@
 /*!
- *  skynav_x80sv
+ *  x80sv_driver
  *  Copyright (c) 2011, Dr Robot Inc
  * All rights reserved.
  *
@@ -31,7 +31,7 @@
 /*!
 
 @mainpage
-  skynav_x80sv is a driver for motion control system on I90/Sentinel3/Hawk/H20/X80SV/Jaguar series mobile robot, available from
+  x80sv_driver is a driver for motion control system on I90/Sentinel3/Hawk/H20/X80SV/Jaguar series mobile robot, available from
 <a href="http://www.drrobot.com">Dr Robot </a>.
 <hr>
 
@@ -39,7 +39,7 @@
 @par     After start roscore, you need load robot configuration file to parameter server first.
           For example, I90 robot, you need load drrobotplayer_I90.yaml use command "rosparam load drrobotplayer_I90.yaml"
 @verbatim
-$ skynav_x80sv
+$ x80sv_driver
 @endverbatim
 
 <hr>
@@ -89,13 +89,13 @@ Publishes to (name / type):
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Float64.h>
 
-#include <skynav_x80sv/MotorInfo.h>
-#include <skynav_x80sv/MotorInfoArray.h>
+#include <x80sv_driver/MotorInfo.h>
+#include <x80sv_driver/MotorInfoArray.h>
 #include <skynav_msgs/RangeArray.h>
 #include <sensor_msgs/Range.h>
-#include <skynav_x80sv/PowerInfo.h>
-#include <skynav_x80sv/StandardSensor.h>
-#include <skynav_x80sv/CustomSensor.h>
+#include <x80sv_driver/PowerInfo.h>
+#include <x80sv_driver/StandardSensor.h>
+#include <x80sv_driver/CustomSensor.h>
 #include <skynav_msgs/TimedPose.h>
 #include <DrRobotMotionSensorDriver.hpp>
 
@@ -228,16 +228,16 @@ public:
         //  strcat(robotConfig2_.serialPortName,robotSerialPort_.c_str());
         strcpy(robotConfig2_.serialPortName, robotSerialPort_.c_str());
         //create publishers for sensor data information
-        motorInfo_pub_ = node_.advertise<skynav_x80sv::MotorInfoArray>("drrobot_motor", 1);
-        powerInfo_pub_ = node_.advertise<skynav_x80sv::PowerInfo>("drrobot_powerinfo", 1);
+        motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
+        powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
         if (enable_ir_) {
             ir_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_ir", 1);
         }
         if (enable_sonar_) {
             sonar_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_sonar", 1);
         }
-        standardSensor_pub_ = node_.advertise<skynav_x80sv::StandardSensor>("drrobot_standardsensor", 1);
-        customSensor_pub_ = node_.advertise<skynav_x80sv::CustomSensor>("drrobot_customsensor", 1);
+        standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
+        customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
 
         drrobotPowerDriver_ = new DrRobotMotionSensorDriver();
         drrobotMotionDriver_ = new DrRobotMotionSensorDriver();
@@ -372,7 +372,7 @@ public:
                 || (robotConfig1_.boardType == Hawk_H20_Power)) {
             if (drrobotPowerDriver_->portOpen()) {
                 drrobotPowerDriver_->readPowerSensorData(&powerSensorData_);
-                skynav_x80sv::PowerInfo powerInfo;
+                x80sv_driver::PowerInfo powerInfo;
                 powerInfo.ref_vol = 1.5 * 4095 / (double) powerSensorData_.refVol;
 
                 powerInfo.bat1_vol = (double) powerSensorData_.battery1Vol * 8 / 4095 * powerInfo.ref_vol;
@@ -397,7 +397,7 @@ public:
             drrobotMotionDriver_->readCustomSensorData(&customSensorData_);
             // Translate from driver data to ROS data
             cntNum_++;
-            skynav_x80sv::MotorInfoArray motorInfoArray;
+            x80sv_driver::MotorInfoArray motorInfoArray;
             motorInfoArray.motorInfos.resize(MOTOR_NUM);
             for (uint32_t i = 0; i < MOTOR_NUM; ++i) {
                 motorInfoArray.motorInfos[i].header.stamp = ros::Time::now();
@@ -456,7 +456,7 @@ public:
                 ir_pub_.publish(rangerArray);
             }
 
-            skynav_x80sv::StandardSensor standardSensor;
+            x80sv_driver::StandardSensor standardSensor;
             standardSensor.humanSensorData.resize(4);
             standardSensor.tiltingSensorData.resize(2);
             standardSensor.overHeatSensorData.resize(2);
@@ -483,7 +483,7 @@ public:
             standardSensor.potVol = (double) standardSensorData_.potVol / 4095 * 6;
             standardSensor_pub_.publish(standardSensor);
 
-            skynav_x80sv::CustomSensor customSensor;
+            x80sv_driver::CustomSensor customSensor;
             customSensor.customADData.resize(8);
             customSensor.header.stamp = ros::Time::now();
             customSensor.header.frame_id = string("drrobot_customsensor");

@@ -3,7 +3,7 @@
 #include <sensor_msgs/Range.h>
 #include <skynav_msgs/RangeDefined.h>
 #include <skynav_msgs/RangeDefinedArray.h>
-#include <skynav_x80sv/MotorInfoArray.h>
+#include <x80sv_driver/MotorInfoArray.h>
 #include <skynav_msgs/TimedPose.h>
 #include <geometry_msgs/Twist.h>
 #include <list>
@@ -214,14 +214,14 @@ void subTargetPoseCallback(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
 
 }
 
-void subEncoderCallback(const skynav_x80sv::MotorInfoArray::ConstPtr& motorInfo) {
+void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo) {
 
     double movementDelta0 = 0, movementDelta1 = 0;
 
     const uint encoderMax = 32768;
 
-    skynav_x80sv::MotorInfo mtr0 = motorInfo->motorInfos.at(0);
-    skynav_x80sv::MotorInfo mtr1 = motorInfo->motorInfos.at(1);
+    x80sv_driver::MotorInfo mtr0 = motorInfo->motorInfos.at(0);
+    x80sv_driver::MotorInfo mtr1 = motorInfo->motorInfos.at(1);
 
     //    ROS_INFO("Encoder values: %u, %u", mtr0.encoder_pos, mtr1.encoder_pos);
 

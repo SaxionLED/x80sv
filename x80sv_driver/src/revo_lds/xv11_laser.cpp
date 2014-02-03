@@ -135,28 +135,34 @@ namespace xv_11_laser_driver {
 	    //read data in sets of 4
 	    for(uint16_t i = 0; i < raw_bytes.size(); i=i+22) {
 	      if(raw_bytes[i] == 0xFA && raw_bytes[i+1] == (0xA0+i/22)) {//&& CRC check
-		good_sets++;
-		motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
+			good_sets++;
+			motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
        		rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/64; 
 		
-		for(uint16_t j = i+4; j < i+20; j=j+4) {
-		  index = (4*i)/22 + (j-4-i)/4;
-		  // Four bytes per reading
-		  uint8_t byte0 = raw_bytes[j];
-		  uint8_t byte1 = raw_bytes[j+1];
-		  uint8_t byte2 = raw_bytes[j+2];
-		  uint8_t byte3 = raw_bytes[j+3];
-		  // First two bits of byte1 are status flags
-		  // uint8_t flag1 = (byte1 & 0x80) >> 7;  // No return/max range/too low of reflectivity
-		  // uint8_t flag2 = (byte1 & 0x40) >> 6;  // Object too close, possible poor reading due to proximity kicks in at < 0.6m
-		  // Remaining bits are the range in mm
-		  uint16_t range = ((byte1 & 0x3F)<< 8) + byte0;
-		  // Last two bytes represent the uncertanty or intensity, might also be pixel area of target...
-		  uint16_t intensity = (byte3 << 8) + byte2;
+			for(uint16_t j = i+4; j < i+20; j=j+4) {
+			  index = (4*i)/22 + (j-4-i)/4;
+			  // Four bytes per reading
+			  uint8_t byte0 = raw_bytes[j];
+			  uint8_t byte1 = raw_bytes[j+1];
+			  uint8_t byte2 = raw_bytes[j+2];
+			  uint8_t byte3 = raw_bytes[j+3];
+			  // First two bits of byte1 are status flags
+			  // uint8_t flag1 = (byte1 & 0x80) >> 7;  // No return/max range/too low of reflectivity
+			  // uint8_t flag2 = (byte1 & 0x40) >> 6;  // Object too close, possible poor reading due to proximity kicks in at < 0.6m
+			  // Remaining bits are the range in mm
+			  uint16_t range = ((byte1 & 0x3F)<< 8) + byte0;
+			  // Last two bytes represent the uncertanty or intensity, might also be pixel area of target...
+			  uint16_t intensity = (byte3 << 8) + byte2;
+			  
+			  double rangeM = range / 1000;
+			  
+			  if(rangeM < scan->range_min || rangeM > scan->range_max)	{
+				  continue;	// skip ranges outside limit
+			  }
 
-		  scan->ranges[index] = range / 1000.0;
-		  scan->intensities[index] = intensity;
-		}
+			  scan->ranges[index] = rangeM;
+			  scan->intensities[index] = intensity;
+			}
 	      }
 	    }
 

@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+
+
+
+
+  <world name="localnav_world_1">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    
+    <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall1</name>
+      <pose>5 0 0 0 0 1.57</pose>
+    </include>
+        <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall2</name>
+      <pose>5 1.2 0 0 0 1.57</pose>
+    </include>
+        <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall3</name>
+      <pose>5 -1.2 0 0 0 1.57</pose>
+    </include>
+        <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall4</name>
+      <pose>5 -2.4 0 0 0 1.57</pose>
+    </include>
+            <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall5</name>
+      <pose>5 2.4 0 0 0 0</pose>
+    </include>
+            <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall6</name>
+      <pose>5 -2.4 0 0 0 0</pose>
+    </include>
+            <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall7</name>
+      <pose>6.2 2.4 0 0 0 4.71</pose>
+    </include>
+            <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall8</name>
+      <pose>6.2 1.2 0 0 0 4.71</pose>
+    </include>
+            <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall9</name>
+      <pose>6.2 0 0 0 0 4.71</pose>
+    </include>
+            <include>
+      <uri>model://wall</uri>
+      <name>ob1_wall10</name>
+      <pose>6.2 -1.2 0 0 0 4.71</pose>
+    </include>
+  </world>
+</sdf>

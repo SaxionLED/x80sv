@@ -18,17 +18,19 @@
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/x80sv" args="joint_state_controller" />
     
            <!-- Gmapping node: -->
-	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" output="screen" args="scan:=/x80sv/laser/scan"/>
-	
-	<!-- Laser filter node -->
-	<node name="laser_filter" pkg="x80sv_simulation" type="laser_filter" output="screen"/>
-    
+	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" output="screen" args="scan:=/x80sv/laser/scan">
+		<param name="maxRange" value="4.0"/>
+		<param name="maxUrange" value="3.9"/>	
+	</node>
+	    
       <!-- Node that does planning navigation -->
+<!--
 	<node name="move_base1" pkg="move_base" type="move_base" output="screen" respawn="false">
     <rosparam file="$(find x80sv_bringup)/costmap_common_params.yaml" command="load" ns="global_costmap" />
     <rosparam file="$(find x80sv_bringup)/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find x80sv_bringup)/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find x80sv_bringup)/global_costmap_params.yaml" command="load" />
 	</node>
+-->
 	
 </launch>

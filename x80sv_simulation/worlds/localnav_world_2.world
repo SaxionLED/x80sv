@@ -1,0 +1,226 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+
+
+
+
+  <world name="localnav_world_1">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    
+    <!-- top wall -->
+                <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall1</name>
+      <pose>2.4 3 0 0 0 3.14</pose>
+    </include>
+                    <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall2</name>
+      <pose>1.2 3 0 0 0 3.14</pose>
+    </include>
+                    <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall3</name>
+      <pose>0 3 0 0 0 3.14</pose>
+    </include>
+                    <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall4</name>
+      <pose>-1.2 3 0 0 0 3.14</pose>
+    </include>
+    
+                        <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall4_1</name>
+      <pose>3.6 3 0 0 0 3.14</pose>
+    </include>
+    
+                        <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall4_2</name>
+      <pose>4.8 3 0 0 0 3.14</pose>
+    </include>
+    
+                            <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall4_3</name>
+      <pose>6 3 0 0 0 3.14</pose>
+    </include>
+    
+                                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall4_4</name>
+      <pose>6 4.2 0 0 0 4.71</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall5</name>
+      <pose>-2.4 1.8 0 0 0 4.71</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall6</name>
+      <pose>-2.4 0.6 0 0 0 4.71</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall8</name>
+      <pose>-2.4 3 0 0 0 4.71</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall7</name>
+      <pose>-2.4 -0.6 0 0 0 4.71</pose>
+    </include>
+    
+                    <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall9</name>
+      <pose>-2.4 -1.8 0 0 0 4.71</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall10</name>
+      <pose>-2.4 -3 0 0 0 0</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall11</name>
+      <pose>-1.2 -3 0 0 0 0</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall12</name>
+      <pose>0 -3 0 0 0 0</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall13</name>
+      <pose>1.2 -3 0 0 0 0</pose>
+    </include>
+    
+                    <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall14</name>
+      <pose>2.4 -3 0 0 0 0</pose>
+    </include>
+    
+                    <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall15</name>
+      <pose>3.6 -3 0 0 0 0</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing west -->
+      <name>ob1_wall16</name>
+      <pose>4.8 -3 0 0 0 1.57</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing west -->
+      <name>ob1_wall17</name>
+      <pose>4.8 -0.6 0 0 0 1.57</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing west -->
+      <name>ob1_wall18</name>
+      <pose>4.8 0.6 0 0 0 1.57</pose>
+    </include>
+    
+                        <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall19</name>
+      <pose>4.8 -1.8 0 0 0 0</pose>
+    </include>
+    
+                            <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall19_1</name>
+      <pose>6 -1.8 0 0 0 0</pose>
+    </include>
+    
+                            <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall19_2</name>
+      <pose>7.2 -1.8 0 0 0 0</pose>
+    </include>
+    
+                            <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall20</name>
+      <pose>4.8 1.8 0 0 0 0</pose>
+    </include>
+    
+                           <include>
+      <uri>model://wall</uri>	<!-- facing south -->
+      <name>ob1_wall21</name>
+      <pose>6 -0.6 0 0 0 3.14</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall22</name>
+      <pose>6 0.6 0 0 0 4.71</pose>
+    </include>
+    
+                <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall23</name>
+      <pose>6 1.8 0 0 0 4.71</pose>
+    </include>
+    
+                    <include>
+      <uri>model://wall</uri>	<!-- facing west -->
+      <name>ob1_wall24</name>
+      <pose>8.4 -1.8 0 0 0 1.57</pose>
+    </include>
+    
+                        <include>
+      <uri>model://wall</uri>	<!-- facing west -->
+      <name>ob1_wall25</name>
+      <pose>8.4 -0.6 0 0 0 1.57</pose>
+    </include>
+    
+                                <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall26</name>
+      <pose>8.4 0.6 0 0 0 0</pose>
+    </include>
+    
+                    <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall27</name>
+      <pose>9.6 0.6 0 0 0 4.71</pose>
+    </include>
+    
+                        <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall28</name>
+      <pose>9.6 -0.6 0 0 0 4.71</pose>
+    </include>
+    
+                        <include>
+      <uri>model://wall</uri>	<!-- facing east -->
+      <name>ob1_wall29</name>
+      <pose>9.6 -1.8 0 0 0 4.71</pose>
+    </include>
+    
+  </world>
+</sdf>

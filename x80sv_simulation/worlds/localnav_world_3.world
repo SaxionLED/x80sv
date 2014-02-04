@@ -15,7 +15,7 @@
     </include>
     
     <include>
-      <uri>model://wall</uri>	<!-- facing west -->
+      <uri>model://wall</uri>
       <name>ob1_wall1</name>
       <pose>5 0 0 0 0 1.57</pose>
     </include>
@@ -35,17 +35,17 @@
       <pose>5 -2.4 0 0 0 1.57</pose>
     </include>
             <include>
-      <uri>model://wall</uri>	<!-- facing north -->
+      <uri>model://wall</uri>
       <name>ob1_wall5</name>
       <pose>5 2.4 0 0 0 0</pose>
     </include>
             <include>
-      <uri>model://wall</uri>	<!-- facing south -->
+      <uri>model://wall</uri>
       <name>ob1_wall6</name>
-      <pose>5 -2.4 0 0 0 3.14</pose>
+      <pose>5 -2.4 0 0 0 0</pose>
     </include>
             <include>
-      <uri>model://wall</uri>	<!-- facing east -->
+      <uri>model://wall</uri>
       <name>ob1_wall7</name>
       <pose>6.2 2.4 0 0 0 4.71</pose>
     </include>

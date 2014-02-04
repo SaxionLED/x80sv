@@ -1,18 +1,24 @@
 <?xml version="1.0"?>
 <package>
-  <name>x80sv_simulation</name>
-  <version>0.0.0</version>
-  <description>The x80sv_simulation package</description>
+	<name>x80sv_simulation</name>
+	<version>0.0.0</version>
+	<description>The x80sv_simulation package</description>
 
-  <maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
+	<maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
 
 
-  <license>TODO</license>
+	<license>TODO</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+	<buildtool_depend>catkin</buildtool_depend>
+	<build_depend>roscpp</build_depend>
+	<build_depend>sensor_msgs</build_depend>
   
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>gazebo_ros_control</run_depend>
-  <run_depend>ros_control</run_depend>
-  <run_depend>x80sv_description</run_depend>
+	<run_depend>sensor_msgs</run_depend>
+  
+	<run_depend>gazebo_ros</run_depend>
+	<run_depend>gazebo_ros_control</run_depend>
+	<run_depend>ros_control</run_depend>
+	<run_depend>x80sv_description</run_depend>
+	<run_depend>roscpp</run_depend>
+	
 </package>

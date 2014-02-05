@@ -222,5 +222,29 @@
       <pose>9.6 -1.8 0 0 0 4.71</pose>
     </include>
     
+                                    <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall30</name>
+      <pose>4.8 4.2 0 0 0 0</pose>
+    </include>
+    
+                                    <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall31</name>
+      <pose>3.6 4.2 0 0 0 0</pose>
+    </include>
+    
+                                    <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall32</name>
+      <pose>2.4 4.2 0 0 0 0</pose>
+    </include>
+    
+                                    <include>
+      <uri>model://wall</uri>	<!-- facing north -->
+      <name>ob1_wall33</name>
+      <pose>1.2 4.2 0 0 0 0</pose>
+    </include>
+    
   </world>
 </sdf>

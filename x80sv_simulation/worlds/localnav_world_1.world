@@ -42,7 +42,7 @@
             <include>
       <uri>model://wall</uri>	<!-- facing south -->
       <name>ob1_wall6</name>
-      <pose>5 -2.4 0 0 0 3.14</pose>
+      <pose>6.2 -2.4 0 0 0 3.14</pose>
     </include>
             <include>
       <uri>model://wall</uri>	<!-- facing east -->
@@ -64,5 +64,20 @@
       <name>ob1_wall10</name>
       <pose>6.2 -1.2 0 0 0 4.71</pose>
     </include>
+    
+        <!-- coke cans at random positions so gmapping can stay orientated -->
+    <include><uri>model://coke_can</uri><pose>-3 -1 0 0 0 0</pose><name>coke1</name></include>
+    <include><uri>model://coke_can</uri><pose>-1 -3 0 0 0 0</pose><name>coke2</name></include>
+    <include><uri>model://coke_can</uri><pose>-2 2 0 0 0 0</pose><name>coke3</name></include>
+    <include><uri>model://coke_can</uri><pose>0 3 0 0 0 0</pose><name>coke4</name></include>
+    <include><uri>model://coke_can</uri><pose>2 -6 0 0 0 0</pose><name>coke5</name></include>
+    <include><uri>model://coke_can</uri><pose>2 6 0 0 0 0</pose><name>coke6</name></include>
+    <include><uri>model://coke_can</uri><pose>4 7 0 0 0 0</pose><name>coke7</name></include>
+    <include><uri>model://coke_can</uri><pose>6 -5 0 0 0 0</pose><name>coke8</name></include>
+    <include><uri>model://coke_can</uri><pose>8 5 0 0 0 0</pose><name>coke9</name></include>
+    <include><uri>model://coke_can</uri><pose>11 -4 0 0 0 0</pose><name>coke10</name></include>
+    <include><uri>model://coke_can</uri><pose>13 3 0 0 0 0</pose><name>coke11</name></include>
+    <include><uri>model://coke_can</uri><pose>7 -1 0 0 0 0</pose><name>coke12</name></include>
+    
   </world>
 </sdf>

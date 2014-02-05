@@ -4,7 +4,7 @@
 
 
 	<!-- Laser filter node -->
-	<node name="laser_filter" pkg="x80sv_simulation" type="laser_filter" output="screen"/>
+	<node name="laser_filter" pkg="x80sv_simulation" type="laser_filter"/>
 
 
 	<node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" required="true"/>
@@ -15,10 +15,10 @@
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
-	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/x80sv" args="joint_state_controller" />
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" ns="/x80sv" args="joint_state_controller" />
      
            <!-- Gmapping node: -->
-	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" output="screen" args="scan:=/x80sv/laser/scan">
+	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/x80sv/laser/scan">
 		<param name="maxRange" value="4.5"/>
 		<param name="maxUrange" value="3.9"/>	<!-- maxUrange: actual maximum laser range -->
 	</node>

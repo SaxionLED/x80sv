@@ -1,6 +1,8 @@
 <?xml version='1.0' ?>
 
 <robot name="x80sv" xmlns:xacro="http://www.ros.org/wiki/xacro">
+	
+	<xacro:include filename="$(find erratic_description)/urdf/erratic_wheel.xacro" />
 
  <!--
   Wheel inertia:
@@ -12,93 +14,172 @@
    h = 0.01 [m] (wheel width)
    Ixx = Iyy = 3.17e-5
    Izz = 6.25e-5
- -->
- <xacro:property name="wheel_base" value="0.2" />
- <xacro:property name="wheel_diameter" value="0.1" />
- <xacro:property name="axis_height" value="0.05" />
- <xacro:property name="wheel_mass" value="0.05" />
- <xacro:property name="wheel_Ixx" value="0.0000317" />
- <xacro:property name="wheel_Izz" value="0.0000625" />
- <xacro:property name="M_PI" value="3.1415926535" />
+-->
+<xacro:property name="wheel_base" value="0.2" />
+<xacro:property name="wheel_diameter" value="0.16" />
+<xacro:property name="wheel_distance" value="0.305"/>
+<xacro:property name="axis_height" value="0.05" />
+<xacro:property name="wheel_mass" value="0.05" />
+<xacro:property name="wheel_Ixx" value="0.0000317" />
+<xacro:property name="wheel_Izz" value="0.0000625" />
+<xacro:property name="M_PI" value="3.141592653589793238462643383279502884197169399375105820974944592307816406" />
 
- <link name="base_link">
-  <collision>
-   <origin xyz="0 0 0" rpy="0 0 0"/>
-    <geometry>
-     <box size="0.4 0.2 0.01" />
-    </geometry>
-  </collision>
-  <visual>
-   <origin xyz="0 0 -0.20" rpy="0 0 0"/>
-   <geometry>
-     <mesh filename="package://x80sv_description/meshes/x80sv.stl" />
-    </geometry>
-  </visual>
-  <inertial>
-   <mass value="2" />
-   <inertia ixx="0.003" ixy="0" ixz="0" iyy="0.003" iyz="0" izz="0.003" />
-  </inertial>
- </link>
 
- <link name="left_wheel">
-  <collision>
-   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
-   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
-  </collision>
-  <visual>
-   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
-   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
-  </visual>
-  <inertial>
-   <mass value="${wheel_mass}" />
-   <inertia ixx="${wheel_Ixx}" ixy="0" ixz="0" iyy="${wheel_Ixx}" iyz="0" izz="${wheel_Izz}" />
-  </inertial>
- </link>
+ 	<link name="base_footprint">
+		<inertial>
+			<mass value="0.0001" />
+			<origin xyz="0 0 0" />
+			<inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+				iyy="0.0001" iyz="0.0" 
+				izz="0.0001" />
+		</inertial>
 
- <link name="right_wheel">
-  <collision>
-   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
-   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
-  </collision>
-  <visual>
-   <origin xyz="0 0 0" rpy="0 1.57 1.57"/>
-   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
-  </visual>
-  <inertial>
-   <mass value="${wheel_mass}" />
-   <inertia ixx="${wheel_Ixx}" ixy="0" ixz="0" iyy="${wheel_Ixx}" iyz="0" izz="${wheel_Izz}" />
-  </inertial>
- </link>
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.001 0.001 0.001" />
+			</geometry>
+			<material name="Green" />
+		</visual>
 
- <link name="zwenk_wiel_flens">
-  <collision>
-   <origin xyz="0 0 0" rpy="0 0 0"/>
-   <geometry><box size="${wheel_diameter/2} 0.01 0.01" /></geometry>
-  </collision>
-  <visual>
-   <origin xyz="0 0 0" rpy="0 0 0"/>
-   <geometry><box size="${wheel_diameter/2} 0.01 0.01" /></geometry>
-  </visual>
-  <inertial>
-   <mass value="0.1" />
-   <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001" />
-  </inertial>
- </link>
+		<collision>
+			<origin xyz="0 0 0.128" rpy="0 0 0" />
+			<geometry>
+				<box size="0.001 0.001 0.001" />
+			</geometry>
+		</collision>
+	</link>
 
- <link name="zwenk_wiel">
-  <collision>
-   <origin xyz="0 0 0" rpy="0 1.57 ${M_PI/2}"/>
-   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
-  </collision>
-  <visual>
-   <origin xyz="0 0 0" rpy="0 1.57 ${M_PI/2}"/>
-   <geometry><cylinder radius="${wheel_diameter/2}" length="0.01" /></geometry>
-  </visual>
-  <inertial>
-   <mass value="${wheel_mass}" />
-   <inertia ixx="${wheel_Ixx}" ixy="0" ixz="0" iyy="${wheel_Ixx}" iyz="0" izz="${wheel_Izz}" />
-  </inertial>
- </link>
+	<joint name="base_footprint_joint" type="fixed">
+		<origin xyz="0.063 0 0.128" rpy="0 0 0" />
+		<parent link="base_footprint"/>
+		<child link="base_link" />
+	</joint>
+
+
+	<link name="base_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="0.4 0.2 0.01" />
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0 0 -0.20" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://x80sv_description/meshes/x80sv.stl" />
+			</geometry>
+		</visual>
+		<inertial>
+			<mass value="0.2" />
+			<origin xyz="0 0 0" />
+			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
+				iyy="1.0" iyz="0.0" 
+				izz="1.0" />
+		</inertial>
+	</link>
+
+
+	<joint name="base_caster_support_joint" type="continuous">
+		<origin xyz="-0.188 0 -0.043" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="base_caster_support_link"/>
+
+		<axis xyz="0 0 1" />
+		<anchor xyz="0.01 0 0" />
+		<limit effort="100" velocity="100" k_velocity="0" />
+		<joint_properties damping="0.0" friction="0.0" />
+	</joint>
+
+	<transmission type="pr2_mechanism_model/SimpleTransmission" name="base_caster_support_trans">
+		<actuator name="base_caster_support_motor" />
+		<joint name="base_caster_support_joint" />
+		<mechanicalReduction>1.0</mechanicalReduction>
+	</transmission>
+
+	<link name="base_caster_support_link">
+		<inertial>
+			<mass value="0.1"/>
+			<origin xyz="0 0 0" />
+			<inertia ixx="0.01" ixy="0.0" ixz="0.0"
+				iyy="0.01" iyz="0.0"
+				izz="0.01" />
+			</inertial>
+
+			<visual>
+				<origin xyz="0 0 -0.08" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
+				</geometry>
+			</visual>
+
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
+				</geometry>
+			</collision>
+	</link>	
+
+	<joint name="caster_wheel_joint" type="continuous">
+		<origin xyz="-0.025 0 -0.1229" rpy="0 0 0" />
+		<parent link="base_caster_support_link" />
+		<child link="caster_wheel_link" />
+
+		<axis xyz="0 1 0" />
+		<anchor xyz="0 0 0" />
+		<limit effort="100" velocity="100" k_velocity="0" />
+		<joint_properties damping="0.0" friction="0.0" />
+	</joint>
+
+	<transmission type="pr2_mechanism_model/SimpleTransmission" name="caster_wheel_trans">
+		<actuator name="caster_wheel_motor" />
+		<joint name="caster_wheel_joint" />
+		<mechanicalReduction>1.0</mechanicalReduction>
+	</transmission>
+
+	<link name="caster_wheel_link">
+		<inertial>
+			<mass value="0.1" /> 
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<inertia  ixx="0.012411765597" ixy="-0.000711733678" ixz="0.00050272983"
+				iyy="0.015218160428" iyz="-0.000004273467"
+				izz="0.011763977943" />
+			</inertial>
+
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_wheel_link.dae"/>
+				</geometry>
+				<material name="Black"/>
+			</visual>
+
+			<collision>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_wheel_link.dae"/>
+				</geometry>
+			</collision>
+		</link>
+
+	<gazebo reference="caster_wheel_link">
+		<mu1 value="100.0" />
+		<mu2 value="100.0" />
+		<kp  value="1000000.0" />
+		<kd  value="1.0" />
+	</gazebo>
+
+
+	<erratic_wheel suffix="left" parent="base_link">
+		<origin xyz="0.0 0.15525 -0.129" rpy="0 0 0" />
+	</erratic_wheel>
+
+	<erratic_wheel suffix="right" parent="base_link">
+		<origin xyz="0.0 -0.15525 -0.129" rpy="0 0 0" />
+	</erratic_wheel>
+
+
 
 
  <link name="laser_scanner">
@@ -116,36 +197,7 @@
   </inertial>
  </link>
 
-<!-- Joints -->
-  <joint type="continuous" name="left_wheel_as">
-   <origin xyz="0.1 0.13 -${axis_height}" rpy="0 0 0"/>
-  <child link="left_wheel"/>
-  <parent link="base_link" />
-  <axis xyz="0 1 0" />
-  <limit effort="10.0" velocity="5.0" />
-  </joint>
 
-  <joint type="continuous" name="right_wheel_as">
-   <origin xyz="0.1 -0.13 -${axis_height}" rpy="0 0 0"/>
-  <child link="right_wheel"/>
-  <parent link="base_link" />
-  <axis xyz="0 1 0" />
-  <limit effort="10.0" velocity="5.0" />
-  </joint>
-
-  <joint type="continuous" name="zwenk_wiel_as">
-   <origin xyz="-${wheel_diameter/2} 0 ${-axis_height+0.02}" rpy="0 0 0"/>
-  <child link="zwenk_wiel"/>
-  <parent link="zwenk_wiel_flens" />
-  <axis xyz="0 1 0" />
-  </joint>
-
-  <joint type="continuous" name="zwenk_wiel_stuur_as">
-   <origin xyz="-0.2 0 -0.02" rpy="0 0 0"/>
-  <parent link="base_link" />
-  <child link="zwenk_wiel_flens"/>
-  <axis xyz="0 0 1" />
-  </joint>
 
   <joint type="fixed" name="laser_scanner_glue">
    <origin xyz="0 0 0.15" rpy="0 0 0"/>
@@ -153,9 +205,10 @@
   <parent link="base_link" />
   </joint>
 
- <!-- plugins -->
 
-  <!-- hokuyo -->
+<!-- plugins -->
+
+<!-- hokuyo -->
    <gazebo reference="laser_scanner">
     <sensor type="gpu_ray" name="laser_scanner_sensor">
       <pose>0 0 0 0 0 0</pose>
@@ -177,10 +230,6 @@
         </range>
         <noise>
           <type>gaussian</type>
-          <!-- Noise parameters based on published spec for Hokuyo laser
-               achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
-               stddev of 0.01m will put 99.7% of samples within 0.03m of the true
-               reading. -->
           <mean>0.0</mean>
           <stddev>0.01</stddev>
         </noise>
@@ -191,21 +240,28 @@
       </plugin>
     </sensor>
    </gazebo>
-
+   
 <gazebo>
-  <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-    <alwaysOn>true</alwaysOn>
-    <updateRate>10</updateRate>
-    <leftJoint>left_wheel_as</leftJoint>
-    <rightJoint>right_wheel_as</rightJoint>
-    <wheelSeparation>${wheel_base}</wheelSeparation>
-    <wheelDiameter>${wheel_diameter}</wheelDiameter>
-    <torque>20</torque>
-    <commandTopic>cmd_vel</commandTopic>
-    <odometryTopic>odom</odometryTopic>
-    <odometryFrame>odom</odometryFrame>
-    <robotBaseFrame>base_link</robotBaseFrame>
-  </plugin>
+	<plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+		<alwaysOn>true</alwaysOn>
+		<updateRate>100</updateRate>
+		<leftJoint>base_link_right_wheel_joint</leftJoint>
+		<rightJoint>base_link_left_wheel_joint</rightJoint>
+		<wheelSeparation>${wheel_distance}</wheelSeparation>
+		<wheelDiameter>${wheel_diameter}</wheelDiameter>
+		<torque>5</torque>
+		<commandTopic>cmd_vel</commandTopic>
+		<odometryTopic>odom</odometryTopic>
+		<odometryFrame>odom</odometryFrame>
+		<robotBaseFrame>base_footprint</robotBaseFrame>
+	</plugin>
+
+
+<!-- 	<controller:gazebo_ros_controller_manager name="gazebo_ros_controller_manager" plugin="libgazebo_ros_controller_manager.so">
+		<alwaysOn>true</alwaysOn>
+		<updateRate>100.0</updateRate>
+		<interface:audio name="gazebo_ros_controller_manager_dummy_iface" />
+	</controller:gazebo_ros_controller_manager> -->
 </gazebo>
 
 </robot>

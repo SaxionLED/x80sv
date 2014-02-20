@@ -104,21 +104,21 @@
 			<inertia ixx="0.01" ixy="0.0" ixz="0.0"
 				iyy="0.01" iyz="0.0"
 				izz="0.01" />
-			</inertial>
+		</inertial>
 
-			<visual>
-				<origin xyz="0 0 -0.08" rpy="0 0 0" />
-				<geometry>
-					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
-				</geometry>
-			</visual>
+		<visual>
+			<origin xyz="0 0 -0.08" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
+			</geometry>
+		</visual>
 
-			<collision>
-				<origin xyz="0 0 0" rpy="0 0 0" />
-				<geometry>
-					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
-				</geometry>
-			</collision>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+				<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
+			</geometry>
+		</collision>
 	</link>	
 
 	<joint name="caster_wheel_joint" type="continuous">
@@ -200,7 +200,7 @@
 
 
   <joint type="fixed" name="laser_scanner_glue">
-   <origin xyz="0 0 0.15" rpy="0 0 0"/>
+   <origin xyz="0 0 0.05" rpy="0 0 0"/>
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>

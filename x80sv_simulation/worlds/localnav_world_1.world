@@ -83,6 +83,7 @@
     <include><uri>model://coke_can</uri><pose>11 -4 0 0 0 0</pose><name>coke10</name></include>
     <include><uri>model://coke_can</uri><pose>13 3 0 0 0 0</pose><name>coke11</name></include>
     <include><uri>model://coke_can</uri><pose>7 -1 0 0 0 0</pose><name>coke12</name></include>
+    <include><uri>model://coke_can</uri><pose>2 -2 0 0 0 0</pose><name>coke13</name></include>
     
   </world>
 </sdf>

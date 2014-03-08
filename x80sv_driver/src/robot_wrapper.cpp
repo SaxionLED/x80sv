@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 
     ros::init(argc, argv, "robot_wrapper");
 
-    ros::NodeHandle n("/robot");
+    ros::NodeHandle n("/x80sv");
     ros::NodeHandle n_control("/control");
 
     //pubs

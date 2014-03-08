@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     
     ros::init(argc, argv, "sensor_safety");
 
-    ros::NodeHandle n("/robot");
+    ros::NodeHandle n("/x80sv");
     
     // pubs
     pubSensors = n.advertise<skynav_msgs::RangeArray>("sensorsafe", 1024);

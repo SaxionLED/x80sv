@@ -129,31 +129,31 @@ public:
         ros::NodeHandle private_nh("~");
 
         robotID_ = "drrobot1";
-        private_nh.getParam("/robot/x80_config/RobotID", robotID_);
+        private_nh.getParam("/x80sv/x80_config/x80svID", robotID_);
         ROS_INFO("I get ROBOT_ID: [%s]", robotID_.c_str());
 
         robotType_ = "X80";
-        private_nh.getParam("/robot/x80_config/RobotType", robotType_);
+        private_nh.getParam("/x80sv/x80_config/x80svType", robotType_);
         ROS_INFO("I get ROBOT_Type: [%s]", robotType_.c_str());
 
         robotCommMethod_ = "Network";
-        private_nh.getParam("/robot/x80_config/RobotCommMethod", robotCommMethod_);
+        private_nh.getParam("/x80sv/x80_config/x80svCommMethod", robotCommMethod_);
         ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
 
         robotIP_ = "192.168.0.201";
-        private_nh.getParam("/robot/x80_config/RobotBaseIP", robotIP_);
+        private_nh.getParam("/x80sv/x80_config/x80svBaseIP", robotIP_);
         ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
 
         commPortNum_ = 10001;
-        private_nh.getParam("/robot/x80_config/RobotPortNum", commPortNum_);
+        private_nh.getParam("/x80sv/x80_config/x80svPortNum", commPortNum_);
         ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
 
         robotSerialPort_ = "/dev/ttyS0";
-        private_nh.getParam("/robot/x80_config/RobotSerialPort", robotSerialPort_);
+        private_nh.getParam("/x80sv/x80_config/x80svSerialPort", robotSerialPort_);
         ROS_INFO("I get ROBOT_SerialPort: [%s]", robotSerialPort_.c_str());
 
         enable_ir_ = true;
-        private_nh.getParam("/robot/x80_config/Enable_IR", enable_ir_);
+        private_nh.getParam("/x80sv/x80_config/Enable_IR", enable_ir_);
         if (enable_ir_)
             ROS_INFO("I get Enable_IR: true");
         else
@@ -161,34 +161,34 @@ public:
 
 
         enable_sonar_ = true;
-        private_nh.getParam("/robot/x80_config/Enable_US", enable_sonar_);
+        private_nh.getParam("/x80sv/x80_config/Enable_US", enable_sonar_);
         if (enable_sonar_)
             ROS_INFO("I get Enable_US: true");
         else
             ROS_INFO("I get Enable_US: false");
 
         motorDir_ = 1;
-        private_nh.getParam("/robot/x80_config/MotorDir", motorDir_);
+        private_nh.getParam("/x80sv/x80_config/MotorDir", motorDir_);
         ROS_INFO("I get MotorDir: [%d]", motorDir_);
 
         wheelRadius_ = 0.080;
-        private_nh.getParam("/robot/x80_config/WheelRadius", wheelRadius_);
+        private_nh.getParam("/x80sv/x80_config/WheelRadius", wheelRadius_);
         ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
 
         wheelDis_ = 0.305;
-        private_nh.getParam("/robot/x80_config/WheelDistance", wheelDis_);
+        private_nh.getParam("/x80sv/x80_config/WheelDistance", wheelDis_);
         ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
 
         minSpeed_ = 0.1;
-        private_nh.getParam("/robot/x80_config/MinSpeed", minSpeed_);
+        private_nh.getParam("/x80sv/x80_config/MinSpeed", minSpeed_);
         ROS_INFO("I get Min Speed: [%f]", minSpeed_);
 
         maxSpeed_ = 1.0;
-        private_nh.getParam("/robot/x80_config/MaxSpeed", maxSpeed_);
+        private_nh.getParam("/x80sv/x80_config/MaxSpeed", maxSpeed_);
         ROS_INFO("I get Max Speed: [%f]", maxSpeed_);
 
         encoderOneCircleCnt_ = 756;
-        private_nh.getParam("/robot/x80_config/EncoderCircleCnt", encoderOneCircleCnt_);
+        private_nh.getParam("/x80sv/x80_config/EncoderCircleCnt", encoderOneCircleCnt_);
         ROS_INFO("I get Encoder One Circle Count: [%d]", encoderOneCircleCnt_);
 
         if (robotCommMethod_ == "Network") {

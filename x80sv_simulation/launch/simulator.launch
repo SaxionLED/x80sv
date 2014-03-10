@@ -17,9 +17,10 @@
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" ns="/x80sv" args="joint_state_controller" />
      
            <!-- Gmapping node: -->
+
 	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/x80sv/laser/scan">
 		<param name="maxRange" value="4.5"/>
-		<param name="maxUrange" value="3.9"/>	<!-- maxUrange: actual maximum laser range -->
+		<param name="maxUrange" value="3.9"/>
 	</node>
-		
+	
 </launch>

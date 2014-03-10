@@ -50,7 +50,7 @@ target_link_libraries(neato_laser_publisher ${catkin_LIBRARIES})
 # robot wrapper
 add_executable(robot_wrapper src/robot_wrapper.cpp)
 target_link_libraries(robot_wrapper ${catkin_LIBRARIES})
-add_dependencies(robot_wrapper skynav_msgs_gencpp)
+add_dependencies(robot_wrapper skynav_msgs_gencpp x80sv_driver_gencpp)
 
 # sensor safety
 add_executable(sensor_safety src/sensor_safety.cpp)

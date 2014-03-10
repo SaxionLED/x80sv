@@ -7,7 +7,7 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://nist_maze_wall_120/meshes/nist_maze_wall_120.dae</uri>
+            <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -15,7 +15,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://nist_maze_wall_120/meshes/nist_maze_wall_120.dae</uri>
+            <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>

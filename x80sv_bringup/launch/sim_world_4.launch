@@ -1,0 +1,13 @@
+<launch>
+
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find x80sv_simulation)/worlds/localnav_world_4.world"/>
+		<arg name="gui" value="true"/>
+	</include> 
+
+
+		<include file="$(find x80sv_simulation)/launch/simulator.launch"/>
+
+
+	
+</launch>

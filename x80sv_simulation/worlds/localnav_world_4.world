@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+
+
+
+  <world name="localnav_world_4">
+	 
+	<physics type="ode">
+		<real_time_update_rate>250</real_time_update_rate>
+		<max_step_size>0.004</max_step_size>
+	</physics>
+	  
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+          
+        <!-- coke cans at strategic positions for object detection tests--> 
+	<include><uri>model://coke_can</uri><pose>-16 1 0 0 0 0</pose><name>coke-16</name></include>
+	<include><uri>model://coke_can</uri><pose>-15 -1 0 0 0 0</pose><name>coke-15</name></include>
+	<include><uri>model://coke_can</uri><pose>-14 1 0 0 0 0</pose><name>coke-14</name></include>
+	<include><uri>model://coke_can</uri><pose>-13 -1 0 0 0 0</pose><name>coke-13</name></include>
+	<include><uri>model://coke_can</uri><pose>-12 1 0 0 0 0</pose><name>coke-12</name></include>
+   	<include><uri>model://coke_can</uri><pose>-11 -1 0 0 0 0</pose><name>coke-11</name></include>
+	<include><uri>model://coke_can</uri><pose>-10 1 0 0 0 0</pose><name>coke-10</name></include>
+    <include><uri>model://coke_can</uri><pose>-9 -1 0 0 0 0</pose><name>coke-9</name></include>
+    <include><uri>model://coke_can</uri><pose>-8 1 0 0 0 0</pose><name>coke-8</name></include>
+    <include><uri>model://coke_can</uri><pose>-7 -1 0 0 0 0</pose><name>coke-7</name></include>
+    <include><uri>model://coke_can</uri><pose>-6 1 0 0 0 0</pose><name>coke-6</name></include>
+    <include><uri>model://coke_can</uri><pose>-5 -1 0 0 0 0</pose><name>coke-5</name></include>
+    <include><uri>model://coke_can</uri><pose>-4 1 0 0 0 0</pose><name>coke-4</name></include>
+    <include><uri>model://coke_can</uri><pose>-3 -1 0 0 0 0</pose><name>coke-3</name></include>
+    <include><uri>model://coke_can</uri><pose>-2 1 0 0 0 0</pose><name>coke-2</name></include>
+    <include><uri>model://coke_can</uri><pose>-1 -1 0 0 0 0</pose><name>coke-1</name></include>
+	<include><uri>model://coke_can</uri><pose>0 1 0 0 0 0</pose><name>coke0</name></include>
+    <include><uri>model://coke_can</uri><pose>1 -1 0 0 0 0</pose><name>coke1</name></include>
+    <include><uri>model://coke_can</uri><pose>2 1 0 0 0 0</pose><name>coke2</name></include>
+    <include><uri>model://coke_can</uri><pose>3 -1 0 0 0 0</pose><name>coke3</name></include>
+    <include><uri>model://coke_can</uri><pose>4 1 0 0 0 0</pose><name>coke4</name></include>
+    <include><uri>model://coke_can</uri><pose>5 -1 0 0 0 0</pose><name>coke5</name></include>
+    <include><uri>model://coke_can</uri><pose>6 1 0 0 0 0</pose><name>coke6</name></include>
+    <include><uri>model://coke_can</uri><pose>7 -1 0 0 0 0</pose><name>coke7</name></include>
+    <include><uri>model://coke_can</uri><pose>8 1 0 0 0 0</pose><name>coke8</name></include>
+    <include><uri>model://coke_can</uri><pose>9 -1 0 0 0 0</pose><name>coke9</name></include>
+    <include><uri>model://coke_can</uri><pose>10 1 0 0 0 0</pose><name>coke10</name></include>
+    <include><uri>model://coke_can</uri><pose>11 -1 0 0 0 0</pose><name>coke11</name></include>
+    <include><uri>model://coke_can</uri><pose>12 1 0 0 0 0</pose><name>coke12</name></include>
+    <include><uri>model://coke_can</uri><pose>13 -1 0 0 0 0</pose><name>coke13</name></include>
+    <include><uri>model://coke_can</uri><pose>14 1 0 0 0 0</pose><name>coke14</name></include>
+    <include><uri>model://coke_can</uri><pose>15 -1 0 0 0 0</pose><name>coke15</name></include>
+    <include><uri>model://coke_can</uri><pose>16 1 0 0 0 0</pose><name>coke16</name></include>
+
+    
+  </world>
+</sdf>

@@ -73,8 +73,8 @@ namespace xv_11_laser_driver {
 	    // Read in 360*4 = 1440 chars for each point
 	    boost::asio::read(serial_,boost::asio::buffer(&raw_bytes,1440));
 
-	    scan->angle_min = -M_PI;
-	    scan->angle_max = M_PI;
+	    scan->angle_min = 0.0;
+	    scan->angle_max = 2.0*M_PI;
 	    scan->angle_increment = (2.0*M_PI/360.0);
 	    scan->time_increment = motor_speed_/1e8;
 	    scan->range_min = 0.06;
@@ -106,7 +106,6 @@ namespace xv_11_laser_driver {
       boost::array<uint8_t, 1980> raw_bytes;
       uint8_t good_sets = 0;
       uint32_t motor_speed = 0;
-      rpms=0;
       int index;
       while (!shutting_down_ && !got_scan) {
 	// Wait until first data sync of frame: 0xFA, 0xA0
@@ -124,8 +123,8 @@ namespace xv_11_laser_driver {
 
 	    boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 1978));
 
-	    scan->angle_min = -M_PI;            // was 0                // this way the range finder is turned 180 degrees
-	    scan->angle_max = M_PI;             // was 2*M_PI
+	    scan->angle_min = -M_PI - M_PI/2;
+	    scan->angle_max = M_PI/2;
 	    scan->angle_increment = (2.0*M_PI/360.0);
 	    scan->range_min = 0.06;
 	    scan->range_max = 5.0;
@@ -135,34 +134,27 @@ namespace xv_11_laser_driver {
 	    //read data in sets of 4
 	    for(uint16_t i = 0; i < raw_bytes.size(); i=i+22) {
 	      if(raw_bytes[i] == 0xFA && raw_bytes[i+1] == (0xA0+i/22)) {//&& CRC check
-			good_sets++;
-			motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
-       		rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/64; 
+		good_sets++;
+		motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
 		
-			for(uint16_t j = i+4; j < i+20; j=j+4) {
-			  index = (4*i)/22 + (j-4-i)/4;
-			  // Four bytes per reading
-			  uint8_t byte0 = raw_bytes[j];
-			  uint8_t byte1 = raw_bytes[j+1];
-			  uint8_t byte2 = raw_bytes[j+2];
-			  uint8_t byte3 = raw_bytes[j+3];
-			  // First two bits of byte1 are status flags
-			  // uint8_t flag1 = (byte1 & 0x80) >> 7;  // No return/max range/too low of reflectivity
-			  // uint8_t flag2 = (byte1 & 0x40) >> 6;  // Object too close, possible poor reading due to proximity kicks in at < 0.6m
-			  // Remaining bits are the range in mm
-			  uint16_t range = ((byte1 & 0x3F)<< 8) + byte0;
-			  // Last two bytes represent the uncertanty or intensity, might also be pixel area of target...
-			  uint16_t intensity = (byte3 << 8) + byte2;
-			  
-			  double rangeM = range / 1000;
-			  
-			  if(rangeM < scan->range_min || rangeM > scan->range_max)	{
-				  continue;	// skip ranges outside limit
-			  }
+		for(uint16_t j = i+4; j < i+20; j=j+4) {
+		  index = (4*i)/22 + (j-4-i)/4;
+		  // Four bytes per reading
+		  uint8_t byte0 = raw_bytes[j];
+		  uint8_t byte1 = raw_bytes[j+1];
+		  uint8_t byte2 = raw_bytes[j+2];
+		  uint8_t byte3 = raw_bytes[j+3];
+		  // First two bits of byte1 are status flags
+		  // uint8_t flag1 = (byte1 & 0x80) >> 7;  // No return/max range/too low of reflectivity
+		  // uint8_t flag2 = (byte1 & 0x40) >> 6;  // Object too close, possible poor reading due to proximity kicks in at < 0.6m
+		  // Remaining bits are the range in mm
+		  uint16_t range = ((byte1 & 0x3F)<< 8) + byte0;
+		  // Last two bytes represent the uncertanty or intensity, might also be pixel area of target...
+		  uint16_t intensity = (byte3 << 8) + byte2;
 
-			  scan->ranges[index] = rangeM;
-			  scan->intensities[index] = intensity;
-			}
+		  scan->ranges[index] = range / 1000.0;
+		  scan->intensities[index] = intensity;
+		}
 	      }
 	    }
 

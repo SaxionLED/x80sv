@@ -36,7 +36,6 @@
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
 #include <xv_11_laser_driver/xv11_laser.h>
-#include <std_msgs/UInt16.h>
 
 int main(int argc, char **argv)
 {
@@ -48,12 +47,10 @@ int main(int argc, char **argv)
   int baud_rate;
   std::string frame_id;
   int firmware_number;
- 
-  std_msgs::UInt16 rpms; 
 
-  priv_nh.param("port", port, std::string("/dev/sensors/ftdi_A601LMNL"));       // serial number depends on ftdi chip used
+  priv_nh.param("port", port, std::string("/dev/sensors/ftdi_A601LMNL"));  
   priv_nh.param("baud_rate", baud_rate, 115200);
-  priv_nh.param("frame_id", frame_id, std::string("/base_link"));              //TODO change this to neato_laser frame when it is available
+  priv_nh.param("frame_id", frame_id, std::string("/base_link"));
   priv_nh.param("firmware_version", firmware_number, 2);
 
   boost::asio::io_service io;
@@ -61,17 +58,13 @@ int main(int argc, char **argv)
   try {
     xv_11_laser_driver::XV11Laser laser(port, baud_rate, firmware_number, io);
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
 
     while (ros::ok()) {
       sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
       scan->header.frame_id = frame_id;
       scan->header.stamp = ros::Time::now();
       laser.poll(scan);
-      rpms.data=laser.rpms;      
       laser_pub.publish(scan);
-      motor_pub.publish(rpms);
-
     }
     laser.close();
     return 0;

@@ -1,7 +1,0 @@
-drrobot_player.cpp depends on skynav_msgs, should be independant
-
-Add topic prefix to launch files, create x80 & simulator launch files
-
-X80_config.yaml references fix
-
-Gazebo CPU usage (reduce physics update rate)

@@ -158,13 +158,11 @@ void subSensorSafeCallback(const skynav_msgs::RangeArray::ConstPtr& msg) {
                     return;
             }
 
-//            if (sensorID == 0) { //////// TEMP HACK !!!!!!!!! to only process sensor 0
                 rangeDefined.angleFromCenter = angleFromCenterDegrees / 180 * M_PI; // save as rads
                 rangeDefined.distanceFromCenter = distanceFromCenterMM / 1000; // save as meters
                 rangeDefined.yOffsetFromCenter = yOffsetFromCenterMM / 1000;
 
                 rangeDefinedArray.ranges.push_back(rangeDefined);
-//            }
         } else
             ROS_ERROR("invalid or NYI sensor type found");
     }

@@ -48,10 +48,10 @@ int main(int argc, char **argv) {
     ros::NodeHandle n("/x80sv");
 
     //pubs
-    pubLaserFiltered = n.advertise<LaserScan>("laser/scan_filtered", 32);
+    pubLaserFiltered = n.advertise<LaserScan>("laser/scan_filtered", 1000);
 
     //subs
-    ros::Subscriber subLaser = n.subscribe("laser/scan", 32, subLaserCallback);
+    ros::Subscriber subLaser = n.subscribe("laser/scan", 1000, subLaserCallback);
 
     ros::spin();
 

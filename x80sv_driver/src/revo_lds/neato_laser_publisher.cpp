@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "neato_laser_publisher");
   ros::NodeHandle n;
-  ros::NodeHandle priv_nh("~");
+  ros::NodeHandle priv_nh("");
 
   std::string port;
   int baud_rate;
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
   try {
     xv_11_laser_driver::XV11Laser laser(port, baud_rate, firmware_number, io);
-    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
+    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("laser/scan", 1000);
 
     while (ros::ok()) {
       sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);

@@ -3,7 +3,7 @@
 	<param name="robot_description" command="$(find xacro)/xacro.py '$(find x80sv_description)/urdf/x80sv.xacro'" />
 
 	<!-- Laser filter node -->
-	<node name="laser_filter" pkg="x80sv_simulation" type="laser_filter"/>
+	<!--<node name="laser_filter" pkg="x80sv_simulation" type="laser_filter"/>--> <!--integrated into data_verifier-->
 
 
 	<node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" required="true"/>

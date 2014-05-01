@@ -291,7 +291,7 @@ public:
         int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
         int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
 
-        ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+        //ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
         drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
     }
 
@@ -317,7 +317,7 @@ public:
 
         if (targetPose->pose.orientation.z != 0) { // handle the angle
 
-            ROS_INFO("x80: turning %.2f degrees over %dms", targetPose->pose.orientation.z * 180 / M_PI, actuationTimeMS);
+            //ROS_INFO("x80: turning %.2f degrees over %dms", targetPose->pose.orientation.z * 180 / M_PI, actuationTimeMS);
 
             double turnDis = wheelDis_ / 2 * (targetPose->pose.orientation.z);
 
@@ -337,13 +337,13 @@ public:
             } else if (rightWheelCmd > 32767) {
                 rightWheelCmd = rightWheelCmd - 32767;
             }
-            ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+            //ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
             drrobotMotionDriver_->sendMotorCtrlAllCmd(Position, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL, actuationTimeMS);
 
 
         } else if (targetPose->pose.position.x > 0) { // handle going straight ahead
 
-            ROS_INFO("x80: moving straight ahead %.3fm over %ds", targetPose->pose.position.x, (actuationTimeMS / 1000));
+            //ROS_INFO("x80: moving straight ahead %.3fm over %ds", targetPose->pose.position.x, (actuationTimeMS / 1000));
 
             int diffEncoder = (int) (targetPose->pose.position.x / (2 * M_PI * wheelRadius_) * encoderOneCircleCnt_);
 
@@ -360,7 +360,7 @@ public:
             } else if (rightWheelCmd > 32767) {
                 rightWheelCmd = rightWheelCmd - 32767;
             }
-            ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+            //ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
             drrobotMotionDriver_->sendMotorCtrlAllCmd(Position, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL, actuationTimeMS);
 
         }

@@ -264,7 +264,7 @@ void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo)
     double deltaAngle = atan((movementDelta1 - movementDelta0) / mWheelDistance); // difference in angle from last encoder values, 0.285 is distance between wheel centers in m
 
 
-    if (averageDistance != 0.0 || deltaAngle != 0.0) { // no need to publish empty poses
+    if (averageDistance != 0.0 && deltaAngle != 0.0) { // no need to publish empty poses
 
         Pose poseOut; // not a pose, x = distance travelleed and theta = delta angle
         poseOut.position.x = averageDistance;

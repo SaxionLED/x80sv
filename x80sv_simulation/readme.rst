@@ -15,4 +15,10 @@ You will then see this:
 .. image:: gazebo_gmapping.png
 
 
+Offline models
+--------------
 
+For offline usage of downloaded gazebo models, the local model database should be used by gazebo.
+
+This can be done by referencting the local gazebo model path database, in this case:
+><dl><dd>export GAZEBO_MODEL_PATH=~/catkin_ws/src/x80sv/x80sv_simulation/models/</dd></dl>

@@ -1,6 +1,4 @@
-
 <launch>
-
 	<param name="robot_description" command="$(find xacro)/xacro.py '$(find x80sv_description)/urdf/x80sv.xacro'" />
 
 	<group ns="x80sv">
@@ -8,9 +6,7 @@
 		<node pkg="x80sv_driver" name="x80_robot" type="x80_robot" output="screen"/>	
 		<node pkg="x80sv_driver" name="neato_laser_publisher" type="neato_laser_publisher" output="screen"/>
 		<node pkg="x80sv_driver" name="robot_wrapper" type="robot_wrapper" output="screen"/>
-		<node pkg="x80sv_driver" name="sensor_safety" type="sensor_safety" output="screen"/>
-		
-		<!-- <node pkg="x80sv_driver" name="input_keyboard" type="input_keyboard" output="screen"/> -->
+		<node pkg="x80sv_driver" name="sensor_safety" type="sensor_safety" output="screen"/>		
 	</group>
 
 </launch>

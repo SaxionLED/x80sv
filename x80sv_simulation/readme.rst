@@ -18,7 +18,9 @@ You will then see this:
 Offline models
 --------------
 
-For offline usage of downloaded gazebo models, the local model database should be used by gazebo.
+For offline usage of the downloaded object models, the local model database should be used by gazebo.
 
 This can be done by referencting the local gazebo model path database, in this case:
-><dl><dd>export GAZEBO_MODEL_PATH=~/catkin_ws/src/x80sv/x80sv_simulation/models/</dd></dl>
+> <dl>export GAZEBO_MODEL_PATH=~/catkin_ws/src/x80sv/x80sv_simulation/models/</dl>
+
+Models can be downloaded from the Gazebo model database [bitbucket](https://bitbucket.org/osrf/gazebo_models)

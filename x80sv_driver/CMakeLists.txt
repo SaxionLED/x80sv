@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(x80sv_driver)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp skynav_msgs tf joy)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp skynav_msgs tf joy rostest)
 find_package(Boost REQUIRED)
 
 add_message_files(
@@ -58,6 +58,8 @@ target_link_libraries(sensor_safety ${catkin_LIBRARIES})
 add_dependencies(sensor_safety skynav_msgs_gencpp)
 
 
+catkin_add_gtest(x80sv_driver_test test/test_laser.cpp)
+target_link_libraries(x80sv_driver_test xv11_laser_driver)
 
 
 

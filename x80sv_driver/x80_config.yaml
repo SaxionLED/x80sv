@@ -5,7 +5,12 @@ x80_config: {
     RobotPortNum: 10001,
     RobotSerialPort: /dev/ttyS0,
     RobotType: X80,
-    MotorDir: 1, WheelRadius: 0.080, WheelDistance: 0.305,
-  EncoderCircleCnt: 756, MinSpeed: 0.1, MaxSpeed: 1.0, Enable_IR: true, 
+    MotorDir: 1,
+    WheelRadius: 0.080,
+    WheelDistance: 0.305,
+    EncoderCircleCnt: 756,
+    MinSpeed: 0.1,
+    MaxSpeed: 1.0,
+    Enable_IR: true, 
     Enable_US: true
  }

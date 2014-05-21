@@ -10,8 +10,8 @@
 #include "DrRobotCommConst.hpp"
 
 
-//#define DEBUG_ERROR           //set printf out error message
-#undef DEBUG_ERROR
+#define DEBUG_ERROR           //set printf out error message
+//#undef DEBUG_ERROR
 
 
 using namespace std;
@@ -54,7 +54,6 @@ DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DrRobotMotionSensorDriver
     _eCommState = Disconnected;
     _desID = COM_TYPE_MOT;
     _pcID = COM_TYPE_PC;
-
 }
 
 DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::~DrRobotMotionSensorDriver() {

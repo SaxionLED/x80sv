@@ -126,44 +126,15 @@ public:
     ros::Publisher customSensor_pub_;
 
     ros::Subscriber cmd_vel_sub_;
-    ros::Subscriber cmd_pose_sub_;
     std::string robot_prefix_;
 
     DrRobotPlayerNode(); 
     ~DrRobotPlayerNode() {
     }
 
-    int start() {
+    int start();
 
-        //int res = -1;
-
-        if (robotCommMethod_ == "Network") {
-            drrobotMotionDriver_->openNetwork(robotConfig2_.robotIP, robotConfig2_.portNum);
-            drrobotPowerDriver_->openNetwork(robotConfig1_.robotIP, robotConfig1_.portNum);
-        } else {
-            drrobotMotionDriver_->openSerial(robotConfig2_.serialPortName, 115200);
-            drrobotPowerDriver_->openSerial(robotConfig1_.serialPortName, 115200);
-        }
-
-        cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&DrRobotPlayerNode::cmdVelReceived, this, _1));
-        cmd_pose_sub_ = node_.subscribe<skynav_msgs::TimedPose>("drrobot_cmd_pose", 1, boost::bind(&DrRobotPlayerNode::cmdPoseReceived, this, _1));
-
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);  // only needed when using velocity (1, 0, 170))
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
-
-        drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000); // PID default is 1000, 5, 10000 (taken from C# src)
-        drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);       // 500, 2, 510 has smoother motion but does not take friction in account
-
-        return (0);
-    }
-
-    int stop() {
-        int status = 0;
-        drrobotMotionDriver_->close();
-        drrobotPowerDriver_->close();
-        usleep(1000000);
-        return (status);
-    }
+    int stop();
 
     void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel) {
         double g_vel = cmd_vel->linear.x;
@@ -179,76 +150,6 @@ public:
         drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
     }
 
-    void cmdPoseReceived(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
-
-        // check some stuff
-
-        if (targetPose->pose.position.x != 0 && targetPose->pose.orientation.z != 0) {
-            ROS_ERROR("currently not allowed to use a pose with both x and theta, seperate them");
-            return;
-        }
-
-        if (targetPose->pose.position.y != 0) {
-            ROS_ERROR("found y value in target pose, it is ignored");
-            return;
-        }
-
-
-        int actuationTimeMS = (targetPose->actuationSeconds) * 1000;
-
-
-        // calculate
-
-        if (targetPose->pose.orientation.z != 0) { // handle the angle
-
-            //ROS_INFO("x80: turning %.2f degrees over %dms", targetPose->pose.orientation.z * 180 / M_PI, actuationTimeMS);
-
-            double turnDis = wheelDis_ / 2 * (targetPose->pose.orientation.z);
-
-
-            int diffEncoder = (int) (turnDis / (2 * M_PI * wheelRadius_) * encoderOneCircleCnt_);
-
-            int leftWheelCmd = motorSensorData_.motorSensorEncoderPos[0] + motorDir_ * diffEncoder;
-            if (leftWheelCmd < 0) {
-                leftWheelCmd = 32767 + leftWheelCmd;
-            } else if (leftWheelCmd > 32767) {
-                leftWheelCmd = leftWheelCmd - 32767;
-            }
-
-            int rightWheelCmd = motorSensorData_.motorSensorEncoderPos[1] + motorDir_ * diffEncoder;
-            if (rightWheelCmd < 0) {
-                rightWheelCmd = 32767 + rightWheelCmd;
-            } else if (rightWheelCmd > 32767) {
-                rightWheelCmd = rightWheelCmd - 32767;
-            }
-            //ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
-            drrobotMotionDriver_->sendMotorCtrlAllCmd(Position, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL, actuationTimeMS);
-
-
-        } else if (targetPose->pose.position.x > 0) { // handle going straight ahead
-
-            //ROS_INFO("x80: moving straight ahead %.3fm over %ds", targetPose->pose.position.x, (actuationTimeMS / 1000));
-
-            int diffEncoder = (int) (targetPose->pose.position.x / (2 * M_PI * wheelRadius_) * encoderOneCircleCnt_);
-
-            int leftWheelCmd = motorSensorData_.motorSensorEncoderPos[0] - motorDir_ * diffEncoder;
-            if (leftWheelCmd < 0) {
-                leftWheelCmd = 32767 + leftWheelCmd;
-            } else if (leftWheelCmd > 32767) {
-                leftWheelCmd = leftWheelCmd - 32767;
-            }
-
-            int rightWheelCmd = motorSensorData_.motorSensorEncoderPos[1] + motorDir_ * diffEncoder;
-            if (rightWheelCmd < 0) {
-                rightWheelCmd = 32767 + rightWheelCmd;
-            } else if (rightWheelCmd > 32767) {
-                rightWheelCmd = rightWheelCmd - 32767;
-            }
-            //ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
-            drrobotMotionDriver_->sendMotorCtrlAllCmd(Position, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL, actuationTimeMS);
-
-        }
-    }
 
     void doUpdate()
     {
@@ -274,6 +175,7 @@ public:
                 powerInfo_pub_.publish(powerInfo);
             }
         }
+
         if (drrobotMotionDriver_->portOpen()) {
             drrobotMotionDriver_->readMotorSensorData(&motorSensorData_);
             drrobotMotionDriver_->readRangeSensorData(&rangeSensorData_);
@@ -554,6 +456,40 @@ DrRobotPlayerNode::DrRobotPlayerNode()
     drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
     drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
     cntNum_ = 0;
+}
+
+
+int DrRobotPlayerNode::start() {
+
+        //int res = -1;
+
+        if (robotCommMethod_ == "Network") {
+            drrobotMotionDriver_->openNetwork(robotConfig2_.robotIP, robotConfig2_.portNum);
+            drrobotPowerDriver_->openNetwork(robotConfig1_.robotIP, robotConfig1_.portNum);
+        } else {
+            drrobotMotionDriver_->openSerial(robotConfig2_.serialPortName, 115200);
+            drrobotPowerDriver_->openSerial(robotConfig1_.serialPortName, 115200);
+        }
+
+        cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&DrRobotPlayerNode::cmdVelReceived, this, _1));
+
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);  // only needed when using velocity (1, 0, 170))
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
+
+        drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000); // PID default is 1000, 5, 10000 (taken from C# src)
+        drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);       // 500, 2, 510 has smoother motion but does not take friction in account
+
+        return (0);
+}
+
+
+int DrRobotPlayerNode::stop()
+{
+        int status = 0;
+        drrobotMotionDriver_->close();
+        drrobotPowerDriver_->close();
+        usleep(1000000);
+        return (status);
 }
 
 

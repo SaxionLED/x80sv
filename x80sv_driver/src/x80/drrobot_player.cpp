@@ -85,6 +85,9 @@ Publishes to (name / type):
 #include "tf/transform_broadcaster.h"
 #include <tf/transform_listener.h>
 
+#include <diagnostic_updater/diagnostic_updater.h>
+#include <diagnostic_updater/publisher.h>
+
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Float64.h>
@@ -107,7 +110,8 @@ Publishes to (name / type):
 using namespace std;
 using namespace DrRobot_MotionSensorDriver;
 
-class DrRobotPlayerNode {
+class DrRobotPlayerNode
+{
 public:
 
     ros::NodeHandle node_;
@@ -125,127 +129,7 @@ public:
     ros::Subscriber cmd_pose_sub_;
     std::string robot_prefix_;
 
-    DrRobotPlayerNode() {
-        ros::NodeHandle private_nh("");
-
-        robotID_ = "drrobot1";
-        private_nh.getParam("x80_config/RobotID", robotID_);
-        ROS_INFO("I get ROBOT_ID: [%s]", robotID_.c_str());
-
-        robotType_ = "X80";
-        private_nh.getParam("x80_config/RobotType", robotType_);
-        ROS_INFO("I get ROBOT_Type: [%s]", robotType_.c_str());
-
-        robotCommMethod_ = "Network";
-        private_nh.getParam("x80_config/RobotCommMethod", robotCommMethod_);
-        ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
-
-        robotIP_ = "192.168.0.201";
-        private_nh.getParam("x80_config/RobotBaseIP", robotIP_);
-        ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
-
-        commPortNum_ = 10001;
-        private_nh.getParam("x80_config/RobotPortNum", commPortNum_);
-        ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
-
-        robotSerialPort_ = "/dev/ttyS0";
-        private_nh.getParam("x80_config/RobotSerialPort", robotSerialPort_);
-        ROS_INFO("I get ROBOT_SerialPort: [%s]", robotSerialPort_.c_str());
-
-        enable_ir_ = true;
-        private_nh.getParam("x80_config/Enable_IR", enable_ir_);
-        if (enable_ir_)
-            ROS_INFO("I get Enable_IR: true");
-        else
-            ROS_INFO("I get Enable_IR: false");
-
-
-        enable_sonar_ = true;
-        private_nh.getParam("x80_config/Enable_US", enable_sonar_);
-        if (enable_sonar_)
-            ROS_INFO("I get Enable_US: true");
-        else
-            ROS_INFO("I get Enable_US: false");
-
-        motorDir_ = 1;
-        private_nh.getParam("x80_config/MotorDir", motorDir_);
-        ROS_INFO("I get MotorDir: [%d]", motorDir_);
-
-        wheelRadius_ = 0.080;
-        private_nh.getParam("x80_config/WheelRadius", wheelRadius_);
-        ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
-
-        wheelDis_ = 0.305;
-        private_nh.getParam("x80_config/WheelDistance", wheelDis_);
-        ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
-
-        minSpeed_ = 0.1;
-        private_nh.getParam("x80_config/MinSpeed", minSpeed_);
-        ROS_INFO("I get Min Speed: [%f]", minSpeed_);
-
-        maxSpeed_ = 1.0;
-        private_nh.getParam("x80_config/MaxSpeed", maxSpeed_);
-        ROS_INFO("I get Max Speed: [%f]", maxSpeed_);
-
-        encoderOneCircleCnt_ = 756;
-        private_nh.getParam("x80_config/EncoderCircleCnt", encoderOneCircleCnt_);
-        ROS_INFO("I get Encoder One Circle Count: [%d]", encoderOneCircleCnt_);
-
-        if (robotCommMethod_ == "Network") {
-            robotConfig1_.commMethod = Network;
-            robotConfig2_.commMethod = Network;
-        } else {
-            robotConfig1_.commMethod = Serial;
-            robotConfig2_.commMethod = Serial;
-        }
-
-        if (robotType_ == "Jaguar") {
-            robotConfig1_.boardType = Jaguar;
-        } else if (robotType_ == "I90") {
-            robotConfig1_.boardType = I90_Power;
-            robotConfig2_.boardType = I90_Motion;
-        } else if (robotType_ == "Sentinel3") {
-            robotConfig1_.boardType = Sentinel3_Power;
-            robotConfig2_.boardType = Sentinel3_Motion;
-        } else if (robotType_ == "Hawk_H20") {
-            robotConfig1_.boardType = Hawk_H20_Power;
-            robotConfig2_.boardType = Hawk_H20_Motion;
-        } else if (robotType_ == "X80") {
-            robotConfig1_.boardType = X80SV;
-        }
-
-
-        robotConfig1_.portNum = commPortNum_;
-        robotConfig2_.portNum = commPortNum_ + 1;
-
-        //  strcat(robotConfig1_.robotIP,robotIP_.c_str());
-        strcpy(robotConfig1_.robotIP, robotIP_.c_str());
-        //  strcat(robotConfig2_.robotIP,robotIP_.c_str());
-        strcpy(robotConfig2_.robotIP, robotIP_.c_str());
-
-        //  strcat(robotConfig1_.serialPortName,robotSerialPort_.c_str());
-        strcpy(robotConfig1_.serialPortName, robotSerialPort_.c_str());
-        //  strcat(robotConfig2_.serialPortName,robotSerialPort_.c_str());
-        strcpy(robotConfig2_.serialPortName, robotSerialPort_.c_str());
-        //create publishers for sensor data information
-        motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
-        powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
-        if (enable_ir_) {
-            ir_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_ir", 1);
-        }
-        if (enable_sonar_) {
-            sonar_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_sonar", 1);
-        }
-        standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
-        customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
-
-        drrobotPowerDriver_ = new DrRobotMotionSensorDriver();
-        drrobotMotionDriver_ = new DrRobotMotionSensorDriver();
-        drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
-        drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
-        cntNum_ = 0;
-    }
-
+    DrRobotPlayerNode(); 
     ~DrRobotPlayerNode() {
     }
 
@@ -366,7 +250,8 @@ public:
         }
     }
 
-    void doUpdate() {
+    void doUpdate()
+    {
 
         if ((robotConfig1_.boardType == I90_Power) || (robotConfig1_.boardType == Sentinel3_Power)
                 || (robotConfig1_.boardType == Hawk_H20_Power)) {
@@ -496,6 +381,8 @@ public:
         }
     }
 
+    void produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
+
 private:
 
     DrRobotMotionSensorDriver* drrobotMotionDriver_;
@@ -547,11 +434,159 @@ private:
     }
 };
 
-int main(int argc, char** argv) {
+DrRobotPlayerNode::DrRobotPlayerNode()
+ {
+    ros::NodeHandle private_nh("");
+
+    robotID_ = "drrobot1";
+    private_nh.getParam("x80_config/RobotID", robotID_);
+    ROS_INFO("I get ROBOT_ID: [%s]", robotID_.c_str());
+
+    robotType_ = "X80";
+    private_nh.getParam("x80_config/RobotType", robotType_);
+    ROS_INFO("I get ROBOT_Type: [%s]", robotType_.c_str());
+
+    robotCommMethod_ = "Network";
+    private_nh.getParam("x80_config/RobotCommMethod", robotCommMethod_);
+    ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
+
+    robotIP_ = "192.168.0.201";
+    private_nh.getParam("x80_config/RobotBaseIP", robotIP_);
+    ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
+
+    commPortNum_ = 10001;
+    private_nh.getParam("x80_config/RobotPortNum", commPortNum_);
+    ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
+
+    robotSerialPort_ = "/dev/ttyS0";
+    private_nh.getParam("x80_config/RobotSerialPort", robotSerialPort_);
+    ROS_INFO("I get ROBOT_SerialPort: [%s]", robotSerialPort_.c_str());
+
+    enable_ir_ = true;
+    private_nh.getParam("x80_config/Enable_IR", enable_ir_);
+    if (enable_ir_)
+        ROS_INFO("I get Enable_IR: true");
+    else
+        ROS_INFO("I get Enable_IR: false");
+
+
+    enable_sonar_ = true;
+    private_nh.getParam("x80_config/Enable_US", enable_sonar_);
+    if (enable_sonar_)
+        ROS_INFO("I get Enable_US: true");
+    else
+        ROS_INFO("I get Enable_US: false");
+
+    motorDir_ = 1;
+    private_nh.getParam("x80_config/MotorDir", motorDir_);
+    ROS_INFO("I get MotorDir: [%d]", motorDir_);
+
+    wheelRadius_ = 0.080;
+    private_nh.getParam("x80_config/WheelRadius", wheelRadius_);
+    ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
+
+    wheelDis_ = 0.305;
+    private_nh.getParam("x80_config/WheelDistance", wheelDis_);
+    ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
+
+    minSpeed_ = 0.1;
+    private_nh.getParam("x80_config/MinSpeed", minSpeed_);
+    ROS_INFO("I get Min Speed: [%f]", minSpeed_);
+
+    maxSpeed_ = 1.0;
+    private_nh.getParam("x80_config/MaxSpeed", maxSpeed_);
+    ROS_INFO("I get Max Speed: [%f]", maxSpeed_);
+
+    encoderOneCircleCnt_ = 756;
+    private_nh.getParam("x80_config/EncoderCircleCnt", encoderOneCircleCnt_);
+    ROS_INFO("I get Encoder One Circle Count: [%d]", encoderOneCircleCnt_);
+
+    if (robotCommMethod_ == "Network") {
+        robotConfig1_.commMethod = Network;
+        robotConfig2_.commMethod = Network;
+    } else {
+        robotConfig1_.commMethod = Serial;
+        robotConfig2_.commMethod = Serial;
+    }
+
+    if (robotType_ == "Jaguar") {
+        robotConfig1_.boardType = Jaguar;
+    } else if (robotType_ == "I90") {
+        robotConfig1_.boardType = I90_Power;
+        robotConfig2_.boardType = I90_Motion;
+    } else if (robotType_ == "Sentinel3") {
+        robotConfig1_.boardType = Sentinel3_Power;
+        robotConfig2_.boardType = Sentinel3_Motion;
+    } else if (robotType_ == "Hawk_H20") {
+        robotConfig1_.boardType = Hawk_H20_Power;
+        robotConfig2_.boardType = Hawk_H20_Motion;
+    } else if (robotType_ == "X80") {
+        robotConfig1_.boardType = X80SV;
+    }
+
+
+    robotConfig1_.portNum = commPortNum_;
+    robotConfig2_.portNum = commPortNum_ + 1;
+
+    //  strcat(robotConfig1_.robotIP,robotIP_.c_str());
+    strcpy(robotConfig1_.robotIP, robotIP_.c_str());
+    //  strcat(robotConfig2_.robotIP,robotIP_.c_str());
+    strcpy(robotConfig2_.robotIP, robotIP_.c_str());
+
+    //  strcat(robotConfig1_.serialPortName,robotSerialPort_.c_str());
+    strcpy(robotConfig1_.serialPortName, robotSerialPort_.c_str());
+    //  strcat(robotConfig2_.serialPortName,robotSerialPort_.c_str());
+    strcpy(robotConfig2_.serialPortName, robotSerialPort_.c_str());
+    //create publishers for sensor data information
+    motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
+    powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
+    if (enable_ir_) {
+        ir_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_ir", 1);
+    }
+    if (enable_sonar_) {
+        sonar_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_sonar", 1);
+    }
+    standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
+    customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
+
+    drrobotPowerDriver_ = new DrRobotMotionSensorDriver();
+    drrobotMotionDriver_ = new DrRobotMotionSensorDriver();
+    drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
+    drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
+    cntNum_ = 0;
+}
+
+
+void DrRobotPlayerNode::produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
+{
+        CommState communication_state = drrobotMotionDriver_->getCommunicationState();
+
+        if (communication_state == Connected)
+        {
+            stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motion driver connected");
+        }
+        else
+        {
+            stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Motion driver disconnected");
+        }
+
+        stat.add("com cnt", drrobotMotionDriver_->getComCnt());
+}
+
+
+int main(int argc, char** argv)
+{
     ros::init(argc, argv, "x80_config");
+
+    diagnostic_updater::Updater updater;
+    updater.setHardwareID("none");
 
     DrRobotPlayerNode drrobotPlayer;
     ros::NodeHandle n;
+
+    updater.add("Motion driver", &drrobotPlayer, &DrRobotPlayerNode::produce_motion_diagnostics);
+    updater.force_update();
+
     // Start up the robot
     if (drrobotPlayer.start() != 0) {
         exit(-1);
@@ -564,6 +599,7 @@ int main(int argc, char** argv) {
         drrobotPlayer.doUpdate();
         ros::spinOnce();
         loop_rate.sleep();
+        updater.update();
     }
     /////////////////////////////////////////////////////////////////
 

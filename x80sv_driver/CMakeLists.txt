@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(x80sv_driver)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp skynav_msgs tf joy rostest)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp skynav_msgs tf rostest)
 find_package(Boost REQUIRED)
 
 add_message_files(
@@ -22,7 +22,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp skynav_msgs tf joy
+  CATKIN_DEPENDS roscpp skynav_msgs tf
 )
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
@@ -32,13 +32,6 @@ add_library(x80_sensor_driver src/x80/sensor_driver/DrRobotMotionSensorDriver.cp
 add_executable(x80_robot src/x80/drrobot_player.cpp)
 target_link_libraries(x80_robot x80_sensor_driver)
 target_link_libraries(x80_robot ${catkin_LIBRARIES})
-
-# input
-add_executable(input_keyboard src/x80/drrobot_keyboard_teleop.cpp)
-target_link_libraries(input_keyboard ${catkin_LIBRARIES})
-
-add_executable(input_joystick src/x80/drrobot_joystick_teleop.cpp)
-target_link_libraries(input_joystick ${catkin_LIBRARIES})
 
 # neato revo lds 
 add_library(xv11_laser_driver src/revo_lds/xv11_laser.cpp)

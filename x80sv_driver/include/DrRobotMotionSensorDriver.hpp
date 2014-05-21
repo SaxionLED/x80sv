@@ -514,6 +514,14 @@ namespace DrRobot_MotionSensorDriver
      */
     int sendPowerCtrlCmd(const int cmd);
 
+    // Get communication state.
+    CommState getCommunicationState();
+
+    int getComCnt()
+    {
+        return _comCnt;
+    }
+
   private:
     BYTE _recBuf[MAXBUFLEN];
     BYTE _dataBuf[MAXBUFLEN];

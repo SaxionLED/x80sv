@@ -1178,5 +1178,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendCommand(const uns
     return -1;
 }
 
+CommState DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::getCommunicationState()
+{
+    return _eCommState;
+}
 
 

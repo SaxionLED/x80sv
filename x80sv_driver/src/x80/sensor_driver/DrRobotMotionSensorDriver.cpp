@@ -31,7 +31,7 @@ DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DrRobotMotionSensorDriver
     sprintf(_robotConfig->robotID, "DrRobot");
     sprintf(_robotConfig->robotIP, "192.168.0.201");
 
-    _robotConfig->boardType = I90_Power;
+    _robotConfig->boardType = X80SV;
 
     _nMsgLen = 0;
 
@@ -91,7 +91,8 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::close() {
     }
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openSerial(const char* serialPort, const long BAUD) {
+int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openSerial(const char* serialPort, const long BAUD)
+{
 
     if (portOpen())
         close();
@@ -102,10 +103,18 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openSerial(const char
 
     _serialfd = ::open(_robotConfig->serialPortName, O_RDWR | O_NONBLOCK | O_NOCTTY);
     //_serialfd = ::open("/dev/ttyS0", O_RDWR | O_NONBLOCK | O_NOCTTY);
-    if (_serialfd > 0) {
+    if (_serialfd > 0)
+    {
+        int res = 0;
         struct termios newtio;
 
-        tcgetattr(_serialfd, &newtio);
+        res = tcgetattr(_serialfd, &newtio);
+        if (res != 0)
+        {
+            ROS_ERROR("tcgetattr failed");
+            return -1;
+        }
+
         memset(&newtio.c_cc, 0, sizeof (newtio.c_cc));
 //        newtio.c_cflag = BAUD | CS8 | CLOCAL | CREAD;
         newtio.c_cflag = CS8 | CLOCAL | CREAD;
@@ -116,19 +125,36 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openSerial(const char
         newtio.c_cc[VTIME] = 0;
 
 
-        cfsetispeed(&newtio, B115200);        // to fix minicom start issue, but can often cause massive data discrepancies...  
-        cfsetospeed(&newtio, B115200);
+        res = cfsetispeed(&newtio, B115200);        // to fix minicom start issue, but can often cause massive data discrepancies...  
+        if (res != 0)
+        {
+            ROS_ERROR("tcsetattr failed");
+            return -1;
+        }
+
+        res = cfsetospeed(&newtio, B115200);
+        if (res != 0)
+        {
+            ROS_ERROR("tcsetattr failed");
+            return -1;
+        }
 
         tcflush(_serialfd, TCIFLUSH);
-        tcsetattr(_serialfd, TCSANOW, &newtio);
-
+        res = tcsetattr(_serialfd, TCSANOW, &newtio);
+        if (res != 0)
+        {
+            ROS_ERROR("tcsetattr failed");
+            return -1;
+        }
 
         ROS_INFO("Serial listener at %s: waiting for robot server, starting receiving...", _robotConfig->serialPortName);
         _eCommState = Connected;
         _stopComm = false;
         _pCommThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DrRobotMotionSensorDriver::commWorkingThread, this)));
         return 0;
-    } else {
+    }
+    else
+    {
         const char *extra_msg = "";
         switch (errno) {
             case EACCES:
@@ -354,14 +380,27 @@ unsigned char DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::CalculateCR
 
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendAck() {
+int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendAck()
+{
     unsigned char msg[] = {COM_STX0, COM_STX1, COM_TYPE_MOT, 0, 0xff, 1, 1, 0, COM_ETX0, COM_ETX1};
     msg[2] = _desID;
     msg[7] = CalculateCRC(&msg[2], msg[5] + 4);
     return sendCommand(msg, 10);
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const unsigned char *lpComData, const int nLen) {
+void dump_msg(const unsigned char* data, const int len)
+{
+    printf("Message with %i bytes:\n", len);
+    for (int i = 0; i < len; i++)
+    {
+        printf("data[%i] = %X\n", i, data[i]);
+    }
+}
+
+void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const unsigned char *lpComData, const int nLen)
+{
+    // dump_msg(lpComData, nLen);
+
     char debugtemp[512];
     int temp;
     if ((lpComData[INDEX_STX0] != COM_STX0) ||
@@ -373,20 +412,25 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const
         debugCommMessage("invalid packet header ID, discard it!\n");
 
         return;
-    } else if (lpComData[INDEX_DES] != _pcID) {
-        m_packets_error++;
-        debugCommMessage("invalid packet destination id PC, discard it!\n");
-        return;
     }
 
-    BYTE ucLength = (BYTE) lpComData[INDEX_LENGTH];
+    int ucLength = lpComData[INDEX_LENGTH];
 
-    if ((ucLength + INDEX_DATA + 3) != nLen) {
+    if ((ucLength + INDEX_DATA + 3) != nLen)
+    {
         m_packets_error++;
         sprintf(debugtemp, "invalid packet size, discard it! whole length: %d, the data length: %d\n", nLen, ucLength);
         std::string temp(debugtemp);
         debugCommMessage(temp);
 
+        return;
+    }
+
+    if (lpComData[INDEX_DES] != _pcID)
+    {
+        m_packets_error++;
+        debugCommMessage("invalid packet destination id PC, discard it!\n");
+	printf("id: %X != %X \n", lpComData[INDEX_DES], _pcID);
         return;
     }
 
@@ -691,10 +735,13 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setDrRobotMotionDriv
     strcpy(_robotConfig->robotIP, driverConfig->robotIP);
     strcpy(_robotConfig->serialPortName, driverConfig->serialPortName);
 
-    if ((_robotConfig->boardType == I90_Motion) || (_robotConfig->boardType == I90_Power) || (_robotConfig->boardType == Jaguar)) {
+    if ((_robotConfig->boardType == I90_Motion) || (_robotConfig->boardType == I90_Power) || (_robotConfig->boardType == Jaguar) || (_robotConfig->boardType == X80SV))
+    {
         _pcID = COM_TYPE_PC;
         _desID = COM_TYPE_MOT;
-    } else {
+    }
+    else
+    {
         _pcID = COM_TYPE_PC_PLUS;
         _desID = COM_TYPE_MOT_PLUS;
     }

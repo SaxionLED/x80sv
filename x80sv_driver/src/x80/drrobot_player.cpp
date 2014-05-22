@@ -418,11 +418,6 @@ DrRobotPlayerNode::DrRobotPlayerNode()
     robotConfig1_.portNum = commPortNum_;
     robotConfig2_.portNum = commPortNum_ + 1;
 
-    //  strcat(robotConfig1_.robotIP,robotIP_.c_str());
-    strcpy(robotConfig1_.robotIP, robotIP_.c_str());
-    //  strcat(robotConfig2_.robotIP,robotIP_.c_str());
-    strcpy(robotConfig2_.robotIP, robotIP_.c_str());
-
     //  strcat(robotConfig1_.serialPortName,robotSerialPort_.c_str());
     strcpy(robotConfig1_.serialPortName, robotSerialPort_.c_str());
     //  strcat(robotConfig2_.serialPortName,robotSerialPort_.c_str());

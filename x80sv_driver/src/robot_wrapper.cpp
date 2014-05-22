@@ -12,7 +12,7 @@
 using namespace std;
 using namespace geometry_msgs;
 
-ros::Publisher pubActuationPose, pubActuationVelocity, pubOdometry, pubSensors;
+ros::Publisher pubActuationVelocity, pubOdometry, pubSensors;
 
 int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
 int mEncoderPreviousRight = -1;
@@ -198,8 +198,6 @@ void subTargetPoseCallback(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
     //        adjustedPose.pose.x -= (adjustedPose.pose.x * 0.06);    // with current PID settings, the x80 seems to always move 5cm too far, try and prevent this
     //    }
 
-    pubActuationPose.publish(adjustedPose);
-
 
     // uncomment the follow lines to use velocity instead of position control
     //    Twist twist;
@@ -284,7 +282,6 @@ int main(int argc, char **argv) {
     //pubs
     pubOdometry = n.advertise<geometry_msgs::Pose>("odometry", 32);
     pubSensors = n.advertise<skynav_msgs::RangeDefinedArray>("sensors", 1024);
-    pubActuationPose = n.advertise<skynav_msgs::TimedPose>("drrobot_cmd_pose", 32); // drrobot specific topic
     pubActuationVelocity = n.advertise<geometry_msgs::Twist>("drrobot_cmd_vel", 32); // only for small, precise turns 
 
     //subs

@@ -522,6 +522,12 @@ namespace DrRobot_MotionSensorDriver
         return _comCnt;
     }
 
+    void get_packet_stats(int& ok, int& err)
+    {
+        ok = m_packets_ok;
+        err = m_packets_error;
+    }
+
   private:
     BYTE _recBuf[MAXBUFLEN];
     BYTE _dataBuf[MAXBUFLEN];
@@ -535,6 +541,8 @@ namespace DrRobot_MotionSensorDriver
     struct timeval _tv;
     fd_set _readfds;
     int _comCnt;
+    int m_packets_ok;
+    int m_packets_error;
     pthread_mutex_t _mutex_Data_Buf;
     DrRobotMotionConfig *_robotConfig;
     boost::shared_ptr<boost::thread> _pCommThread;

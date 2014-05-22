@@ -10,8 +10,8 @@
 #include "DrRobotCommConst.hpp"
 
 
-#define DEBUG_ERROR           //set printf out error message
-//#undef DEBUG_ERROR
+//#define DEBUG_ERROR           //set printf out error message
+#undef DEBUG_ERROR
 
 
 using namespace std;
@@ -50,6 +50,8 @@ DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DrRobotMotionSensorDriver
 
     _stopComm = true;
     _comCnt = 0;
+    m_packets_ok = 0;
+    m_packets_error = 0;
     _mutex_Data_Buf = PTHREAD_MUTEX_INITIALIZER;
     _eCommState = Disconnected;
     _desID = COM_TYPE_MOT;
@@ -121,7 +123,7 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openSerial(const char
         tcsetattr(_serialfd, TCSANOW, &newtio);
 
 
-        ROS_INFO("Serial listener: waiting for robot server, starting receiving...");
+        ROS_INFO("Serial listener at %s: waiting for robot server, starting receiving...", _robotConfig->serialPortName);
         _eCommState = Connected;
         _stopComm = false;
         _pCommThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DrRobotMotionSensorDriver::commWorkingThread, this)));
@@ -364,12 +366,15 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const
     int temp;
     if ((lpComData[INDEX_STX0] != COM_STX0) ||
             (lpComData[INDEX_STX1] != COM_STX1)
-            ) {
+            ) 
+    {
+        m_packets_error++;
 
         debugCommMessage("invalid packet header ID, discard it!\n");
 
         return;
     } else if (lpComData[INDEX_DES] != _pcID) {
+        m_packets_error++;
         debugCommMessage("invalid packet destination id PC, discard it!\n");
         return;
     }
@@ -377,6 +382,7 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const
     BYTE ucLength = (BYTE) lpComData[INDEX_LENGTH];
 
     if ((ucLength + INDEX_DATA + 3) != nLen) {
+        m_packets_error++;
         sprintf(debugtemp, "invalid packet size, discard it! whole length: %d, the data length: %d\n", nLen, ucLength);
         std::string temp(debugtemp);
         debugCommMessage(temp);
@@ -388,6 +394,7 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const
             (lpComData[nLen - 2] != COM_ETX0)
             ) // check ETX indicator
     {
+        m_packets_error++;
         debugCommMessage("invalid packet ETX indicator, discard it!\n");
         return;
     }
@@ -395,11 +402,13 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const
     // verify CRC correction
     if (CalculateCRC(lpComData + INDEX_DES, ucLength + 4)
             != (BYTE) lpComData[ucLength + INDEX_DATA]) {
+        m_packets_error++;
         debugCommMessage("invalid CRC, discard it\n");
         return;
     }
 
     // all right, until this point, all format data have been checked okay!
+    m_packets_ok++;
     //
     switch ((unsigned char) lpComData[INDEX_TYPE]) {
         case COMTYPE_SYSTEM:

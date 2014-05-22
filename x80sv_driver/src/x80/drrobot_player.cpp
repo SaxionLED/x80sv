@@ -136,20 +136,7 @@ public:
 
     int stop();
 
-    void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel) {
-        double g_vel = cmd_vel->linear.x;
-        double t_vel = cmd_vel->angular.z;
-
-        double leftWheel = (2 * g_vel - t_vel * wheelDis_) / (2 * wheelRadius_);
-        double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_); // seems the right wheel needs a minor offset to prevent an angle when going straight
-
-        int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
-        int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
-
-        //ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
-        drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
-    }
-
+    void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel);
 
     void doUpdate()
     {
@@ -424,6 +411,7 @@ DrRobotPlayerNode::DrRobotPlayerNode()
         robotConfig2_.boardType = Hawk_H20_Motion;
     } else if (robotType_ == "X80") {
         robotConfig1_.boardType = X80SV;
+        robotConfig2_.boardType = X80SV;
     }
 
 
@@ -459,7 +447,8 @@ DrRobotPlayerNode::DrRobotPlayerNode()
 }
 
 
-int DrRobotPlayerNode::start() {
+int DrRobotPlayerNode::start()
+{
 
         //int res = -1;
 
@@ -468,7 +457,9 @@ int DrRobotPlayerNode::start() {
             drrobotPowerDriver_->openNetwork(robotConfig1_.robotIP, robotConfig1_.portNum);
         } else {
             drrobotMotionDriver_->openSerial(robotConfig2_.serialPortName, 115200);
-            drrobotPowerDriver_->openSerial(robotConfig1_.serialPortName, 115200);
+            //drrobotPowerDriver_->openSerial(robotConfig1_.serialPortName, 115200);
+            ROS_INFO("motion driver: [%i]", drrobotMotionDriver_->portOpen());
+            ROS_INFO("power driver: [%i]", drrobotPowerDriver_->portOpen());
         }
 
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&DrRobotPlayerNode::cmdVelReceived, this, _1));
@@ -480,6 +471,22 @@ int DrRobotPlayerNode::start() {
         drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);       // 500, 2, 510 has smoother motion but does not take friction in account
 
         return (0);
+}
+
+
+void DrRobotPlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
+{
+        double g_vel = cmd_vel->linear.x;
+        double t_vel = cmd_vel->angular.z;
+
+        double leftWheel = (2 * g_vel - t_vel * wheelDis_) / (2 * wheelRadius_);
+        double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_); // seems the right wheel needs a minor offset to prevent an angle when going straight
+
+        int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
+        int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
+
+        // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+        drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
 }
 
 
@@ -507,6 +514,15 @@ void DrRobotPlayerNode::produce_motion_diagnostics(diagnostic_updater::Diagnosti
         }
 
         stat.add("com cnt", drrobotMotionDriver_->getComCnt());
+
+        int packets_ok, packets_error;
+        drrobotMotionDriver_->get_packet_stats(packets_ok, packets_error);
+        stat.add("motion packets ok", packets_ok);
+        stat.add("motion packets error", packets_error);
+
+        drrobotPowerDriver_->get_packet_stats(packets_ok, packets_error);
+        stat.add("power packets ok", packets_ok);
+        stat.add("power packets error", packets_error);
 }
 
 
@@ -521,7 +537,6 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
 
     updater.add("Motion driver", &drrobotPlayer, &DrRobotPlayerNode::produce_motion_diagnostics);
-    updater.force_update();
 
     // Start up the robot
     if (drrobotPlayer.start() != 0) {

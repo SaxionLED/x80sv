@@ -16,3 +16,8 @@ to use the robot over serial-usb, make sure the usb ports of the pc are configur
 It is important to note that the robot (currently) needs to be connected to __ttyUSB0__
 
 
+
+
+[![Build Status](https://travis-ci.org/SaxionLED/x80sv.svg)](https://travis-ci.org/SaxionLED/x80sv)
+
+

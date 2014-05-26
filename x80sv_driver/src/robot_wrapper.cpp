@@ -7,8 +7,8 @@
 #include <x80sv_driver/RangeDefinedArray.h>
 
 #include <x80sv_driver/MotorInfoArray.h>
-#include <skynav_msgs/TimedPose.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose.h>
 #include <list>
 #include <std_msgs/UInt8.h>
 
@@ -30,8 +30,6 @@ double mEncoderCircleCount = 756;
 double mWheelDistance = 0.305;
 
 ros::Timer mActuationTimer;
-
-list<skynav_msgs::TimedPose> mSubPoseList;
 
 void actuationTimeoutCallback(const ros::TimerEvent&) {
 
@@ -226,45 +224,6 @@ void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg)
 }
 
 
-void subTargetPoseCallback(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
-    
-    
-    if (targetPose->pose.position.x != 0 && targetPose->pose.orientation.z != 0) {
-        ROS_ERROR("not allowed to move forward and turn at the same time");
-        return;
-    }
-
-    if (targetPose->actuationSeconds > 32) {
-        ROS_ERROR("X80SV cannot accept time periods larger than 32s");
-        return;
-    }
-
-    if (targetPose->pose.position.x / targetPose->actuationSeconds > 1) {
-        ROS_ERROR("Safety limit! Attempted to move faster than 1m/s (attempted speed: %f)", targetPose->pose.position.x / targetPose->actuationSeconds);
-        return;
-    }
-
-    // skynav_msgs::TimedPose adjustedPose; // new object because targetPose is read-only and needs to be because of ROS
-    // adjustedPose = (*targetPose);
-
-    //    if (targetPose->pose.theta > 0) {
-    //
-    //        adjustedPose.pose.theta += (M_PI / 180) * 2; // because the x80 has difficult with small turns, roughly below 20 degrees, we add 2 degrees. In practice this makes turns > 5 and < 20 more accurate
-    //    } else if (targetPose->pose.x > 0.2) {      // 0.2 is an estimation
-    //        adjustedPose.pose.x -= (adjustedPose.pose.x * 0.06);    // with current PID settings, the x80 seems to always move 5cm too far, try and prevent this
-    //    }
-
-
-    // uncomment the follow lines to use velocity instead of position control
-    //    Twist twist;
-    //    twist.linear.x = targetPose->pose.x / targetPose->actuationSeconds;
-    //    twist.angular.z = ((mWheelDistance / 2) * targetPose->pose.theta) / targetPose->actuationSeconds;
-    //
-    //    pubActuationVelocity.publish(twist);
-    //
-    //    mActuationTimer = n.createTimer(ros::Duration(targetPose->actuationSeconds), actuationTimeoutCallback);
-
-}
 
 void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo)
 {
@@ -345,7 +304,7 @@ int main(int argc, char **argv) {
     ros::Subscriber subSensorSafe = n.subscribe("sensorsafe", 32, subSensorSafeCallback);
     //TODO IMU, optionally a battery voltage warning
     ros::Subscriber subEncoder = n.subscribe("drrobot_motor", 256, subEncoderCallback);
-    ros::Subscriber subTargetPose = n_control.subscribe("target_motion", 32, subTargetPoseCallback);
+
 
     // read x80 parameter file
     n.getParam("x80_config/WheelRadius", mWheelRadius);
@@ -354,8 +313,8 @@ int main(int argc, char **argv) {
 
     ros::Rate loop_rate(100);
 
-    while (ros::ok()) {
-
+    while (ros::ok())
+    {
         ros::spinOnce();
 
         loop_rate.sleep();

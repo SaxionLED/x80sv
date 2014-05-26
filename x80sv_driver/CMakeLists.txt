@@ -11,6 +11,9 @@ add_message_files(
   MotorInfoArray.msg
   PowerInfo.msg
   StandardSensor.msg
+  RangeArray.msg
+  RangeDefined.msg
+  RangeDefinedArray.msg
 )
 
 generate_messages(
@@ -43,12 +46,12 @@ target_link_libraries(neato_laser_publisher ${catkin_LIBRARIES})
 # robot wrapper
 add_executable(robot_wrapper src/robot_wrapper.cpp)
 target_link_libraries(robot_wrapper ${catkin_LIBRARIES})
-add_dependencies(robot_wrapper skynav_msgs_gencpp x80sv_driver_gencpp)
+add_dependencies(robot_wrapper x80sv_driver_gencpp)
 
 # sensor safety
 add_executable(sensor_safety src/sensor_safety.cpp)
 target_link_libraries(sensor_safety ${catkin_LIBRARIES})
-add_dependencies(sensor_safety skynav_msgs_gencpp)
+add_dependencies(sensor_safety x80sv_driver_gencpp)
 
 
 catkin_add_gtest(x80sv_driver_test test/test_laser.cpp)

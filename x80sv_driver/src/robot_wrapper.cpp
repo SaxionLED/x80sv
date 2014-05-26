@@ -1,8 +1,8 @@
 #include <ros/ros.h>
-#include <skynav_msgs/RangeArray.h>
+#include <x80sv_driver/RangeArray.h>
 #include <sensor_msgs/Range.h>
-#include <skynav_msgs/RangeDefined.h>
-#include <skynav_msgs/RangeDefinedArray.h>
+#include <x80sv_driver/RangeDefined.h>
+#include <x80sv_driver/RangeDefinedArray.h>
 #include <x80sv_driver/MotorInfoArray.h>
 #include <skynav_msgs/TimedPose.h>
 #include <geometry_msgs/Twist.h>
@@ -42,15 +42,15 @@ void actuationTimeoutCallback(const ros::TimerEvent&) {
     pubActuationVelocity.publish(robotActuation);
 }
 
-void subSensorSafeCallback(const skynav_msgs::RangeArray::ConstPtr& msg) {
+void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg) {
 
     // convert range arrays here to RangeDefinedArray (this means adding the angle and distance toward centroid of robot)
 
-    skynav_msgs::RangeDefinedArray rangeDefinedArray;
+    x80sv_driver::RangeDefinedArray rangeDefinedArray;
 
     for (uint32_t i = 0; i < msg->ranges.size(); i++) {
 
-        skynav_msgs::RangeDefined rangeDefined; // the new range msg, angle/distance needs to be filled in
+        x80sv_driver::RangeDefined rangeDefined; // the new range msg, angle/distance needs to be filled in
 
 
         if (msg->ranges.at(i).radiation_type == sensor_msgs::Range::ULTRASOUND) {
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
 
     //pubs
     pubOdometry = n.advertise<geometry_msgs::Pose>("odometry", 32);
-    pubSensors = n.advertise<skynav_msgs::RangeDefinedArray>("sensors", 1024);
+    pubSensors = n.advertise<x80sv_driver::RangeDefinedArray>("sensors", 1024);
     pubActuationVelocity = n.advertise<geometry_msgs::Twist>("drrobot_cmd_vel", 32); // only for small, precise turns 
 
     //subs

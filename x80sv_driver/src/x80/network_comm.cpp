@@ -16,6 +16,13 @@ using namespace DrRobot_MotionSensorDriver;
 namespace DrRobot_MotionSensorDriver
 {
 
+    DrRobotNetworkDriver::DrRobotNetworkDriver()
+    {
+        bzero(&_addr, sizeof (_addr));
+        _addr.sin_family = AF_INET;
+        _addr.sin_port = htons(_robotConfig->portNum);
+        _addr_len = sizeof _addr;
+    }
 
     int DrRobotNetworkDriver::vali_ip(const char* ip_str)
     {
@@ -88,6 +95,39 @@ namespace DrRobot_MotionSensorDriver
             ::close(_sockfd);
             _sockfd = -1;
         }
+    }
+
+//communication thread here
+
+    void DrRobotNetworkDriver::commWorkingThread()
+    {
+        while (!_stopComm)
+        {
+            FD_ZERO(&_readfds);
+            FD_SET(_sockfd, &_readfds);
+            select(_sockfd + 1, &_readfds, NULL, NULL, &_tv);
+            if (FD_ISSET(_sockfd, &_readfds)) {
+                if ((_numbytes = recvfrom(_sockfd, _recBuf, MAXBUFLEN - 1, 0, (struct sockaddr *) &_addr, &_addr_len)) == -1) {
+                    perror("recvfrom");
+                    return;
+                }
+#ifdef DEBUG_ERROR
+                printf("listener: packet is %d bytes long\n", _numbytes);
+#endif
+                _comCnt = 0;
+                handleComData(_recBuf, _numbytes);
+            } else {
+                _comCnt++;
+
+                usleep(10000); //10ms
+                if (_comCnt > COMM_LOST_TH) {
+                    ROS_ERROR("Communication is lost, need close all. IP address %s, Port: %d", _robotConfig->robotIP, _robotConfig->portNum);
+                    _stopComm = true;                    
+                    return;
+                }
+            }
+        }
+        return;
     }
 
 

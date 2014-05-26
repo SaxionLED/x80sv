@@ -11,6 +11,9 @@ using namespace std;
 
 namespace DrRobot_MotionSensorDriver
 {
+    DrRobotSerialDriver::DrRobotSerialDriver()
+    {
+    }
 
     int DrRobotSerialDriver::openSerial(const char* serialPort, const long BAUD)
     {
@@ -103,6 +106,98 @@ namespace DrRobot_MotionSensorDriver
             ::close(_serialfd);
             _serialfd = -1;
         }
+    }
+
+
+    void DrRobotSerialDriver::commWorkingThread()
+    {
+        while (!_stopComm)
+        {
+                _numbytes = read(_serialfd, _recBuf, sizeof (_recBuf));
+                if (_numbytes <= 0) //( (_numbytes == -1) && (errno != EAGAIN) && (errno != EWOULDBLOCK) )
+                {
+                    //read erro,
+                    _comCnt++;
+                    //printf ("Serial time out\n");
+                    usleep(10000);
+                    if (_comCnt > COMM_LOST_TH) {
+                        ROS_ERROR("Communication is lost, need close all. Serial Port is %s", _robotConfig->serialPortName);
+                        _stopComm = true;
+                        _eCommState = Disconnected;
+                        ::close(_serialfd);
+                        _serialfd = -1;
+                    }
+
+                } else {
+    #ifdef DEBUG_ERROR
+                    printf("listener: packet is %d bytes long\n", _numbytes);
+    #endif
+                    _comCnt = 0;
+                    handleComData(_recBuf, _numbytes);
+                }
+
+
+
+                /*
+               struct pollfd ufd[1];
+               int retval;
+               int timeout = 0;
+               ufd[0].fd = _serialfd;
+               ufd[0].events = POLLIN;
+               //below will block to wait event
+
+               //if (timeout == 0)
+               //  timeout = -1;
+
+
+
+               retval = poll(ufd, 1, timeout);
+               if (retval < 0)
+               {
+                 //poll fialed -- error
+                 printf("DrRobot Serial Communication error, eroor no is %d: %s", errno, strerror(errno));
+                _stopComm = true;
+                _eCommState = Disconnected;
+                ::close(_sockfd);
+                _sockfd = -1;
+                return;
+               }
+               else if (retval  == 0)
+               {
+                 //timeout,
+                 _comCnt ++;
+                 printf ("Serial time out\n");
+                 usleep(10000);
+                 if (_comCnt > COMM_LOST_TH)
+                 {
+                   printf("communication is lost, need close all\n");
+                   _stopComm = true;
+                   _eCommState = Disconnected;
+                   ::close(_serialfd);
+                   _serialfd = -1;
+                 }
+               }
+               else
+               {
+                 _numbytes = read(_serialfd,_recBuf, sizeof(_recBuf));
+                 if ( (_numbytes == -1) && (errno != EAGAIN) && (errno != EWOULDBLOCK) )
+                 {
+                   //read erro,
+                   _comCnt ++;
+                 }
+                 else
+                 {
+         #ifdef DEBUG_ERROR
+                printf("listener: packet is %d bytes long\n", _numbytes);
+          #endif
+                _comCnt = 0;
+                handleComData(_recBuf,_numbytes);
+                 }
+               }
+                 */
+
+        }
+        return;
     }
 
 

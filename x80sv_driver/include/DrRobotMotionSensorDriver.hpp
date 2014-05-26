@@ -55,6 +55,8 @@
 //! A namespace containing the DrRobot Motion/Sensor driver
 namespace DrRobot_MotionSensorDriver
 {
+
+
   typedef unsigned char BYTE;
 
  /*! This definition limits all the string variables length < 255
@@ -210,45 +212,34 @@ namespace DrRobot_MotionSensorDriver
  *       is around 10Hz, it is determined by firmware on the robot, so faster than this rate is not necessary and should be avoid.
  *
  */
-  class DrRobotMotionSensorDriver
-  {
-  public:
-    /*! @brief
-     * Constructor function
-     *
-     */
-    DrRobotMotionSensorDriver();
+    class DrRobotMotionSensorDriver
+    {
+        public:
+        DrRobotMotionSensorDriver();
 
-    /*! @brief
-     *  Destructor function
-     *
-     */
-    ~DrRobotMotionSensorDriver();
+        ~DrRobotMotionSensorDriver();
 
-    /*! @brief
-     *  This function is used for detecting the communication status,
-     * @param[in]   none
-     * @return false -- communication is lost
-     *         true  -- communication is OK
-     */
-    bool portOpen();
+        /*! @brief
+         *  This function is used for detecting the communication status,
+         * @return false -- communication is lost
+         *         true  -- communication is OK
+         */
+        bool portOpen();
 
-    /*! @brief
-     *  This function is used for closing the communication
-     * @param[in]   none
-     * @return 0 -- communication is closed
-     *         others  -- something wrong there
-     */
-    virtual void close();
+        /*! @brief
+         *  This function is used for closing the communication
+         * @return 0 -- communication is closed
+         *         others  -- something wrong there
+         */
+        virtual void close();
 
-    virtual void open() = 0;
+        virtual void open() = 0;
 
 
 
     /*! @brief
      *  This function will use struct DrRobotMotionConfig to configure the driver
      * @param[in]   driverConfig struct DrRobotMotionConfig
-     * @return null
      */
     void setDrRobotMotionDriverConfig(DrRobotMotionConfig* driverConfig);
 
@@ -513,14 +504,13 @@ namespace DrRobot_MotionSensorDriver
         err = m_packets_error;
     }
 
-        void commWorkingThread();
+        virtual void commWorkingThread() = 0;
     protected:
         BYTE _recBuf[MAXBUFLEN];
         BYTE _dataBuf[MAXBUFLEN];
         int _nMsgLen;
         int _sockfd;
         int _serialfd;
-        struct sockaddr_in _addr;
         socklen_t _addr_len;
         char _sAddr[INET6_ADDRSTRLEN];
         int _numbytes;
@@ -557,16 +547,20 @@ namespace DrRobot_MotionSensorDriver
     class DrRobotSerialDriver : public DrRobotMotionSensorDriver
     {
         public:
+            DrRobotSerialDriver();
             int openSerial(const char* serialPort, const long BAUD);
             virtual void open(){}
             virtual void close();
+            virtual void commWorkingThread();
         protected:
             virtual int sendCommand(const unsigned char* msg, const int nLen);
     };
 
+
     class DrRobotNetworkDriver : public DrRobotMotionSensorDriver
     {
         public:
+            DrRobotNetworkDriver();
             virtual void open(){}
             virtual void close();
 
@@ -579,10 +573,16 @@ namespace DrRobot_MotionSensorDriver
              *         others  something wrong there
              */
             int openNetwork(const char*  robotIP, const int portNum);
+            virtual void commWorkingThread();
 
         protected:
             virtual int sendCommand(const unsigned char* msg, const int nLen);
             int vali_ip(const char* ip_str);
+            struct sockaddr_in _addr;
     };
+
+
 }
+
+
 #endif /* DRROBOTMOTIONSENSORDRIVER_H_ */

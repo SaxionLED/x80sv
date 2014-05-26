@@ -1,14 +1,14 @@
 #include <ros/ros.h>
-#include <x80sv_driver/RangeArray.h>
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/PointCloud.h>
 
+#include <x80sv_driver/RangeArray.h>
 #include <x80sv_driver/RangeDefined.h>
 #include <x80sv_driver/RangeDefinedArray.h>
-
 #include <x80sv_driver/MotorInfoArray.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
+
 #include <list>
 #include <std_msgs/UInt8.h>
 
@@ -16,7 +16,8 @@ using namespace std;
 using namespace geometry_msgs;
 using namespace sensor_msgs;
 
-ros::Publisher pubActuationVelocity, pubOdometry, pubSensors;
+ros::Publisher pubOdometry;
+ros::Publisher pubSensors;
 ros::Publisher pubSensorData;
 
 int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
@@ -29,21 +30,6 @@ double mWheelRadius = 0.080; //default values as per x80 source file
 double mEncoderCircleCount = 756;
 double mWheelDistance = 0.305;
 
-ros::Timer mActuationTimer;
-
-void actuationTimeoutCallback(const ros::TimerEvent&) {
-
-    // when calculated time based linear or angular velocity has passed
-    mActuationTimer.stop();
-
-    Twist robotActuation;
-
-    // velocity full stop
-    robotActuation.linear.x = 0;
-    robotActuation.angular.z = 0;
-    
-    pubActuationVelocity.publish(robotActuation);
-}
 
 void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg);
 
@@ -175,7 +161,6 @@ void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg)
     }
 
     // 
-    // pubSensors.publish(rangeDefinedArray);
     subSensorCallback(rangeDefinedArray);
 }
 
@@ -219,7 +204,8 @@ void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg)
         pointCloud.header.frame_id = "/base_link";
 
         // TODO: publish in custom topic of type pointcloud2
-        pubSensorData.publish(pointCloud);
+        // pubSensorData.publish(pointCloud);
+        //// pubSensors.publish(rangeDefinedArray);
     }
 }
 
@@ -288,7 +274,10 @@ void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo)
     }
 }
 
-int main(int argc, char **argv) {
+
+
+int main(int argc, char **argv)
+{
 
     ros::init(argc, argv, "robot_wrapper");
 
@@ -298,7 +287,6 @@ int main(int argc, char **argv) {
     //pubs
     pubOdometry = n.advertise<geometry_msgs::Pose>("odometry", 32);
     pubSensors = n.advertise<sensor_msgs::PointCloud>("sensors", 32);
-    pubActuationVelocity = n.advertise<geometry_msgs::Twist>("drrobot_cmd_vel", 32); // only for small, precise turns 
 
     //subs
     ros::Subscriber subSensorSafe = n.subscribe("sensorsafe", 32, subSensorSafeCallback);

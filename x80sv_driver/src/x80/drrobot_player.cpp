@@ -106,6 +106,8 @@ Publishes to (name / type):
 #define MOTOR_NUM       6
 #define IR_NUM          7
 #define US_NUM          3
+
+
 using namespace std;
 using namespace DrRobot_MotionSensorDriver;
 
@@ -302,8 +304,12 @@ private:
     double maxSpeed_;
 
     int cntNum_;
+    double ad2Dis(int adValue);
 
-    double ad2Dis(int adValue) {
+};
+
+    double DrRobotPlayerNode::ad2Dis(int adValue)
+    {
         double temp = 0;
         double irad2Dis = 0;
 
@@ -320,7 +326,7 @@ private:
             irad2Dis = temp / 100;
         return irad2Dis;
     }
-};
+
 
 DrRobotPlayerNode::DrRobotPlayerNode()
  {

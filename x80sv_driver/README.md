@@ -1,4 +1,4 @@
-skynav_x80sv
+x80sv_driver
 =============
 
 Contains drivers for the x80sv robot.

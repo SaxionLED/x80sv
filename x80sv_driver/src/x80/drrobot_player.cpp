@@ -94,12 +94,11 @@ Publishes to (name / type):
 
 #include <x80sv_driver/MotorInfo.h>
 #include <x80sv_driver/MotorInfoArray.h>
-#include <skynav_msgs/RangeArray.h>
+#include <x80sv_driver/RangeArray.h>
 #include <sensor_msgs/Range.h>
 #include <x80sv_driver/PowerInfo.h>
 #include <x80sv_driver/StandardSensor.h>
 #include <x80sv_driver/CustomSensor.h>
-#include <skynav_msgs/TimedPose.h>
 #include <DrRobotMotionSensorDriver.hpp>
 
 #include <math.h>
@@ -196,7 +195,7 @@ public:
             motorInfo_pub_.publish(motorInfoArray);
 
 
-            skynav_msgs::RangeArray rangerArray;
+            x80sv_driver::RangeArray rangerArray;
             rangerArray.ranges.resize(US_NUM);
             if (enable_sonar_) {
                 for (uint32_t i = 0; i < US_NUM; ++i) {
@@ -426,10 +425,10 @@ DrRobotPlayerNode::DrRobotPlayerNode()
     motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
     powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
     if (enable_ir_) {
-        ir_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_ir", 1);
+        ir_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_ir", 1);
     }
     if (enable_sonar_) {
-        sonar_pub_ = node_.advertise<skynav_msgs::RangeArray>("drrobot_sonar", 1);
+        sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
     }
     standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
     customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);

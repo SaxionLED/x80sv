@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(x80sv_driver)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp skynav_msgs tf rostest)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp tf rostest nav_msgs)
 find_package(Boost REQUIRED)
 
 add_message_files(
@@ -25,7 +25,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp skynav_msgs tf
+  CATKIN_DEPENDS roscpp tf
 )
 
 include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})

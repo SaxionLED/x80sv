@@ -1,8 +1,11 @@
 #include <ros/ros.h>
 #include <x80sv_driver/RangeArray.h>
 #include <sensor_msgs/Range.h>
+#include <sensor_msgs/PointCloud.h>
+
 #include <x80sv_driver/RangeDefined.h>
 #include <x80sv_driver/RangeDefinedArray.h>
+
 #include <x80sv_driver/MotorInfoArray.h>
 #include <skynav_msgs/TimedPose.h>
 #include <geometry_msgs/Twist.h>
@@ -11,8 +14,10 @@
 
 using namespace std;
 using namespace geometry_msgs;
+using namespace sensor_msgs;
 
 ros::Publisher pubActuationVelocity, pubOdometry, pubSensors;
+ros::Publisher pubSensorData;
 
 int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
 int mEncoderPreviousRight = -1;
@@ -42,7 +47,11 @@ void actuationTimeoutCallback(const ros::TimerEvent&) {
     pubActuationVelocity.publish(robotActuation);
 }
 
-void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg) {
+void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg);
+
+
+void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg)
+{
 
     // convert range arrays here to RangeDefinedArray (this means adding the angle and distance toward centroid of robot)
 
@@ -167,8 +176,55 @@ void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg) {
             ROS_ERROR("invalid or NYI sensor type found");
     }
 
-    pubSensors.publish(rangeDefinedArray);
+    // 
+    // pubSensors.publish(rangeDefinedArray);
+    subSensorCallback(rangeDefinedArray);
 }
+
+
+//truncate values (in meters) to certain precision
+float truncateValue(const float value){
+	//return floorf(value*1000)/1000; //mm
+	return floorf(value*100)/100; //cm 
+}
+
+void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg)
+{	// for x80 sonar/IR sensors
+
+
+    PointCloud pointCloud;
+
+    for (uint i = 0; i < msg.ranges.size(); i++) {
+
+        x80sv_driver::RangeDefined rangeMsg = msg.ranges.at(i);
+
+        if (rangeMsg.range.range > rangeMsg.range.min_range && rangeMsg.range.range < rangeMsg.range.max_range) { // skip if not within limits
+
+            double alpha = rangeMsg.angleFromCenter; // sensor angle + current pose angle
+            double distance = rangeMsg.distanceFromCenter + rangeMsg.range.range; // sensor range + offset from center
+
+            double objectX = (cos(alpha) * distance); // add current pose x
+            double objectY = (sin(alpha) * distance) + rangeMsg.yOffsetFromCenter; // y
+
+            Point32 p;
+            p.x = truncateValue(objectX); 
+            p.y = truncateValue(objectY);
+
+            pointCloud.points.push_back(p);
+        }
+    }
+
+    if (pointCloud.points.size() > 0)
+    {
+
+        pointCloud.header.stamp = ros::Time::now();
+        pointCloud.header.frame_id = "/base_link";
+
+        // TODO: publish in custom topic of type pointcloud2
+        pubSensorData.publish(pointCloud);
+    }
+}
+
 
 void subTargetPoseCallback(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
     
@@ -188,8 +244,8 @@ void subTargetPoseCallback(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
         return;
     }
 
-    skynav_msgs::TimedPose adjustedPose; // new object because targetPose is read-only and needs to be because of ROS
-    adjustedPose = (*targetPose);
+    // skynav_msgs::TimedPose adjustedPose; // new object because targetPose is read-only and needs to be because of ROS
+    // adjustedPose = (*targetPose);
 
     //    if (targetPose->pose.theta > 0) {
     //
@@ -210,7 +266,8 @@ void subTargetPoseCallback(const skynav_msgs::TimedPose::ConstPtr& targetPose) {
 
 }
 
-void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo) {
+void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo)
+{
 
     double movementDelta0 = 0, movementDelta1 = 0;
 
@@ -281,11 +338,11 @@ int main(int argc, char **argv) {
 
     //pubs
     pubOdometry = n.advertise<geometry_msgs::Pose>("odometry", 32);
-    pubSensors = n.advertise<x80sv_driver::RangeDefinedArray>("sensors", 1024);
+    pubSensors = n.advertise<sensor_msgs::PointCloud>("sensors", 32);
     pubActuationVelocity = n.advertise<geometry_msgs::Twist>("drrobot_cmd_vel", 32); // only for small, precise turns 
 
     //subs
-    ros::Subscriber subSensorSafe = n.subscribe("sensorsafe", 1024, subSensorSafeCallback);
+    ros::Subscriber subSensorSafe = n.subscribe("sensorsafe", 32, subSensorSafeCallback);
     //TODO IMU, optionally a battery voltage warning
     ros::Subscriber subEncoder = n.subscribe("drrobot_motor", 256, subEncoderCallback);
     ros::Subscriber subTargetPose = n_control.subscribe("target_motion", 32, subTargetPoseCallback);

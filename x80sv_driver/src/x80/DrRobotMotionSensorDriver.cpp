@@ -17,11 +17,13 @@
 using namespace std;
 using namespace DrRobot_MotionSensorDriver;
 
+namespace DrRobot_MotionSensorDriver
+{
 /*! this function is construct function for DrRobotMotionSensorDriver Class
    It will initialize all the internal variables
  */
 
-DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DrRobotMotionSensorDriver() {
+DrRobotMotionSensorDriver::DrRobotMotionSensorDriver() {
 
     _robotConfig = new DrRobotMotionConfig();
     _robotConfig->commMethod = Network;
@@ -58,19 +60,25 @@ DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DrRobotMotionSensorDriver
     _pcID = COM_TYPE_PC;
 }
 
-DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::~DrRobotMotionSensorDriver() {
+
+DrRobotMotionSensorDriver::~DrRobotMotionSensorDriver()
+{
     if (portOpen())
         close();
 }
 
-bool DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::portOpen() {
+
+bool DrRobotMotionSensorDriver::portOpen()
+{
     if ((_eCommState == Connected) && (!_stopComm))
         return true;
     else
         return false;
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::close() {
+
+void DrRobotMotionSensorDriver::close()
+{
 
     _stopComm = true;
     _pCommThread->join();
@@ -91,155 +99,19 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::close() {
     }
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openSerial(const char* serialPort, const long BAUD)
+
+void DrRobotMotionSensorDriver::debug_ouput(const char* errorstr)
 {
-
-    if (portOpen())
-        close();
-
-    _robotConfig->commMethod = Serial;
-
-    sprintf(_robotConfig->serialPortName, "%s", serialPort);
-
-    _serialfd = ::open(_robotConfig->serialPortName, O_RDWR | O_NONBLOCK | O_NOCTTY);
-    //_serialfd = ::open("/dev/ttyS0", O_RDWR | O_NONBLOCK | O_NOCTTY);
-    if (_serialfd > 0)
-    {
-        int res = 0;
-        struct termios newtio;
-
-        res = tcgetattr(_serialfd, &newtio);
-        if (res != 0)
-        {
-            ROS_ERROR("tcgetattr failed");
-            return -1;
-        }
-
-        memset(&newtio.c_cc, 0, sizeof (newtio.c_cc));
-//        newtio.c_cflag = BAUD | CS8 | CLOCAL | CREAD;
-        newtio.c_cflag = CS8 | CLOCAL | CREAD;
-        newtio.c_iflag = IGNPAR;
-        newtio.c_oflag = 0;
-        newtio.c_lflag = 0;
-        newtio.c_cc[VMIN] = 0; //VMIN = 0, VTIME = 0, read will return immediately
-        newtio.c_cc[VTIME] = 0;
-
-
-        res = cfsetispeed(&newtio, B115200);        // to fix minicom start issue, but can often cause massive data discrepancies...  
-        if (res != 0)
-        {
-            ROS_ERROR("tcsetattr failed");
-            return -1;
-        }
-
-        res = cfsetospeed(&newtio, B115200);
-        if (res != 0)
-        {
-            ROS_ERROR("tcsetattr failed");
-            return -1;
-        }
-
-        tcflush(_serialfd, TCIFLUSH);
-        res = tcsetattr(_serialfd, TCSANOW, &newtio);
-        if (res != 0)
-        {
-            ROS_ERROR("tcsetattr failed");
-            return -1;
-        }
-
-        ROS_INFO("Serial listener at %s: waiting for robot server, starting receiving...", _robotConfig->serialPortName);
-        _eCommState = Connected;
-        _stopComm = false;
-        _pCommThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DrRobotMotionSensorDriver::commWorkingThread, this)));
-        return 0;
-    }
-    else
-    {
-        const char *extra_msg = "";
-        switch (errno) {
-            case EACCES:
-                extra_msg = "You probably don't have permission to open the port for reading and writing.\n";
-                debug_ouput(extra_msg);
-                break;
-            case ENOENT:
-                extra_msg = "The request port does not exit. Was the port name misspelled?\n";
-                debug_ouput(extra_msg);
-                break;
-        }
-        _stopComm = true;
-        _eCommState = Disconnected;
-        return errno;
-    }
-
-
-}
-
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::debug_ouput(const char* errorstr) {
 #ifdef DEBUG_ERROR
     printf("DrRobot Motion Sensor: %s", errorstr);
 #endif
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::vali_ip(const char* ip_str) {
-    unsigned int n1, n2, n3, n4;
-    if (sscanf(ip_str, "%u.%u.%u.%u", &n1, &n2, &n3, &n4) != 4) return 1;
-    if ((n1 != 0) && (n1 <= 255) && (n2 <= 255) && (n3 <= 255) && (n4 <= 255)) {
-        char buf[64];
-        sprintf(buf, "%u.%u.%u.%u", n1, n2, n3, n4);
-        if (strcmp(buf, ip_str)) return 1;
-        return 0;
-    }
-
-    return 1;
-}
-
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::openNetwork(const char* robotIP, const int portNum) {
-    char temp[512];
-    //check the parameter first
-    if (portNum <= 0) {
-
-        debug_ouput(temp);
-        return -1;
-    }
-
-    if (vali_ip(robotIP) == 1) {
-        sprintf(temp, "DrRobot Motion/Sensor Driver Error Message: invalid IP address: %s\n", robotIP);
-        debug_ouput(temp);
-        return -2;
-    }
-    _robotConfig->commMethod = Network;
-    _robotConfig->portNum = portNum;
-
-    sprintf(_robotConfig->robotIP, "%s", robotIP);
-    bzero(&_addr, sizeof (_addr));
-    _addr.sin_family = AF_INET;
-    _addr.sin_port = htons(_robotConfig->portNum);
-
-    if (inet_aton(_robotConfig->robotIP, &_addr.sin_addr) == 0) {
-        sprintf(temp, "DrRobot Motion/Sensor Driver Error Message: invalid IP address: %s\n", _robotConfig->robotIP);
-        debug_ouput(temp);
-        return -3;
-    }
-
-    _stopComm = false;
-    _numbytes = sendAck();
-    if (_numbytes < 0) {
-        _stopComm = true;
-        perror("sendto");
-        return -4;
-    }
-
-    ROS_INFO("TCP listener: waiting for robot server, starting receiving...");
-    _eCommState = Connected;
-
-
-    _pCommThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DrRobotMotionSensorDriver::commWorkingThread, this)));
-    return 0;
-}
 
 //communication thread here
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::commWorkingThread() {
+void DrRobotMotionSensorDriver::commWorkingThread()
+{
     while (!_stopComm) {
         if (_robotConfig->commMethod == Network) {
 
@@ -356,7 +228,9 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::commWorkingThread() 
     return;
 }
 
-unsigned char DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::CalculateCRC(const unsigned char *lpBuffer, const int nSize) {
+
+unsigned char DrRobotMotionSensorDriver::CalculateCRC(const unsigned char *lpBuffer, const int nSize)
+{
     unsigned char shift_reg, sr_lsb, data_bit, v;
     int i, j;
     unsigned char fb_bit;
@@ -380,13 +254,15 @@ unsigned char DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::CalculateCR
 
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendAck()
+
+int DrRobotMotionSensorDriver::sendAck()
 {
     unsigned char msg[] = {COM_STX0, COM_STX1, COM_TYPE_MOT, 0, 0xff, 1, 1, 0, COM_ETX0, COM_ETX1};
     msg[2] = _desID;
     msg[7] = CalculateCRC(&msg[2], msg[5] + 4);
     return sendCommand(msg, 10);
 }
+
 
 void dump_msg(const unsigned char* data, const int len)
 {
@@ -397,7 +273,8 @@ void dump_msg(const unsigned char* data, const int len)
     }
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const unsigned char *lpComData, const int nLen)
+
+void DrRobotMotionSensorDriver::DealWithPacket(const unsigned char *lpComData, const int nLen)
 {
     // dump_msg(lpComData, nLen);
 
@@ -609,7 +486,7 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::DealWithPacket(const
     return;
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::handleComData(const unsigned char *data, const int nLen) {
+void DrRobotMotionSensorDriver::handleComData(const unsigned char *data, const int nLen) {
     unsigned char msgHeader[] = {COM_STX0, COM_STX1};
     unsigned char msgTail[] = {COM_ETX0, COM_ETX1};
     int nStartIndex, nUnProcessedPacketLen, nPacketIndex, i;
@@ -707,14 +584,16 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::handleComData(const 
     return;
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::debugCommMessage(std::string msg) {
+
+void DrRobotMotionSensorDriver::debugCommMessage(std::string msg)
+{
 #ifdef DEBUG_ERROR
     printf("DrRobot Motion Sensor Driver: %s", msg.c_str());
 #endif
 
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::getDrRobotMotionDriverConfig(DrRobotMotionConfig* driverConfig) {
+void DrRobotMotionSensorDriver::getDrRobotMotionDriverConfig(DrRobotMotionConfig* driverConfig) {
 
     strcpy(driverConfig->robotID, _robotConfig->robotID);
     driverConfig->boardType = _robotConfig->boardType;
@@ -726,7 +605,7 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::getDrRobotMotionDriv
     return;
 }
 
-void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setDrRobotMotionDriverConfig(DrRobotMotionConfig* driverConfig) {
+void DrRobotMotionSensorDriver::setDrRobotMotionDriverConfig(DrRobotMotionConfig* driverConfig) {
 
     strcpy(_robotConfig->robotID, driverConfig->robotID);
     _robotConfig->boardType = driverConfig->boardType;
@@ -749,21 +628,25 @@ void DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setDrRobotMotionDriv
     return;
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::readMotorSensorData(MotorSensorData* motorSensorData) {
+
+int DrRobotMotionSensorDriver::readMotorSensorData(MotorSensorData* motorSensorData) {
     pthread_mutex_lock(&_mutex_Data_Buf);
     memcpy(motorSensorData, &_motorSensorData, sizeof (MotorSensorData));
     pthread_mutex_unlock(&_mutex_Data_Buf);
     return 0;
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::readPowerSensorData(PowerSensorData* powerSensorData) {
+
+int DrRobotMotionSensorDriver::readPowerSensorData(PowerSensorData* powerSensorData) {
     pthread_mutex_lock(&_mutex_Data_Buf);
     memcpy(powerSensorData, &_powerSensorData, sizeof (PowerSensorData));
     pthread_mutex_unlock(&_mutex_Data_Buf);
     return 0;
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::readCustomSensorData(CustomSensorData* customSensorData) {
+
+int DrRobotMotionSensorDriver::readCustomSensorData(CustomSensorData* customSensorData)
+{
 
     pthread_mutex_lock(&_mutex_Data_Buf);
     memcpy(customSensorData, &_customSensorData, sizeof (CustomSensorData));
@@ -771,21 +654,26 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::readCustomSensorData(
     return 0;
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::readRangeSensorData(RangeSensorData* rangeSensorData) {
+
+int DrRobotMotionSensorDriver::readRangeSensorData(RangeSensorData* rangeSensorData)
+{
     pthread_mutex_lock(&_mutex_Data_Buf);
     memcpy(rangeSensorData, &_rangeSensorData, sizeof (RangeSensorData));
     pthread_mutex_unlock(&_mutex_Data_Buf);
     return 0;
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::readStandardSensorData(StandardSensorData* standardSensorData) {
+
+int DrRobotMotionSensorDriver::readStandardSensorData(StandardSensorData* standardSensorData)
+{
     pthread_mutex_lock(&_mutex_Data_Buf);
     memcpy(standardSensorData, &_standardSensorData, sizeof (StandardSensorData));
     pthread_mutex_unlock(&_mutex_Data_Buf);
     return 0;
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlAllCmd(CtrlMethod ctrlMethod, const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6, const int time) {
+
+int DrRobotMotionSensorDriver::sendMotorCtrlAllCmd(CtrlMethod ctrlMethod, const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6, const int time) {
     unsigned char msg[255];
     short tempCmd = 0;
     short tempTime = time;
@@ -834,7 +722,8 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlAllCmd(C
     return sendCommand(msg, 23);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlAllCmd(CtrlMethod ctrlMethod, const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6) {
+int DrRobotMotionSensorDriver::sendMotorCtrlAllCmd(CtrlMethod ctrlMethod, const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6)
+{
     unsigned char msg[255];
     short tempCmd = 0;
     msg[0] = COM_STX0;
@@ -877,7 +766,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlAllCmd(C
     return sendCommand(msg, 21);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlCmd(CtrlMethod ctrlMethod, const int channel, const int cmd, const int time) {
+
+int DrRobotMotionSensorDriver::sendMotorCtrlCmd(CtrlMethod ctrlMethod, const int channel, const int cmd, const int time)
+{
     unsigned char msg[255];
     short tempTime = (short) (time & 0xffff);
     if ((channel < 0) || (channel > 5))
@@ -905,7 +796,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlCmd(Ctrl
     return sendCommand(msg, 15);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlCmd(CtrlMethod ctrlMethod, const int channel, const int cmd) {
+
+int DrRobotMotionSensorDriver::sendMotorCtrlCmd(CtrlMethod ctrlMethod, const int channel, const int cmd)
+{
     unsigned char msg[255];
     if ((channel < 0) || (channel > 5))
         return -1;
@@ -930,7 +823,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendMotorCtrlCmd(Ctrl
     return sendCommand(msg, 12);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlAllCmd(const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6, const int time) {
+
+int DrRobotMotionSensorDriver::sendServoCtrlAllCmd(const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6, const int time)
+{
     unsigned char msg[255];
     short tempCmd = 0;
     short tempTime = time;
@@ -975,7 +870,7 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlAllCmd(c
 
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlAllCmd(const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6) {
+int DrRobotMotionSensorDriver::sendServoCtrlAllCmd(const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6) {
     unsigned char msg[255];
     short tempCmd = 0;
     msg[0] = COM_STX0;
@@ -1014,7 +909,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlAllCmd(c
     return sendCommand(msg, 21);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlCmd(const int channel, const int cmd, const int time) {
+
+int DrRobotMotionSensorDriver::sendServoCtrlCmd(const int channel, const int cmd, const int time)
+{
     unsigned char msg[255];
     short tempTime = (short) (time & 0xffff);
     if ((channel < 0) || (channel > 5))
@@ -1038,7 +935,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlCmd(cons
     return sendCommand(msg, 15);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlCmd(const int channel, const int cmd) {
+
+int ::DrRobotMotionSensorDriver::sendServoCtrlCmd(const int channel, const int cmd)
+{
     unsigned char msg[255];
     if ((channel < 0) || (channel > 5))
         return -1;
@@ -1057,7 +956,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendServoCtrlCmd(cons
     return sendCommand(msg, 12);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::disableMotorCmd(const int channel) {
+
+int DrRobotMotionSensorDriver::disableMotorCmd(const int channel)
+{
     unsigned char msg[255];
     if ((channel < 0) || (channel > 5))
         return -1;
@@ -1076,7 +977,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::disableMotorCmd(const
     return sendCommand(msg, 11);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::disableServoCmd(const int channel) {
+
+int DrRobotMotionSensorDriver::disableServoCmd(const int channel)
+{
     unsigned char msg[255];
     if ((channel < 0) || (channel > 5))
         return -1;
@@ -1096,7 +999,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::disableServoCmd(const
     return sendCommand(msg, 11);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setMotorPositionCtrlPID(const int channel, const int kp, const int kd, const int ki) {
+
+int DrRobotMotionSensorDriver::setMotorPositionCtrlPID(const int channel, const int kp, const int kd, const int ki)
+{
     unsigned char msg[255];
     if ((channel < 0) || (channel > 5))
         return -1;
@@ -1120,7 +1025,7 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setMotorPositionCtrlP
     return sendCommand(msg, 20);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setMotorVelocityCtrlPID(const int channel, const int kp, const int kd, const int ki) {
+int DrRobotMotionSensorDriver::setMotorVelocityCtrlPID(const int channel, const int kp, const int kd, const int ki) {
     unsigned char msg[255];
     if ((channel < 0) || (channel > 5))
         return -1;
@@ -1145,7 +1050,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setMotorVelocityCtrlP
     return sendCommand(msg, 20);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setMotorFricCompensation(const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6) {
+
+int DrRobotMotionSensorDriver::setMotorFricCompensation(const int cmd1, const int cmd2, const int cmd3, const int cmd4, const int cmd5, const int cmd6)
+{
     unsigned char msg[255];
 
     msg[0] = COM_STX0;
@@ -1170,7 +1077,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setMotorFricCompensat
     return sendCommand(msg, 21);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setCustomIO(const int cmd) {
+
+int DrRobotMotionSensorDriver::setCustomIO(const int cmd)
+{
     unsigned char msg[255];
 
     msg[0] = COM_STX0;
@@ -1186,7 +1095,9 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::setCustomIO(const int
     return sendCommand(msg, 10);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendPowerCtrlCmd(const int cmd) {
+
+int DrRobotMotionSensorDriver::sendPowerCtrlCmd(const int cmd)
+{
     unsigned char msg[255];
 
     msg[0] = COM_STX0;
@@ -1202,40 +1113,14 @@ int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendPowerCtrlCmd(cons
     return sendCommand(msg, 10);
 }
 
-int DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::sendCommand(const unsigned char* msg, const int nLen) {
-    ssize_t retval = 0;
-    if (!_stopComm) {
 
-        if ((_robotConfig->commMethod == Network) && (_sockfd > 0)) {
-            int retval = sendto(_sockfd, msg, nLen, 0, (const struct sockaddr *) &_addr, sizeof (_addr));
-            if (retval > 0) {
-                return retval;
-            } else {
-                perror("sendto");
-                return -1;
-            }
-        } else if ((_robotConfig->commMethod == Serial) && (_serialfd > 0)) {
-            int origflags = fcntl(_serialfd, F_GETFL, 0);
-            fcntl(_serialfd, F_SETFL, origflags & ~O_NONBLOCK);
-
-            retval = write(_serialfd, msg, nLen);
-            int fputserrno = errno;
-            fcntl(_serialfd, F_SETFL, origflags | O_NONBLOCK);
-            errno = fputserrno;
-            if (retval != -1) {
-                return retval;
-            } else {
-                return -1;
-            }
-
-        }
-    }
-    return -1;
-}
-
-CommState DrRobot_MotionSensorDriver::DrRobotMotionSensorDriver::getCommunicationState()
+CommState DrRobotMotionSensorDriver::getCommunicationState()
 {
     return _eCommState;
 }
+
+
+}
+
 
 

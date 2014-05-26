@@ -434,8 +434,8 @@ DrRobotPlayerNode::DrRobotPlayerNode()
     standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
     customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
 
-    drrobotPowerDriver_ = new DrRobotMotionSensorDriver();
-    drrobotMotionDriver_ = new DrRobotMotionSensorDriver();
+    drrobotPowerDriver_ = new DrRobotSerialDriver();
+    drrobotMotionDriver_ = new DrRobotSerialDriver();
     drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
     drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
     cntNum_ = 0;
@@ -448,10 +448,10 @@ int DrRobotPlayerNode::start()
         //int res = -1;
 
         if (robotCommMethod_ == "Network") {
-            drrobotMotionDriver_->openNetwork(robotConfig2_.robotIP, robotConfig2_.portNum);
-            drrobotPowerDriver_->openNetwork(robotConfig1_.robotIP, robotConfig1_.portNum);
+            //drrobotMotionDriver_->openNetwork(robotConfig2_.robotIP, robotConfig2_.portNum);
+            //drrobotPowerDriver_->openNetwork(robotConfig1_.robotIP, robotConfig1_.portNum);
         } else {
-            drrobotMotionDriver_->openSerial(robotConfig2_.serialPortName, 115200);
+            ((DrRobotSerialDriver*)drrobotMotionDriver_)->openSerial(robotConfig2_.serialPortName, 115200);
             //drrobotPowerDriver_->openSerial(robotConfig1_.serialPortName, 115200);
             ROS_INFO("motion driver: [%i]", drrobotMotionDriver_->portOpen());
             ROS_INFO("power driver: [%i]", drrobotPowerDriver_->portOpen());

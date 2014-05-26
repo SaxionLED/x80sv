@@ -239,26 +239,11 @@ namespace DrRobot_MotionSensorDriver
      * @return 0 -- communication is closed
      *         others  -- something wrong there
      */
-    void close();
+    virtual void close();
 
-    /*! @brief
-     *  If the driver is configured as using serial communication, this function could open serial port and starting communication
-     * @param[in]   serialPort serial port, on linux system, should as /dev/ttyS0
-     * @param[in]   BAUD serial port baud rate, should be 115200 on standard robot
-     * @return 0  port opened and starting communication
-     *         others  something wrong there
-     */
-    int openSerial(const char* serialPort, const long BAUD);
+    virtual void open() = 0;
 
-    /*! @brief
-     *  If the driver is configured as using network communication, this function could open UDP port to connect with robot
-     *  and start communication
-     * @param[in]   robotIP, should be as dot format, such as "192.168.0.201"
-     * @param[in]   portNum, port number, 10001 or 10002
-     * @return 0  port opened and starting communication
-     *         others  something wrong there
-     */
-    int openNetwork(const char*  robotIP, const int portNum );
+
 
     /*! @brief
      *  This function will use struct DrRobotMotionConfig to configure the driver
@@ -528,45 +513,76 @@ namespace DrRobot_MotionSensorDriver
         err = m_packets_error;
     }
 
-  private:
-    BYTE _recBuf[MAXBUFLEN];
-    BYTE _dataBuf[MAXBUFLEN];
-    int _nMsgLen;
-    int _sockfd;
-    int _serialfd;
-    struct sockaddr_in _addr;
-    socklen_t _addr_len;
-    char _sAddr[INET6_ADDRSTRLEN];
-    int _numbytes;
-    struct timeval _tv;
-    fd_set _readfds;
-    int _comCnt;
-    int m_packets_ok;
-    int m_packets_error;
-    pthread_mutex_t _mutex_Data_Buf;
-    DrRobotMotionConfig *_robotConfig;
-    boost::shared_ptr<boost::thread> _pCommThread;
-    //private functions here
-    void debug_ouput(const char* errorstr);
-    int vali_ip(const char* ip_str);
-    int sendAck();
-    unsigned char CalculateCRC( const unsigned char *lpBuffer, const int nSize);
-    void commWorkingThread();
-    void DealWithPacket(const unsigned char *lpComData, const int nLen);
-    void handleComData(const unsigned char *data, const int nLen);
-    bool _stopComm;
-    CommState _eCommState;
-    void debugCommMessage(std::string msg);
-    int sendCommand(const unsigned char* msg, const int nLen);
-    //sensor data here
-    struct RangeSensorData  _rangeSensorData;
-    struct CustomSensorData _customSensorData;
-    struct MotorSensorData _motorSensorData;
-    struct PowerSensorData _powerSensorData;
-    struct StandardSensorData _standardSensorData;
-    unsigned char _desID;
-    unsigned char _pcID;
-  };
+        void commWorkingThread();
+    protected:
+        BYTE _recBuf[MAXBUFLEN];
+        BYTE _dataBuf[MAXBUFLEN];
+        int _nMsgLen;
+        int _sockfd;
+        int _serialfd;
+        struct sockaddr_in _addr;
+        socklen_t _addr_len;
+        char _sAddr[INET6_ADDRSTRLEN];
+        int _numbytes;
+        struct timeval _tv;
+        fd_set _readfds;
+        int _comCnt;
+        int m_packets_ok;
+        int m_packets_error;
+        pthread_mutex_t _mutex_Data_Buf;
+        DrRobotMotionConfig *_robotConfig;
+        boost::shared_ptr<boost::thread> _pCommThread;
+        //private functions here
+        void debug_ouput(const char* errorstr);
+        int sendAck();
+        unsigned char CalculateCRC( const unsigned char *lpBuffer, const int nSize);
+        void DealWithPacket(const unsigned char *lpComData, const int nLen);
+        void handleComData(const unsigned char *data, const int nLen);
+        bool _stopComm;
+        CommState _eCommState;
+        void debugCommMessage(std::string msg);
+        virtual int sendCommand(const unsigned char* msg, const int nLen) = 0;
+        //sensor data here
+        struct RangeSensorData  _rangeSensorData;
+        struct CustomSensorData _customSensorData;
+        struct MotorSensorData _motorSensorData;
+        struct PowerSensorData _powerSensorData;
+        struct StandardSensorData _standardSensorData;
+        unsigned char _desID;
+        unsigned char _pcID;
+    };
 
+
+    // Serial implementation
+    class DrRobotSerialDriver : public DrRobotMotionSensorDriver
+    {
+        public:
+            int openSerial(const char* serialPort, const long BAUD);
+            virtual void open(){}
+            virtual void close();
+        protected:
+            virtual int sendCommand(const unsigned char* msg, const int nLen);
+    };
+
+    class DrRobotNetworkDriver : public DrRobotMotionSensorDriver
+    {
+        public:
+            virtual void open(){}
+            virtual void close();
+
+            /*! @brief
+             *  If the driver is configured as using network communication, this function could open UDP port to connect with robot
+             *  and start communication
+             * @param[in]   robotIP, should be as dot format, such as "192.168.0.201"
+             * @param[in]   portNum, port number, 10001 or 10002
+             * @return 0  port opened and starting communication
+             *         others  something wrong there
+             */
+            int openNetwork(const char*  robotIP, const int portNum);
+
+        protected:
+            virtual int sendCommand(const unsigned char* msg, const int nLen);
+            int vali_ip(const char* ip_str);
+    };
 }
 #endif /* DRROBOTMOTIONSENSORDRIVER_H_ */

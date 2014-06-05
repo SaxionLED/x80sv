@@ -1,30 +1,41 @@
 
 
 
-#include <DrRobotMotionSensorDriver.hpp>
+#include <NetworkCommInterface.hpp>
 #include <ros/ros.h>
 #include "DrRobotCommConst.hpp"
 
 
-//#define DEBUG_ERROR           //set printf out error message
-#undef DEBUG_ERROR
-
-
 using namespace std;
-using namespace DrRobot_MotionSensorDriver;
+using namespace DrRobot;
 
-namespace DrRobot_MotionSensorDriver
+namespace DrRobot
 {
 
-    DrRobotNetworkDriver::DrRobotNetworkDriver()
+    NetworkDriver::NetworkDriver()
     {
+        // TODO: fill port and ip
+
         bzero(&_addr, sizeof (_addr));
         _addr.sin_family = AF_INET;
-        _addr.sin_port = htons(_robotConfig->portNum);
+        _addr.sin_port = htons(_portNum);
         _addr_len = sizeof _addr;
+
+        _sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+        _tv.tv_sec = 0;
+        _tv.tv_usec = 200; //200us ?
+
+
+        // _robotConfig->portNum = DEFAULT_PORT;
+        // sprintf(_robotConfig->robotIP, "192.168.0.201");
     }
 
-    int DrRobotNetworkDriver::vali_ip(const char* ip_str)
+    NetworkDriver::~NetworkDriver()
+    {
+    }
+
+    int NetworkDriver::vali_ip(const char* ip_str)
     {
         unsigned int n1, n2, n3, n4;
         if (sscanf(ip_str, "%u.%u.%u.%u", &n1, &n2, &n3, &n4) != 4) return 1;
@@ -39,54 +50,56 @@ namespace DrRobot_MotionSensorDriver
     }
 
 
-    int DrRobotNetworkDriver::openNetwork(const char* robotIP, const int portNum)
+    int NetworkDriver::openNetwork(const char* robotIP, const int portNum)
     {
         char temp[512];
         //check the parameter first
-        if (portNum <= 0) {
-
-            debug_ouput(temp);
+        if (portNum <= 0)
+        {
+            ROS_ERROR("Port < 0");
             return -1;
         }
 
-        if (vali_ip(robotIP) == 1) {
-            sprintf(temp, "DrRobot Motion/Sensor Driver Error Message: invalid IP address: %s\n", robotIP);
-            debug_ouput(temp);
+        if (vali_ip(robotIP) == 1)
+        {
+            ROS_ERROR("DrRobot Motion/Sensor Driver Error Message: invalid IP address: %s\n", robotIP);
             return -2;
         }
-        _robotConfig->commMethod = Network;
-        _robotConfig->portNum = portNum;
+        _portNum = portNum;
 
-        sprintf(_robotConfig->robotIP, "%s", robotIP);
+        sprintf(_robotIP, "%s", robotIP);
         bzero(&_addr, sizeof (_addr));
         _addr.sin_family = AF_INET;
-        _addr.sin_port = htons(_robotConfig->portNum);
+        _addr.sin_port = htons(_portNum);
 
-        if (inet_aton(_robotConfig->robotIP, &_addr.sin_addr) == 0) {
-            sprintf(temp, "DrRobot Motion/Sensor Driver Error Message: invalid IP address: %s\n", _robotConfig->robotIP);
-            debug_ouput(temp);
+        if (inet_aton(_robotIP, &_addr.sin_addr) == 0)
+        {
+            ROS_ERROR("DrRobot Motion/Sensor Driver Error Message: invalid IP address: %s\n", _robotIP);
             return -3;
         }
 
         _stopComm = false;
-        _numbytes = sendAck();
-        if (_numbytes < 0) {
+        int numbytes = 0; // TODO: sendAck();
+        if (numbytes < 0)
+        {
             _stopComm = true;
             perror("sendto");
             return -4;
         }
 
         ROS_INFO("TCP listener: waiting for robot server, starting receiving...");
-        _eCommState = Connected;
-
-        _pCommThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DrRobotMotionSensorDriver::commWorkingThread, this)));
+        CommBase::open();
         return 0;
     }
 
 
-    void DrRobotNetworkDriver::close()
+    void NetworkDriver::open()
     {
-        DrRobotMotionSensorDriver::close();
+    }
+
+    void NetworkDriver::close()
+    {
+        CommBase::close();
 
         //for UDP , do we need close socket?
 
@@ -99,15 +112,18 @@ namespace DrRobot_MotionSensorDriver
 
 //communication thread here
 
-    void DrRobotNetworkDriver::commWorkingThread()
+    void NetworkDriver::commWorkingThread()
     {
         while (!_stopComm)
         {
             FD_ZERO(&_readfds);
             FD_SET(_sockfd, &_readfds);
             select(_sockfd + 1, &_readfds, NULL, NULL, &_tv);
-            if (FD_ISSET(_sockfd, &_readfds)) {
-                if ((_numbytes = recvfrom(_sockfd, _recBuf, MAXBUFLEN - 1, 0, (struct sockaddr *) &_addr, &_addr_len)) == -1) {
+            if (FD_ISSET(_sockfd, &_readfds))
+            {
+                int numbytes;
+                if ((numbytes = recvfrom(_sockfd, _recBuf, MAXBUFLEN - 1, 0, (struct sockaddr *) &_addr, &_addr_len)) == -1) 
+                {
                     perror("recvfrom");
                     return;
                 }
@@ -115,13 +131,16 @@ namespace DrRobot_MotionSensorDriver
                 printf("listener: packet is %d bytes long\n", _numbytes);
 #endif
                 _comCnt = 0;
-                handleComData(_recBuf, _numbytes);
-            } else {
+                _handler->handleComData(_recBuf, numbytes);
+            }
+            else
+            {
                 _comCnt++;
 
                 usleep(10000); //10ms
-                if (_comCnt > COMM_LOST_TH) {
-                    ROS_ERROR("Communication is lost, need close all. IP address %s, Port: %d", _robotConfig->robotIP, _robotConfig->portNum);
+                if (_comCnt > COMM_LOST_TH)
+                {
+                    ROS_ERROR("Communication is lost, need close all. IP address %s, Port: %d", _robotIP, _portNum);
                     _stopComm = true;                    
                     return;
                 }
@@ -131,7 +150,7 @@ namespace DrRobot_MotionSensorDriver
     }
 
 
-    int DrRobotNetworkDriver::sendCommand(const unsigned char* msg, const int nLen)
+    int NetworkDriver::sendCommand(const unsigned char* msg, const int nLen)
     {
         ssize_t retval = 0;
         if (!_stopComm)

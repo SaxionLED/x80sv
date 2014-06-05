@@ -1,32 +1,35 @@
 
+#include <SerialCommInterface.hpp>
 
-#include <DrRobotMotionSensorDriver.hpp>
 #include <ros/ros.h>
 #include "DrRobotCommConst.hpp"
+#include <stdio.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 using namespace std;
 
 
-namespace DrRobot_MotionSensorDriver
+namespace DrRobot
 {
-    DrRobotSerialDriver::DrRobotSerialDriver()
+    SerialDriver::SerialDriver(const char* serialPort, const long BAUD)
+        : CommBase()
     {
+        sprintf(_serialPortName, "%s", serialPort);
+        _serialfd = -1;
     }
 
-    int DrRobotSerialDriver::openSerial(const char* serialPort, const long BAUD)
+    void SerialDriver::open()
     {
-
-        if (portOpen())
+        if (isOpen())
+        {
             close();
+        }
 
-        _robotConfig->commMethod = Serial;
-
-        sprintf(_robotConfig->serialPortName, "%s", serialPort);
-
-        _serialfd = ::open(_robotConfig->serialPortName, O_RDWR | O_NONBLOCK | O_NOCTTY);
-        //_serialfd = ::open("/dev/ttyS0", O_RDWR | O_NONBLOCK | O_NOCTTY);
+        _serialfd = ::open(_serialPortName, O_RDWR | O_NONBLOCK | O_NOCTTY);
         if (_serialfd > 0)
         {
             int res = 0;
@@ -36,7 +39,6 @@ namespace DrRobot_MotionSensorDriver
             if (res != 0)
             {
                 ROS_ERROR("tcgetattr failed");
-                return -1;
             }
 
             memset(&newtio.c_cc, 0, sizeof (newtio.c_cc));
@@ -53,14 +55,12 @@ namespace DrRobot_MotionSensorDriver
             if (res != 0)
             {
                 ROS_ERROR("tcsetattr failed");
-                return -1;
             }
 
             res = cfsetospeed(&newtio, B115200);
             if (res != 0)
             {
                 ROS_ERROR("tcsetattr failed");
-                return -1;
             }
 
             tcflush(_serialfd, TCIFLUSH);
@@ -68,38 +68,29 @@ namespace DrRobot_MotionSensorDriver
             if (res != 0)
             {
                 ROS_ERROR("tcsetattr failed");
-                return -1;
             }
 
-            ROS_INFO("Serial listener at %s: waiting for robot server, starting receiving...", _robotConfig->serialPortName);
-            _eCommState = Connected;
-            _stopComm = false;
-            _pCommThread = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&DrRobotMotionSensorDriver::commWorkingThread, this)));
-            return 0;
+            ROS_INFO("Serial listener at %s: waiting for robot server, starting receiving...", _serialPortName);
+            CommBase::open();
         }
         else
         {
             const char *extra_msg = "";
-            switch (errno) {
+            switch (errno)
+            {
                 case EACCES:
-                    extra_msg = "You probably don't have permission to open the port for reading and writing.\n";
-                    debug_ouput(extra_msg);
+                    ROS_ERROR("You probably don't have permission to open the port for reading and writing.");
                     break;
                 case ENOENT:
-                    extra_msg = "The request port does not exit. Was the port name misspelled?\n";
-                    debug_ouput(extra_msg);
+                    ROS_ERROR("The request port does not exit. Was the port name misspelled?");
                     break;
             }
-            _stopComm = true;
-            _eCommState = Disconnected;
-            return errno;
         }
     }
 
-
-    void DrRobotSerialDriver::close()
+    void SerialDriver::close()
     {
-        DrRobotMotionSensorDriver::close();
+        CommBase::close();
 
         if (_serialfd > 0)
         {
@@ -109,99 +100,37 @@ namespace DrRobot_MotionSensorDriver
     }
 
 
-    void DrRobotSerialDriver::commWorkingThread()
+    void SerialDriver::commWorkingThread()
     {
         while (!_stopComm)
         {
-                _numbytes = read(_serialfd, _recBuf, sizeof (_recBuf));
-                if (_numbytes <= 0) //( (_numbytes == -1) && (errno != EAGAIN) && (errno != EWOULDBLOCK) )
+            int numbytes = read(_serialfd, _recBuf, sizeof (_recBuf));
+            if (numbytes <= 0) //( (_numbytes == -1) && (errno != EAGAIN) && (errno != EWOULDBLOCK) )
+            {
+                //read erro,
+                _comCnt++;
+                //printf ("Serial time out\n");
+                usleep(10000);
+                if (_comCnt > COMM_LOST_TH)
                 {
-                    //read erro,
-                    _comCnt++;
-                    //printf ("Serial time out\n");
-                    usleep(10000);
-                    if (_comCnt > COMM_LOST_TH) {
-                        ROS_ERROR("Communication is lost, need close all. Serial Port is %s", _robotConfig->serialPortName);
-                        _stopComm = true;
-                        _eCommState = Disconnected;
-                        ::close(_serialfd);
-                        _serialfd = -1;
-                    }
+                    ROS_ERROR("Communication is lost, need close all. Serial Port is %s", _serialPortName);
 
-                } else {
-    #ifdef DEBUG_ERROR
-                    printf("listener: packet is %d bytes long\n", _numbytes);
-    #endif
-                    _comCnt = 0;
-                    handleComData(_recBuf, _numbytes);
+                    _stopComm = true;
+                    _eCommState = Disconnected;
+                    ::close(_serialfd);
+                    _serialfd = -1;
                 }
-
-
-
-                /*
-               struct pollfd ufd[1];
-               int retval;
-               int timeout = 0;
-               ufd[0].fd = _serialfd;
-               ufd[0].events = POLLIN;
-               //below will block to wait event
-
-               //if (timeout == 0)
-               //  timeout = -1;
-
-
-
-               retval = poll(ufd, 1, timeout);
-               if (retval < 0)
-               {
-                 //poll fialed -- error
-                 printf("DrRobot Serial Communication error, eroor no is %d: %s", errno, strerror(errno));
-                _stopComm = true;
-                _eCommState = Disconnected;
-                ::close(_sockfd);
-                _sockfd = -1;
-                return;
-               }
-               else if (retval  == 0)
-               {
-                 //timeout,
-                 _comCnt ++;
-                 printf ("Serial time out\n");
-                 usleep(10000);
-                 if (_comCnt > COMM_LOST_TH)
-                 {
-                   printf("communication is lost, need close all\n");
-                   _stopComm = true;
-                   _eCommState = Disconnected;
-                   ::close(_serialfd);
-                   _serialfd = -1;
-                 }
-               }
-               else
-               {
-                 _numbytes = read(_serialfd,_recBuf, sizeof(_recBuf));
-                 if ( (_numbytes == -1) && (errno != EAGAIN) && (errno != EWOULDBLOCK) )
-                 {
-                   //read erro,
-                   _comCnt ++;
-                 }
-                 else
-                 {
-         #ifdef DEBUG_ERROR
-                printf("listener: packet is %d bytes long\n", _numbytes);
-          #endif
+            }
+            else
+            {
                 _comCnt = 0;
-                handleComData(_recBuf,_numbytes);
-                 }
-               }
-                 */
-
+                _handler->handleComData(_recBuf, numbytes);
+            }
         }
-        return;
     }
 
 
-    int DrRobotSerialDriver::sendCommand(const unsigned char* msg, const int nLen)
+    int SerialDriver::sendCommand(const unsigned char* msg, const int nLen)
     {
         ssize_t retval = 0;
         if (!_stopComm)

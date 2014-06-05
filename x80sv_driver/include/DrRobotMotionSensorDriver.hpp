@@ -28,7 +28,6 @@
 #ifndef DRROBOTMOTIONSENSORDRIVER_H_
 #define DRROBOTMOTIONSENSORDRIVER_H_
 #include <stdexcept>
-#include <termios.h>
 #include <vector>
 #include <stdint.h>
 #include <stdio.h>
@@ -39,34 +38,26 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <fcntl.h>
-#include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <poll.h>
 
+#include <DrRobotCommInterface.hpp>
 
-//! A namespace containing the DrRobot Motion/Sensor driver
-namespace DrRobot_MotionSensorDriver
+#define MAXBUFLEN 512
+#define CHAR_BUF_LEN  255
+
+
+namespace DrRobot
 {
 
 
   typedef unsigned char BYTE;
 
- /*! This definition limits all the string variables length < 255
-  * such as robotID, robotIP and serial port name
- */
-  const int CHAR_BUF_LEN  =  255;
-
-  /*! This definition limits the communication receiving buffer length
-   */
-  const int MAXBUFLEN = 512;
 
   /*! This definition is no control command for motion control system.
    *
@@ -84,15 +75,6 @@ namespace DrRobot_MotionSensorDriver
 					//!< mounting position/orientation information please referee robot manual
 
   /*! \enum CommMethod
-   * Normally for standard robot, driver will use Network to communicate with robot
-   * If you use RS232 module connect robot with your PC, you need set as Serial
-   */
-  enum CommMethod {Network, Serial};
-  /*! \enum CommState
-   *  Driver communication status
-   */
-  enum CommState { Disconnected, Connected};
-  /*! \enum CommMethod
    *  specify the control system on the robot
    */
   enum BoardType {I90_Motion,I90_Power,Sentinel3_Motion, Sentinel3_Power,Hawk_H20_Motion,Hawk_H20_Power,Jaguar,X80SV};
@@ -107,16 +89,9 @@ namespace DrRobot_MotionSensorDriver
   struct DrRobotMotionConfig
   {
     char robotID[CHAR_BUF_LEN];        //!< robotID, you could specify your own name for your robot
-    char robotIP[CHAR_BUF_LEN];        //!< robot main WiFi module IP address, you could get it by manual
-    int portNum;                       //!< robot main WiFi module port number, default is power system on 10001 port, motion system on 10002
-    CommMethod commMethod;             //!< communication method enum CommMethod
-    char serialPortName[CHAR_BUF_LEN]; //!< serial port name if you use serial communication
     BoardType boardType;               //!< specify the control system on the robot, enum BoardType
   };
 
-  /*! \struct  MotorSensorData
-   *  for motor sensor data
-   */
   struct MotorSensorData
   {
     int motorSensorEncoderPos[MOTORSENSOR_NUM];         //!< encoder count reading
@@ -212,30 +187,12 @@ namespace DrRobot_MotionSensorDriver
  *       is around 10Hz, it is determined by firmware on the robot, so faster than this rate is not necessary and should be avoid.
  *
  */
-    class DrRobotMotionSensorDriver
+    class MotionSensorDriver : public CommInterfaceHandler
     {
         public:
-        DrRobotMotionSensorDriver();
+        MotionSensorDriver(CommInterface& commInterface);
 
-        ~DrRobotMotionSensorDriver();
-
-        /*! @brief
-         *  This function is used for detecting the communication status,
-         * @return false -- communication is lost
-         *         true  -- communication is OK
-         */
-        bool portOpen();
-
-        /*! @brief
-         *  This function is used for closing the communication
-         * @return 0 -- communication is closed
-         *         others  -- something wrong there
-         */
-        virtual void close();
-
-        virtual void open() = 0;
-
-
+        ~MotionSensorDriver();
 
     /*! @brief
      *  This function will use struct DrRobotMotionConfig to configure the driver
@@ -490,13 +447,7 @@ namespace DrRobot_MotionSensorDriver
      */
     int sendPowerCtrlCmd(const int cmd);
 
-    // Get communication state.
-    CommState getCommunicationState();
 
-    int getComCnt()
-    {
-        return _comCnt;
-    }
 
     void get_packet_stats(int& ok, int& err)
     {
@@ -504,34 +455,21 @@ namespace DrRobot_MotionSensorDriver
         err = m_packets_error;
     }
 
-        virtual void commWorkingThread() = 0;
+        virtual void handleComData(const unsigned char *data, const int nLen);
+
     protected:
-        BYTE _recBuf[MAXBUFLEN];
         BYTE _dataBuf[MAXBUFLEN];
         int _nMsgLen;
-        int _sockfd;
-        int _serialfd;
-        socklen_t _addr_len;
-        char _sAddr[INET6_ADDRSTRLEN];
-        int _numbytes;
-        struct timeval _tv;
-        fd_set _readfds;
-        int _comCnt;
         int m_packets_ok;
         int m_packets_error;
         pthread_mutex_t _mutex_Data_Buf;
         DrRobotMotionConfig *_robotConfig;
-        boost::shared_ptr<boost::thread> _pCommThread;
         //private functions here
         void debug_ouput(const char* errorstr);
         int sendAck();
         unsigned char CalculateCRC( const unsigned char *lpBuffer, const int nSize);
         void DealWithPacket(const unsigned char *lpComData, const int nLen);
-        void handleComData(const unsigned char *data, const int nLen);
-        bool _stopComm;
-        CommState _eCommState;
         void debugCommMessage(std::string msg);
-        virtual int sendCommand(const unsigned char* msg, const int nLen) = 0;
         //sensor data here
         struct RangeSensorData  _rangeSensorData;
         struct CustomSensorData _customSensorData;
@@ -540,46 +478,10 @@ namespace DrRobot_MotionSensorDriver
         struct StandardSensorData _standardSensorData;
         unsigned char _desID;
         unsigned char _pcID;
+
+        CommInterface& _commInterface;
     };
 
-
-    // Serial implementation
-    class DrRobotSerialDriver : public DrRobotMotionSensorDriver
-    {
-        public:
-            DrRobotSerialDriver();
-            int openSerial(const char* serialPort, const long BAUD);
-            virtual void open(){}
-            virtual void close();
-            virtual void commWorkingThread();
-        protected:
-            virtual int sendCommand(const unsigned char* msg, const int nLen);
-    };
-
-
-    class DrRobotNetworkDriver : public DrRobotMotionSensorDriver
-    {
-        public:
-            DrRobotNetworkDriver();
-            virtual void open(){}
-            virtual void close();
-
-            /*! @brief
-             *  If the driver is configured as using network communication, this function could open UDP port to connect with robot
-             *  and start communication
-             * @param[in]   robotIP, should be as dot format, such as "192.168.0.201"
-             * @param[in]   portNum, port number, 10001 or 10002
-             * @return 0  port opened and starting communication
-             *         others  something wrong there
-             */
-            int openNetwork(const char*  robotIP, const int portNum);
-            virtual void commWorkingThread();
-
-        protected:
-            virtual int sendCommand(const unsigned char* msg, const int nLen);
-            int vali_ip(const char* ip_str);
-            struct sockaddr_in _addr;
-    };
 
 
 }

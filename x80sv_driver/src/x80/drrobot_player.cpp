@@ -100,6 +100,8 @@ Publishes to (name / type):
 #include <x80sv_driver/StandardSensor.h>
 #include <x80sv_driver/CustomSensor.h>
 #include <DrRobotMotionSensorDriver.hpp>
+#include <SerialCommInterface.hpp>
+#include <NetworkCommInterface.hpp>
 
 #include <math.h>
 
@@ -109,42 +111,265 @@ Publishes to (name / type):
 
 
 using namespace std;
-using namespace DrRobot_MotionSensorDriver;
+using namespace DrRobot;
 
 class DrRobotPlayerNode
 {
-public:
+    public:
 
-    ros::NodeHandle node_;
+        ros::NodeHandle node_;
 
-    tf::TransformBroadcaster tf_;
+        tf::TransformBroadcaster tf_;
 
-    ros::Publisher motorInfo_pub_;
-    ros::Publisher powerInfo_pub_;
-    ros::Publisher ir_pub_;
-    ros::Publisher sonar_pub_;
-    ros::Publisher standardSensor_pub_;
-    ros::Publisher customSensor_pub_;
+        ros::Publisher motorInfo_pub_;
+        ros::Publisher powerInfo_pub_;
+        ros::Publisher ir_pub_;
+        ros::Publisher sonar_pub_;
+        ros::Publisher standardSensor_pub_;
+        ros::Publisher customSensor_pub_;
 
-    ros::Subscriber cmd_vel_sub_;
-    std::string robot_prefix_;
+        ros::Subscriber cmd_vel_sub_;
+        std::string robot_prefix_;
 
-    DrRobotPlayerNode(); 
-    ~DrRobotPlayerNode() {
+        DrRobotPlayerNode(); 
+        ~DrRobotPlayerNode() {
+        }
+
+        int start();
+        int stop();
+        void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel);
+        void doUpdate();
+        void produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
+
+    private:
+        CommInterface *_comm_interface;
+
+        MotionSensorDriver* drrobotMotionDriver_;
+        MotionSensorDriver* drrobotPowerDriver_;
+        struct DrRobotMotionConfig robotConfig1_;
+        struct DrRobotMotionConfig robotConfig2_;
+
+        std::string odom_frame_id_;
+        struct MotorSensorData motorSensorData_;
+        struct RangeSensorData rangeSensorData_;
+        struct PowerSensorData powerSensorData_;
+        struct StandardSensorData standardSensorData_;
+        struct CustomSensorData customSensorData_;
+
+        std::string robotType_;
+        std::string robotID_;
+        std::string robotIP_;
+        std::string robotCommMethod_;
+        std::string robotSerialPort_;
+        bool enable_ir_;
+        bool enable_sonar_;
+        int commPortNum_;
+        int encoderOneCircleCnt_;
+        double wheelDis_;
+        double wheelRadius_;
+        int motorDir_;
+        double minSpeed_;
+        double maxSpeed_;
+
+        int cntNum_;
+        double ad2Dis(int adValue);
+
+};
+
+    double DrRobotPlayerNode::ad2Dis(int adValue)
+    {
+        double temp = 0;
+        double irad2Dis = 0;
+
+        if (adValue <= 0)
+            temp = -1;
+        else
+            temp = 21.6 / ((double) adValue * 3 / 4096 - 0.17);
+
+        if ((temp > 80) || (temp < 0)) {
+            irad2Dis = 0.81;
+        } else if ((temp < 10) && (temp > 0)) {
+            irad2Dis = 0.09;
+        } else
+            irad2Dis = temp / 100;
+        return irad2Dis;
     }
 
-    int start();
 
-    int stop();
+DrRobotPlayerNode::DrRobotPlayerNode()
+ {
+    ros::NodeHandle private_nh("");
 
-    void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel);
+    robotID_ = "drrobot1";
+    private_nh.getParam("x80_config/RobotID", robotID_);
+    ROS_INFO("I get ROBOT_ID: [%s]", robotID_.c_str());
 
-    void doUpdate()
+    robotType_ = "X80";
+    private_nh.getParam("x80_config/RobotType", robotType_);
+    ROS_INFO("I get ROBOT_Type: [%s]", robotType_.c_str());
+
+    robotCommMethod_ = "Network";
+    private_nh.getParam("x80_config/RobotCommMethod", robotCommMethod_);
+    ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
+
+    robotIP_ = "192.168.0.201";
+    private_nh.getParam("x80_config/RobotBaseIP", robotIP_);
+    ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
+
+    commPortNum_ = 10001;
+    private_nh.getParam("x80_config/RobotPortNum", commPortNum_);
+    ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
+
+    robotSerialPort_ = "/dev/ttyS0";
+    private_nh.getParam("x80_config/RobotSerialPort", robotSerialPort_);
+    ROS_INFO("I get ROBOT_SerialPort: [%s]", robotSerialPort_.c_str());
+
+    enable_ir_ = true;
+    private_nh.getParam("x80_config/Enable_IR", enable_ir_);
+    if (enable_ir_)
+        ROS_INFO("I get Enable_IR: true");
+    else
+        ROS_INFO("I get Enable_IR: false");
+
+
+    enable_sonar_ = true;
+    private_nh.getParam("x80_config/Enable_US", enable_sonar_);
+    if (enable_sonar_)
+        ROS_INFO("I get Enable_US: true");
+    else
+        ROS_INFO("I get Enable_US: false");
+
+    motorDir_ = 1;
+    private_nh.getParam("x80_config/MotorDir", motorDir_);
+    ROS_INFO("I get MotorDir: [%d]", motorDir_);
+
+    wheelRadius_ = 0.080;
+    private_nh.getParam("x80_config/WheelRadius", wheelRadius_);
+    ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
+
+    wheelDis_ = 0.305;
+    private_nh.getParam("x80_config/WheelDistance", wheelDis_);
+    ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
+
+    minSpeed_ = 0.1;
+    private_nh.getParam("x80_config/MinSpeed", minSpeed_);
+    ROS_INFO("I get Min Speed: [%f]", minSpeed_);
+
+    maxSpeed_ = 1.0;
+    private_nh.getParam("x80_config/MaxSpeed", maxSpeed_);
+    ROS_INFO("I get Max Speed: [%f]", maxSpeed_);
+
+    encoderOneCircleCnt_ = 756;
+    private_nh.getParam("x80_config/EncoderCircleCnt", encoderOneCircleCnt_);
+    ROS_INFO("I get Encoder One Circle Count: [%d]", encoderOneCircleCnt_);
+
+    if (robotCommMethod_ == "Network")
+    {
+        _comm_interface = new NetworkDriver();
+    }
+    else
+    {
+        _comm_interface = new SerialDriver(robotSerialPort_.c_str(), 115200);
+    }
+
+    if (robotType_ == "Jaguar")
+    {
+        robotConfig1_.boardType = Jaguar;
+    }
+    else if (robotType_ == "I90")
+    {
+        robotConfig1_.boardType = I90_Power;
+        robotConfig2_.boardType = I90_Motion;
+    }
+    else if (robotType_ == "Sentinel3")
+    {
+        robotConfig1_.boardType = Sentinel3_Power;
+        robotConfig2_.boardType = Sentinel3_Motion;
+    }
+    else if (robotType_ == "Hawk_H20")
+    {
+        robotConfig1_.boardType = Hawk_H20_Power;
+        robotConfig2_.boardType = Hawk_H20_Motion;
+    }
+    else if (robotType_ == "X80")
+    {
+        robotConfig1_.boardType = X80SV;
+        robotConfig2_.boardType = X80SV;
+    }
+
+
+    //robotConfig1_.portNum = commPortNum_;
+    // robotConfig2_.portNum = commPortNum_ + 1;
+
+    //create publishers for sensor data information
+    motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
+    powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
+    if (enable_ir_) {
+        ir_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_ir", 1);
+    }
+    if (enable_sonar_) {
+        sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
+    }
+    standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
+    customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
+
+    drrobotPowerDriver_ = new MotionSensorDriver(*_comm_interface);
+    drrobotMotionDriver_ = new MotionSensorDriver(*_comm_interface);
+    drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
+    drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
+    cntNum_ = 0;
+}
+
+
+int DrRobotPlayerNode::start()
+{
+        _comm_interface->open();
+
+        cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&DrRobotPlayerNode::cmdVelReceived, this, _1));
+
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);  // only needed when using velocity (1, 0, 170))
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
+
+        drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000); // PID default is 1000, 5, 10000 (taken from C# src)
+        drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);       // 500, 2, 510 has smoother motion but does not take friction in account
+
+        return (0);
+}
+
+
+void DrRobotPlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
+{
+        double g_vel = cmd_vel->linear.x;
+        double t_vel = cmd_vel->angular.z;
+
+        double leftWheel = (2 * g_vel - t_vel * wheelDis_) / (2 * wheelRadius_);
+        double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_); // seems the right wheel needs a minor offset to prevent an angle when going straight
+
+        int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
+        int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
+
+        // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+        drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
+}
+
+
+    int DrRobotPlayerNode::stop()
+    {
+            int status = 0;
+            _comm_interface->close();
+            _comm_interface->close();
+            usleep(1000000);
+            return (status);
+    }
+
+    void DrRobotPlayerNode::doUpdate()
     {
 
         if ((robotConfig1_.boardType == I90_Power) || (robotConfig1_.boardType == Sentinel3_Power)
-                || (robotConfig1_.boardType == Hawk_H20_Power)) {
-            if (drrobotPowerDriver_->portOpen()) {
+                || (robotConfig1_.boardType == Hawk_H20_Power))
+        {
+            if (_comm_interface->isOpen())
+            {
                 drrobotPowerDriver_->readPowerSensorData(&powerSensorData_);
                 x80sv_driver::PowerInfo powerInfo;
                 powerInfo.ref_vol = 1.5 * 4095 / (double) powerSensorData_.refVol;
@@ -164,7 +389,8 @@ public:
             }
         }
 
-        if (drrobotMotionDriver_->portOpen()) {
+        if (_comm_interface->isOpen())
+        {
             drrobotMotionDriver_->readMotorSensorData(&motorSensorData_);
             drrobotMotionDriver_->readRangeSensorData(&rangeSensorData_);
             drrobotMotionDriver_->readStandardSensorData(&standardSensorData_);
@@ -271,238 +497,9 @@ public:
         }
     }
 
-    void produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
-
-private:
-
-    DrRobotMotionSensorDriver* drrobotMotionDriver_;
-    DrRobotMotionSensorDriver* drrobotPowerDriver_;
-    struct DrRobotMotionConfig robotConfig1_;
-    struct DrRobotMotionConfig robotConfig2_;
-
-    std::string odom_frame_id_;
-    struct MotorSensorData motorSensorData_;
-    struct RangeSensorData rangeSensorData_;
-    struct PowerSensorData powerSensorData_;
-    struct StandardSensorData standardSensorData_;
-    struct CustomSensorData customSensorData_;
-
-
-    std::string robotType_;
-    std::string robotID_;
-    std::string robotIP_;
-    std::string robotCommMethod_;
-    std::string robotSerialPort_;
-    bool enable_ir_;
-    bool enable_sonar_;
-    int commPortNum_;
-    int encoderOneCircleCnt_;
-    double wheelDis_;
-    double wheelRadius_;
-    int motorDir_;
-    double minSpeed_;
-    double maxSpeed_;
-
-    int cntNum_;
-    double ad2Dis(int adValue);
-
-};
-
-    double DrRobotPlayerNode::ad2Dis(int adValue)
-    {
-        double temp = 0;
-        double irad2Dis = 0;
-
-        if (adValue <= 0)
-            temp = -1;
-        else
-            temp = 21.6 / ((double) adValue * 3 / 4096 - 0.17);
-
-        if ((temp > 80) || (temp < 0)) {
-            irad2Dis = 0.81;
-        } else if ((temp < 10) && (temp > 0)) {
-            irad2Dis = 0.09;
-        } else
-            irad2Dis = temp / 100;
-        return irad2Dis;
-    }
-
-
-DrRobotPlayerNode::DrRobotPlayerNode()
- {
-    ros::NodeHandle private_nh("");
-
-    robotID_ = "drrobot1";
-    private_nh.getParam("x80_config/RobotID", robotID_);
-    ROS_INFO("I get ROBOT_ID: [%s]", robotID_.c_str());
-
-    robotType_ = "X80";
-    private_nh.getParam("x80_config/RobotType", robotType_);
-    ROS_INFO("I get ROBOT_Type: [%s]", robotType_.c_str());
-
-    robotCommMethod_ = "Network";
-    private_nh.getParam("x80_config/RobotCommMethod", robotCommMethod_);
-    ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
-
-    robotIP_ = "192.168.0.201";
-    private_nh.getParam("x80_config/RobotBaseIP", robotIP_);
-    ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
-
-    commPortNum_ = 10001;
-    private_nh.getParam("x80_config/RobotPortNum", commPortNum_);
-    ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
-
-    robotSerialPort_ = "/dev/ttyS0";
-    private_nh.getParam("x80_config/RobotSerialPort", robotSerialPort_);
-    ROS_INFO("I get ROBOT_SerialPort: [%s]", robotSerialPort_.c_str());
-
-    enable_ir_ = true;
-    private_nh.getParam("x80_config/Enable_IR", enable_ir_);
-    if (enable_ir_)
-        ROS_INFO("I get Enable_IR: true");
-    else
-        ROS_INFO("I get Enable_IR: false");
-
-
-    enable_sonar_ = true;
-    private_nh.getParam("x80_config/Enable_US", enable_sonar_);
-    if (enable_sonar_)
-        ROS_INFO("I get Enable_US: true");
-    else
-        ROS_INFO("I get Enable_US: false");
-
-    motorDir_ = 1;
-    private_nh.getParam("x80_config/MotorDir", motorDir_);
-    ROS_INFO("I get MotorDir: [%d]", motorDir_);
-
-    wheelRadius_ = 0.080;
-    private_nh.getParam("x80_config/WheelRadius", wheelRadius_);
-    ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
-
-    wheelDis_ = 0.305;
-    private_nh.getParam("x80_config/WheelDistance", wheelDis_);
-    ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
-
-    minSpeed_ = 0.1;
-    private_nh.getParam("x80_config/MinSpeed", minSpeed_);
-    ROS_INFO("I get Min Speed: [%f]", minSpeed_);
-
-    maxSpeed_ = 1.0;
-    private_nh.getParam("x80_config/MaxSpeed", maxSpeed_);
-    ROS_INFO("I get Max Speed: [%f]", maxSpeed_);
-
-    encoderOneCircleCnt_ = 756;
-    private_nh.getParam("x80_config/EncoderCircleCnt", encoderOneCircleCnt_);
-    ROS_INFO("I get Encoder One Circle Count: [%d]", encoderOneCircleCnt_);
-
-    if (robotCommMethod_ == "Network") {
-        robotConfig1_.commMethod = Network;
-        robotConfig2_.commMethod = Network;
-    } else {
-        robotConfig1_.commMethod = Serial;
-        robotConfig2_.commMethod = Serial;
-    }
-
-    if (robotType_ == "Jaguar") {
-        robotConfig1_.boardType = Jaguar;
-    } else if (robotType_ == "I90") {
-        robotConfig1_.boardType = I90_Power;
-        robotConfig2_.boardType = I90_Motion;
-    } else if (robotType_ == "Sentinel3") {
-        robotConfig1_.boardType = Sentinel3_Power;
-        robotConfig2_.boardType = Sentinel3_Motion;
-    } else if (robotType_ == "Hawk_H20") {
-        robotConfig1_.boardType = Hawk_H20_Power;
-        robotConfig2_.boardType = Hawk_H20_Motion;
-    } else if (robotType_ == "X80") {
-        robotConfig1_.boardType = X80SV;
-        robotConfig2_.boardType = X80SV;
-    }
-
-
-    robotConfig1_.portNum = commPortNum_;
-    robotConfig2_.portNum = commPortNum_ + 1;
-
-    //  strcat(robotConfig1_.serialPortName,robotSerialPort_.c_str());
-    strcpy(robotConfig1_.serialPortName, robotSerialPort_.c_str());
-    //  strcat(robotConfig2_.serialPortName,robotSerialPort_.c_str());
-    strcpy(robotConfig2_.serialPortName, robotSerialPort_.c_str());
-    //create publishers for sensor data information
-    motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
-    powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
-    if (enable_ir_) {
-        ir_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_ir", 1);
-    }
-    if (enable_sonar_) {
-        sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
-    }
-    standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
-    customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
-
-    drrobotPowerDriver_ = new DrRobotSerialDriver();
-    drrobotMotionDriver_ = new DrRobotSerialDriver();
-    drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
-    drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
-    cntNum_ = 0;
-}
-
-
-int DrRobotPlayerNode::start()
-{
-
-        //int res = -1;
-
-        if (robotCommMethod_ == "Network") {
-            //drrobotMotionDriver_->openNetwork(robotConfig2_.robotIP, robotConfig2_.portNum);
-            //drrobotPowerDriver_->openNetwork(robotConfig1_.robotIP, robotConfig1_.portNum);
-        } else {
-            ((DrRobotSerialDriver*)drrobotMotionDriver_)->openSerial(robotConfig2_.serialPortName, 115200);
-            //drrobotPowerDriver_->openSerial(robotConfig1_.serialPortName, 115200);
-            ROS_INFO("motion driver: [%i]", drrobotMotionDriver_->portOpen());
-            ROS_INFO("power driver: [%i]", drrobotPowerDriver_->portOpen());
-        }
-
-        cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&DrRobotPlayerNode::cmdVelReceived, this, _1));
-
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);  // only needed when using velocity (1, 0, 170))
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
-
-        drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000); // PID default is 1000, 5, 10000 (taken from C# src)
-        drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);       // 500, 2, 510 has smoother motion but does not take friction in account
-
-        return (0);
-}
-
-
-void DrRobotPlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
-{
-        double g_vel = cmd_vel->linear.x;
-        double t_vel = cmd_vel->angular.z;
-
-        double leftWheel = (2 * g_vel - t_vel * wheelDis_) / (2 * wheelRadius_);
-        double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_); // seems the right wheel needs a minor offset to prevent an angle when going straight
-
-        int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
-        int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
-
-        // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
-        drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
-}
-
-
-int DrRobotPlayerNode::stop()
-{
-        int status = 0;
-        drrobotMotionDriver_->close();
-        drrobotPowerDriver_->close();
-        usleep(1000000);
-        return (status);
-}
-
-
 void DrRobotPlayerNode::produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
 {
-        CommState communication_state = drrobotMotionDriver_->getCommunicationState();
+        CommState communication_state = _comm_interface->getCommunicationState();
 
         if (communication_state == Connected)
         {
@@ -513,7 +510,7 @@ void DrRobotPlayerNode::produce_motion_diagnostics(diagnostic_updater::Diagnosti
             stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Motion driver disconnected");
         }
 
-        stat.add("com cnt", drrobotMotionDriver_->getComCnt());
+        stat.add("com cnt", _comm_interface->getComCnt());
 
         int packets_ok, packets_error;
         drrobotMotionDriver_->get_packet_stats(packets_ok, packets_error);

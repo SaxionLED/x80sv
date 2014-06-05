@@ -3,15 +3,15 @@
 
 #include <DrRobotMotionSensorDriver.hpp>
 
-using namespace DrRobot_MotionSensorDriver;
+using namespace DrRobot;
 
 //using namespace geometry_msgs;
 
 TEST(X80svTestSuite, testSomeFunction)
 {
     // pass
-    MockedCommInterface iface;
-    DrRobotMotionSensorDriver dut(iface);
+    //MockedCommInterface iface;
+    //DrRobotMotionSensorDriver dut(iface);
 
 }
 

@@ -113,7 +113,11 @@ Publishes to (name / type):
 using namespace std;
 using namespace DrRobot;
 
-class DrRobotPlayerNode
+
+namespace DrRobot
+{
+
+class PlayerNode
 {
     public:
 
@@ -131,8 +135,8 @@ class DrRobotPlayerNode
         ros::Subscriber cmd_vel_sub_;
         std::string robot_prefix_;
 
-        DrRobotPlayerNode(); 
-        ~DrRobotPlayerNode() {
+        PlayerNode(); 
+        ~PlayerNode() {
         }
 
         int start();
@@ -176,7 +180,12 @@ class DrRobotPlayerNode
 
 };
 
-    double DrRobotPlayerNode::ad2Dis(int adValue)
+}
+
+namespace DrRobot
+{
+
+    double PlayerNode::ad2Dis(int adValue)
     {
         double temp = 0;
         double irad2Dis = 0;
@@ -196,7 +205,7 @@ class DrRobotPlayerNode
     }
 
 
-DrRobotPlayerNode::DrRobotPlayerNode()
+PlayerNode::PlayerNode()
  {
     ros::NodeHandle private_nh("");
 
@@ -321,11 +330,11 @@ DrRobotPlayerNode::DrRobotPlayerNode()
 }
 
 
-int DrRobotPlayerNode::start()
+int PlayerNode::start()
 {
         _comm_interface->open();
 
-        cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&DrRobotPlayerNode::cmdVelReceived, this, _1));
+        cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
 
         drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);  // only needed when using velocity (1, 0, 170))
         drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
@@ -337,7 +346,7 @@ int DrRobotPlayerNode::start()
 }
 
 
-void DrRobotPlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
+void PlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
 {
         double g_vel = cmd_vel->linear.x;
         double t_vel = cmd_vel->angular.z;
@@ -353,16 +362,15 @@ void DrRobotPlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd
 }
 
 
-    int DrRobotPlayerNode::stop()
+    int PlayerNode::stop()
     {
             int status = 0;
-            _comm_interface->close();
             _comm_interface->close();
             usleep(1000000);
             return (status);
     }
 
-    void DrRobotPlayerNode::doUpdate()
+    void PlayerNode::doUpdate()
     {
 
         if ((robotConfig1_.boardType == I90_Power) || (robotConfig1_.boardType == Sentinel3_Power)
@@ -497,29 +505,31 @@ void DrRobotPlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd
         }
     }
 
-void DrRobotPlayerNode::produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
-{
-        CommState communication_state = _comm_interface->getCommunicationState();
+    void PlayerNode::produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)
+    {
+            CommState communication_state = _comm_interface->getCommunicationState();
 
-        if (communication_state == Connected)
-        {
-            stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motion driver connected");
-        }
-        else
-        {
-            stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Motion driver disconnected");
-        }
+            if (communication_state == Connected)
+            {
+                stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motion driver connected");
+            }
+            else
+            {
+                stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Motion driver disconnected");
+            }
 
-        stat.add("com cnt", _comm_interface->getComCnt());
+            stat.add("com cnt", _comm_interface->getComCnt());
 
-        int packets_ok, packets_error;
-        drrobotMotionDriver_->get_packet_stats(packets_ok, packets_error);
-        stat.add("motion packets ok", packets_ok);
-        stat.add("motion packets error", packets_error);
+            int packets_ok, packets_error;
+            drrobotMotionDriver_->get_packet_stats(packets_ok, packets_error);
+            stat.add("motion packets ok", packets_ok);
+            stat.add("motion packets error", packets_error);
 
-        drrobotPowerDriver_->get_packet_stats(packets_ok, packets_error);
-        stat.add("power packets ok", packets_ok);
-        stat.add("power packets error", packets_error);
+            drrobotPowerDriver_->get_packet_stats(packets_ok, packets_error);
+            stat.add("power packets ok", packets_ok);
+            stat.add("power packets error", packets_error);
+    }
+
 }
 
 
@@ -530,10 +540,10 @@ int main(int argc, char** argv)
     diagnostic_updater::Updater updater;
     updater.setHardwareID("none");
 
-    DrRobotPlayerNode drrobotPlayer;
+    PlayerNode drrobotPlayer;
     ros::NodeHandle n;
 
-    updater.add("Motion driver", &drrobotPlayer, &DrRobotPlayerNode::produce_motion_diagnostics);
+    updater.add("Motion driver", &drrobotPlayer, &PlayerNode::produce_motion_diagnostics);
 
     // Start up the robot
     if (drrobotPlayer.start() != 0) {

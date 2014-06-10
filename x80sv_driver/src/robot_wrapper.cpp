@@ -5,9 +5,6 @@
 #include <x80sv_driver/RangeArray.h>
 #include <x80sv_driver/RangeDefined.h>
 #include <x80sv_driver/RangeDefinedArray.h>
-#include <x80sv_driver/MotorInfoArray.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Pose.h>
 
 #include <list>
 #include <std_msgs/UInt8.h>
@@ -16,19 +13,8 @@ using namespace std;
 using namespace geometry_msgs;
 using namespace sensor_msgs;
 
-ros::Publisher pubOdometry;
 ros::Publisher pubSensors;
 ros::Publisher pubSensorData;
-
-int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
-int mEncoderPreviousRight = -1;
-
-int mActuationTime = 0; // time in seconds the current actuation needs to finish
-int currentStep = 0; // loop rate steps used to measure time since actuation started
-
-double mWheelRadius = 0.080; //default values as per x80 source file
-double mEncoderCircleCount = 756;
-double mWheelDistance = 0.305;
 
 
 void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg);
@@ -46,7 +32,8 @@ void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg)
         x80sv_driver::RangeDefined rangeDefined; // the new range msg, angle/distance needs to be filled in
 
 
-        if (msg->ranges.at(i).radiation_type == sensor_msgs::Range::ULTRASOUND) {
+        if (msg->ranges.at(i).radiation_type == sensor_msgs::Range::ULTRASOUND)
+        {
 
 
             rangeDefined.range = msg->ranges.at(i); // copy old sensor data
@@ -87,14 +74,9 @@ void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg)
             rangeDefined.yOffsetFromCenter = yOffsetFromCenterMM / 1000; // as meters
             
             rangeDefinedArray.ranges.push_back(rangeDefined);
-
-            
-            
-            
-            
-            
-
-        } else if (msg->ranges.at(i).radiation_type == sensor_msgs::Range::INFRARED) {
+        }
+        else if (msg->ranges.at(i).radiation_type == sensor_msgs::Range::INFRARED)
+        {
 
             rangeDefined.range = msg->ranges.at(i); // copy old sensor data
 
@@ -156,8 +138,11 @@ void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg)
                 rangeDefined.yOffsetFromCenter = yOffsetFromCenterMM / 1000;
 
                 rangeDefinedArray.ranges.push_back(rangeDefined);
-        } else
+        }
+        else
+        {
             ROS_ERROR("invalid or NYI sensor type found");
+        }
     }
 
     // 
@@ -166,10 +151,12 @@ void subSensorSafeCallback(const x80sv_driver::RangeArray::ConstPtr& msg)
 
 
 //truncate values (in meters) to certain precision
-float truncateValue(const float value){
+float truncateValue(const float value)
+{
 	//return floorf(value*1000)/1000; //mm
 	return floorf(value*100)/100; //cm 
 }
+
 
 void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg)
 {	// for x80 sonar/IR sensors
@@ -210,101 +197,21 @@ void subSensorCallback(const x80sv_driver::RangeDefinedArray& msg)
 }
 
 
-
-void subEncoderCallback(const x80sv_driver::MotorInfoArray::ConstPtr& motorInfo)
-{
-
-    double movementDelta0 = 0, movementDelta1 = 0;
-
-    const uint encoderMax = 32768;
-
-    x80sv_driver::MotorInfo mtr0 = motorInfo->motorInfos.at(0);
-    x80sv_driver::MotorInfo mtr1 = motorInfo->motorInfos.at(1);
-
-    //    ROS_INFO("Encoder values: %u, %u", mtr0.encoder_pos, mtr1.encoder_pos);
-
-    { //motor 0
-
-        if (mEncoderPreviousLeft != -1) {
-            if (mEncoderPreviousLeft < 5000 && mtr0.encoder_pos > 25000) {
-                mEncoderPreviousLeft = mtr0.encoder_pos - mEncoderPreviousLeft;
-            } else if (mEncoderPreviousLeft > 25000 && mtr0.encoder_pos < 5000) {
-                mEncoderPreviousLeft = mtr0.encoder_pos + (encoderMax - mEncoderPreviousLeft);
-            }
-
-            int encoderDelta0 = mEncoderPreviousLeft - mtr0.encoder_pos;
-
-            movementDelta0 = (((mWheelRadius * 2 * M_PI) / mEncoderCircleCount) * encoderDelta0);
-        }
-
-        mEncoderPreviousLeft = mtr0.encoder_pos;
-    }
-
-
-    { //motor 1
-
-        if (mEncoderPreviousRight != -1) {
-            if (mEncoderPreviousRight < 5000 && mtr1.encoder_pos > 25000) {
-                mEncoderPreviousRight = mtr1.encoder_pos - mEncoderPreviousRight;
-            } else if (mEncoderPreviousRight > 25000 && mtr0.encoder_pos < 5000) {
-                mEncoderPreviousRight = mtr0.encoder_pos + (encoderMax - mEncoderPreviousRight);
-            }
-
-            int encoderDelta1 = mtr1.encoder_pos - mEncoderPreviousRight;
-
-            movementDelta1 = (((mWheelRadius * 2 * M_PI) / mEncoderCircleCount) * encoderDelta1);
-        }
-
-        mEncoderPreviousRight = mtr1.encoder_pos;
-    }
-
-    // now calculate the angle relative to the last position (which is always 0,0)
-
-    double averageDistance = (movementDelta1 + movementDelta0) / 2; // average distance between 2 wheels = actual distance from center
-    double deltaAngle = atan((movementDelta1 - movementDelta0) / mWheelDistance); // difference in angle from last encoder values, 0.285 is distance between wheel centers in m
-
-
-    if (averageDistance != 0.0 && deltaAngle != 0.0) { // no need to publish empty poses
-
-        Pose poseOut; // not a pose, x = distance travelleed and theta = delta angle
-        poseOut.position.x = averageDistance;
-        poseOut.orientation.z = deltaAngle;
-
-        pubOdometry.publish(poseOut);
-    }
-}
-
-
-
 int main(int argc, char **argv)
 {
-
     ros::init(argc, argv, "robot_wrapper");
-
     ros::NodeHandle n("/x80sv");
-    ros::NodeHandle n_control("/control");
 
-    //pubs
-    pubOdometry = n.advertise<geometry_msgs::Pose>("odometry", 32);
     pubSensors = n.advertise<sensor_msgs::PointCloud>("sensors", 32);
 
-    //subs
     ros::Subscriber subSensorSafe = n.subscribe("sensorsafe", 32, subSensorSafeCallback);
     //TODO IMU, optionally a battery voltage warning
-    ros::Subscriber subEncoder = n.subscribe("drrobot_motor", 256, subEncoderCallback);
-
-
-    // read x80 parameter file
-    n.getParam("x80_config/WheelRadius", mWheelRadius);
-    n.getParam("x80_config/EncoderCircleCnt", mEncoderCircleCount);
-    n.getParam("x80_config/WheelDistance", mWheelDistance);
 
     ros::Rate loop_rate(100);
 
     while (ros::ok())
     {
         ros::spinOnce();
-
         loop_rate.sleep();
     }
 

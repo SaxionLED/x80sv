@@ -37,6 +37,8 @@
 #include <boost/asio.hpp>
 #include <xv_11_laser_driver/xv11_laser.h>
 
+using namespace xv_11_laser_driver;
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "neato_laser_publisher");
@@ -48,7 +50,7 @@ int main(int argc, char **argv)
   std::string frame_id;
   int firmware_number;
 
-  priv_nh.param("port", port, std::string("/dev/sensors/ftdi_A601LMNL"));  
+  priv_nh.param("port", port, std::string("/dev/ttyLASER"));  
   priv_nh.param("baud_rate", baud_rate, 115200);
   priv_nh.param("frame_id", frame_id, std::string("/base_link"));
   priv_nh.param("firmware_version", firmware_number, 2);
@@ -56,7 +58,7 @@ int main(int argc, char **argv)
   boost::asio::io_service io;
 
   try {
-    xv_11_laser_driver::XV11Laser laser(port, baud_rate, firmware_number, io);
+    XV11Laser laser(port, baud_rate, firmware_number, io);
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("laser/scan", 1000);
 
     while (ros::ok()) {

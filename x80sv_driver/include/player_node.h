@@ -52,6 +52,7 @@ namespace DrRobot
             int start();
             int stop();
             void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel);
+            void publishOdometry(const x80sv_driver::MotorInfoArray& motorInfo);
             void doUpdate();
             void produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);
 
@@ -64,6 +65,12 @@ namespace DrRobot
             struct DrRobotMotionConfig robotConfig2_;
 
             std::string odom_frame_id_;
+            float m_x;
+            float m_y;
+            float m_theta;
+            tf::TransformBroadcaster m_odom_broadcaster;
+            ros::Publisher m_odom_pub;
+
             struct MotorSensorData motorSensorData_;
             struct RangeSensorData rangeSensorData_;
             struct PowerSensorData powerSensorData_;
@@ -73,11 +80,8 @@ namespace DrRobot
             std::string robotType_;
             std::string robotID_;
             std::string robotIP_;
-            std::string robotCommMethod_;
-            std::string robotSerialPort_;
             bool enable_ir_;
             bool enable_sonar_;
-            int commPortNum_;
             int encoderOneCircleCnt_;
             double wheelDis_;
             double wheelRadius_;
@@ -87,6 +91,7 @@ namespace DrRobot
 
             int cntNum_;
             double ad2Dis(int adValue);
+            void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta);
 
     };
 

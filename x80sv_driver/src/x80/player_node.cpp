@@ -4,11 +4,41 @@
 #include <SerialCommInterface.hpp>
 #include <NetworkCommInterface.hpp>
 
+#include <x80sv_driver/MotorInfoArray.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Pose.h>
 
 using namespace std;
 
 namespace DrRobot
 {
+
+    class EncoderFilter
+    {
+        public:
+            EncoderFilter();
+
+            void reset()
+            {
+                initialized = false;
+            }
+
+            void update()
+            {
+                vx = 0;
+            }
+
+            float vx;
+
+        private:
+            bool initialized;
+    };
+
+    EncoderFilter::EncoderFilter()
+    {
+        reset();
+    }
+
 
     double PlayerNode::ad2Dis(int adValue)
     {
@@ -16,16 +46,27 @@ namespace DrRobot
         double irad2Dis = 0;
 
         if (adValue <= 0)
+        {
             temp = -1;
+        }
         else
+        {
             temp = 21.6 / ((double) adValue * 3 / 4096 - 0.17);
+        }
 
-        if ((temp > 80) || (temp < 0)) {
+        if ((temp > 80) || (temp < 0))
+        {
             irad2Dis = 0.81;
-        } else if ((temp < 10) && (temp > 0)) {
+        }
+        else if ((temp < 10) && (temp > 0))
+        {
             irad2Dis = 0.09;
-        } else
+        }
+        else
+        {
             irad2Dis = temp / 100;
+        }
+
         return irad2Dis;
     }
 
@@ -42,6 +83,7 @@ namespace DrRobot
         private_nh.getParam("x80_config/RobotType", robotType_);
         ROS_INFO("I get ROBOT_Type: [%s]", robotType_.c_str());
 
+        std::string robotCommMethod_;
         robotCommMethod_ = "Network";
         private_nh.getParam("x80_config/RobotCommMethod", robotCommMethod_);
         ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
@@ -50,10 +92,13 @@ namespace DrRobot
         private_nh.getParam("x80_config/RobotBaseIP", robotIP_);
         ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
 
+        int commPortNum_;
+
         commPortNum_ = 10001;
         private_nh.getParam("x80_config/RobotPortNum", commPortNum_);
         ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
 
+        std::string robotSerialPort_;
         robotSerialPort_ = "/dev/ttyS0";
         private_nh.getParam("x80_config/RobotSerialPort", robotSerialPort_);
         ROS_INFO("I get ROBOT_SerialPort: [%s]", robotSerialPort_.c_str());
@@ -147,12 +192,20 @@ namespace DrRobot
         standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
         customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
 
+        m_odom_pub = node_.advertise<nav_msgs::Odometry>("odom", 50);
+
         drrobotPowerDriver_ = new MotionSensorDriver(*_comm_interface);
         drrobotMotionDriver_ = new MotionSensorDriver(*_comm_interface);
         drrobotPowerDriver_->setDrRobotMotionDriverConfig(&robotConfig1_);
         drrobotMotionDriver_->setDrRobotMotionDriverConfig(&robotConfig2_);
         cntNum_ = 0;
+
+        // Keep track of robot:
+        m_x = 0;
+        m_y = 0;
+        m_theta = 0;
     }
+
 
     PlayerNode::~PlayerNode()
     {
@@ -188,6 +241,106 @@ namespace DrRobot
 
         // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
         drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
+    }
+
+
+    // Calculate the rotation of the wheel relative to a previous time:
+    void PlayerNode::calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta)
+    {
+        const uint encoderMax = 32768;
+
+        if (encoderPrevious != -1)
+        {
+            if (encoderPrevious < 5000 && mtr.encoder_pos > 25000)
+            {
+                encoderPrevious = mtr.encoder_pos - encoderPrevious;
+            }
+            else if (encoderPrevious > 25000 && mtr.encoder_pos < 5000)
+            {
+                encoderPrevious = mtr.encoder_pos + (encoderMax - encoderPrevious);
+            }
+
+            int encoderDelta = encoderPrevious - mtr.encoder_pos;
+            // double wheel_angle = ((encoderDelta * 2 * M_PI) / encoderOneCircleCnt_);
+
+            movementDelta = (((wheelRadius_ * 2 * M_PI) / encoderOneCircleCnt_) * encoderDelta);
+        }
+        else
+        {
+            movementDelta = 0;
+        }
+
+        encoderPrevious = mtr.encoder_pos;
+    }
+
+
+    void PlayerNode::publishOdometry(const x80sv_driver::MotorInfoArray& motorInfo)
+    {
+        static int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
+        static int mEncoderPreviousRight = -1;
+
+        double d_left = 0;
+        double d_right = 0;
+
+        x80sv_driver::MotorInfo mtr0 = motorInfo.motorInfos.at(0);
+        x80sv_driver::MotorInfo mtr1 = motorInfo.motorInfos.at(1);
+
+        // ROS_INFO("Encoder values: %u, %u", mtr0.encoder_pos, mtr1.encoder_pos);
+
+        calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left);
+        calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right);
+
+        // average distance between 2 wheels = actual distance from center
+        double averageDistance = (d_left + d_right) / 2.0;
+
+        // difference in angle from last encoder values, distance between wheel centers in m
+        double deltaAngle = atan2((d_right - d_left), wheelDis_);
+        double delta_x = averageDistance * cos(m_theta);
+        double delta_y = averageDistance * sin(m_theta);
+
+        // TODO: retrieve velocities:
+        double vx = 0;
+        double vy = 0;
+        double vth = 0;
+
+        // update pose:
+        m_theta += deltaAngle;
+        m_x += delta_x;
+        m_y += delta_y;
+
+        // Grab some constant things:
+        tf::Quaternion odom_quat;
+        odom_quat.setRPY(m_theta, 0, 0);
+        ros::Time nu = ros::Time::now();
+
+        // Construct tf message:
+        tf::Transform transform;
+        transform.setOrigin(tf::Vector3(m_x, m_y, 0.0));
+        transform.setRotation(odom_quat);
+
+        // Send via tf system:
+        m_odom_broadcaster.sendTransform(tf::StampedTransform(transform, nu, "odom", "base_link"));
+
+        // Construct odometry message:
+        nav_msgs::Odometry odom;
+        odom.header.stamp = nu;
+        odom.header.frame_id = "odom";
+
+        // Set position:
+        odom.pose.pose.position.x = m_x;
+        odom.pose.pose.position.y = m_y;
+
+        geometry_msgs::Quaternion odom_quat2 = tf::createQuaternionMsgFromYaw(m_theta);
+        odom.pose.pose.orientation = odom_quat2;
+
+        // Set velocity:
+        odom.child_frame_id = "base_link";
+        odom.twist.twist.linear.x = vx;
+        odom.twist.twist.linear.x = vy;
+        odom.twist.twist.angular.z = vth;
+
+        // Publish the message:
+        m_odom_pub.publish(odom);
     }
 
 
@@ -259,6 +412,7 @@ namespace DrRobot
 
             //ROS_INFO("publish motor info array");
             motorInfo_pub_.publish(motorInfoArray);
+            publishOdometry(motorInfoArray);
 
 
             x80sv_driver::RangeArray rangerArray;

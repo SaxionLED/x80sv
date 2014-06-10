@@ -32,7 +32,7 @@ include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 # x80 control and sensors
 add_library(x80_sensor_driver src/x80/DrRobotMotionSensorDriver.cpp src/x80/serial_comm.cpp src/x80/network_comm.cpp src/x80/comm_base.cpp)
-add_executable(x80_robot src/x80/drrobot_player.cpp)
+add_executable(x80_robot src/x80/drrobot_player.cpp src/x80/player_node.cpp)
 target_link_libraries(x80_robot x80_sensor_driver)
 target_link_libraries(x80_robot ${catkin_LIBRARIES})
 

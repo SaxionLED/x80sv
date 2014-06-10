@@ -3,7 +3,7 @@ x80_config: {
     RobotID: drrobot1,
     RobotBaseIP: 192.168.0.201,
     RobotPortNum: 10001,
-    RobotSerialPort: /dev/ttyUSB0,
+    RobotSerialPort: /dev/ttyX80SV,
     RobotType: X80,
     MotorDir: 1,
     WheelRadius: 0.080,

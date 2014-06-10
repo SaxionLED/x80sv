@@ -309,8 +309,8 @@ namespace DrRobot
         // difference in angle from last encoder values, distance between wheel centers in m
         // When the right wheel moves forward, the angle
         double deltaAngle = atan2((d_left - d_right), wheelDis_);
-        double delta_x = -averageDistance * cos(m_theta);
-        double delta_y = averageDistance * sin(m_theta);
+        double delta_x = averageDistance * cos(m_theta + M_PI);
+        double delta_y = averageDistance * sin(m_theta + M_PI);
 
         // TODO: retrieve velocities:
         double vx = averageDistance / time_delta;

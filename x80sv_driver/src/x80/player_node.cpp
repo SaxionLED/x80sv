@@ -327,12 +327,18 @@ namespace DrRobot
         // This is published into static tf via the robot_state_publisher.
         sensor_msgs::JointState joint_state;
         joint_state.header.stamp = nu;
-        joint_state.name.resize(2);
-        joint_state.position.resize(2);
+        joint_state.name.resize(4);
+        joint_state.position.resize(4);
         joint_state.name[0] = "base_link_left_wheel_joint";
         joint_state.position[0] = left_joint_angle;
         joint_state.name[1] = "base_link_right_wheel_joint";
         joint_state.position[1] = right_joint_angle;
+
+        // These are two joints we cannot measure:
+        joint_state.name[2] = "base_caster_support_joint";
+        joint_state.position[2] = 0;
+        joint_state.name[3] = "caster_wheel_joint";
+        joint_state.position[3] = 0;
         m_joint_state.publish(joint_state);
 
 

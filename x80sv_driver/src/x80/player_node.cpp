@@ -278,6 +278,16 @@ namespace DrRobot
     {
         static int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
         static int mEncoderPreviousRight = -1;
+        static ros::Time prev_time(0);
+
+        ros::Time nu = ros::Time::now();
+
+        double time_delta = (nu - prev_time).toSec();
+        prev_time = nu;
+        if (time_delta < 0.0001)
+        {
+            time_delta = 0.0001;
+        }
 
         double d_left = 0;
         double d_right = 0;
@@ -299,9 +309,9 @@ namespace DrRobot
         double delta_y = averageDistance * sin(m_theta);
 
         // TODO: retrieve velocities:
-        double vx = 0;
+        double vx = averageDistance / time_delta;
         double vy = 0;
-        double vth = 0;
+        double vth = deltaAngle / time_delta;
 
         // update pose:
         m_theta += deltaAngle;
@@ -310,8 +320,7 @@ namespace DrRobot
 
         // Grab some constant things:
         tf::Quaternion odom_quat;
-        odom_quat.setRPY(m_theta, 0, 0);
-        ros::Time nu = ros::Time::now();
+        odom_quat.setRPY(0, 0, m_theta);
 
         // Construct tf message:
         tf::Transform transform;

@@ -7,6 +7,8 @@
 #include <x80sv_driver/MotorInfoArray.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
+#include <sensor_msgs/JointState.h>
+
 
 using namespace std;
 
@@ -176,23 +178,16 @@ namespace DrRobot
             robotConfig2_.boardType = X80SV;
         }
 
-
-        //robotConfig1_.portNum = commPortNum_;
-        // robotConfig2_.portNum = commPortNum_ + 1;
-
         //create publishers for sensor data information
         motorInfo_pub_ = node_.advertise<x80sv_driver::MotorInfoArray>("drrobot_motor", 1);
         powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
-        if (enable_ir_) {
-            ir_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_ir", 1);
-        }
-        if (enable_sonar_) {
-            sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
-        }
+        ir_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_ir", 1);
+        sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
         standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
         customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
 
-        m_odom_pub = node_.advertise<nav_msgs::Odometry>("odom", 50);
+        m_odom_pub = node_.advertise<nav_msgs::Odometry>("odom", 1);
+        m_joint_state = node_.advertise<sensor_msgs::JointState>("joint_states", 1);
 
         drrobotPowerDriver_ = new MotionSensorDriver(*_comm_interface);
         drrobotMotionDriver_ = new MotionSensorDriver(*_comm_interface);
@@ -245,7 +240,7 @@ namespace DrRobot
 
 
     // Calculate the rotation of the wheel relative to a previous time:
-    void PlayerNode::calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta)
+    void PlayerNode::calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle, double scale_factor)
     {
         const uint encoderMax = 32768;
 
@@ -261,19 +256,27 @@ namespace DrRobot
             }
 
             int encoderDelta = encoderPrevious - mtr.encoder_pos;
-            // double wheel_angle = ((encoderDelta * 2 * M_PI) / encoderOneCircleCnt_);
 
-            movementDelta = (((wheelRadius_ * 2 * M_PI) / encoderOneCircleCnt_) * encoderDelta);
+            movementDelta = (((wheelRadius_ * 2 * M_PI) / encoderOneCircleCnt_) * encoderDelta) * scale_factor;
         }
         else
         {
             movementDelta = 0;
         }
 
+        joint_angle = ((mtr.encoder_pos * 2 * M_PI) / encoderOneCircleCnt_) * scale_factor;
         encoderPrevious = mtr.encoder_pos;
     }
 
 
+    /*
+        This function calculates odometry information from the encoderdata.  
+        It creates a transform from 'odom' to 'base_footprint'
+
+        motor 0 is the left wheel, motor 1 the right wheel.
+
+        The x axis is forward, the y axis is to the left, and the z is upwards.
+    */
     void PlayerNode::publishOdometry(const x80sv_driver::MotorInfoArray& motorInfo)
     {
         static int mEncoderPreviousLeft = -1; //TODO confirm left and right are correct
@@ -289,23 +292,24 @@ namespace DrRobot
             time_delta = 0.0001;
         }
 
-        double d_left = 0;
-        double d_right = 0;
+        double d_left = 0, left_joint_angle;
+        double d_right = 0, right_joint_angle;
 
-        x80sv_driver::MotorInfo mtr0 = motorInfo.motorInfos.at(0);
-        x80sv_driver::MotorInfo mtr1 = motorInfo.motorInfos.at(1);
+        x80sv_driver::MotorInfo mtr0 = motorInfo.motorInfos.at(0); // Left motor
+        x80sv_driver::MotorInfo mtr1 = motorInfo.motorInfos.at(1); // Right motor
 
         // ROS_INFO("Encoder values: %u, %u", mtr0.encoder_pos, mtr1.encoder_pos);
 
-        calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left);
-        calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right);
+        calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left, left_joint_angle, -1);
+        calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right, right_joint_angle, 1);
 
         // average distance between 2 wheels = actual distance from center
         double averageDistance = (d_left + d_right) / 2.0;
 
         // difference in angle from last encoder values, distance between wheel centers in m
-        double deltaAngle = atan2((d_right - d_left), wheelDis_);
-        double delta_x = averageDistance * cos(m_theta);
+        // When the right wheel moves forward, the angle
+        double deltaAngle = atan2((d_left - d_right), wheelDis_);
+        double delta_x = -averageDistance * cos(m_theta);
         double delta_y = averageDistance * sin(m_theta);
 
         // TODO: retrieve velocities:
@@ -318,6 +322,20 @@ namespace DrRobot
         m_x += delta_x;
         m_y += delta_y;
 
+        // Send out joint state via topic:
+        // The joint name is a combination of the erratic wheel and the xacro description.
+        // This is published into static tf via the robot_state_publisher.
+        sensor_msgs::JointState joint_state;
+        joint_state.header.stamp = nu;
+        joint_state.name.resize(2);
+        joint_state.position.resize(2);
+        joint_state.name[0] = "base_link_left_wheel_joint";
+        joint_state.position[0] = left_joint_angle;
+        joint_state.name[1] = "base_link_right_wheel_joint";
+        joint_state.position[1] = right_joint_angle;
+        m_joint_state.publish(joint_state);
+
+
         // Grab some constant things:
         tf::Quaternion odom_quat;
         odom_quat.setRPY(0, 0, m_theta);
@@ -328,7 +346,7 @@ namespace DrRobot
         transform.setRotation(odom_quat);
 
         // Send via tf system:
-        m_odom_broadcaster.sendTransform(tf::StampedTransform(transform, nu, "odom", "base_link"));
+        m_odom_broadcaster.sendTransform(tf::StampedTransform(transform, nu, "odom", "base_footprint"));
 
         // Construct odometry message:
         nav_msgs::Odometry odom;
@@ -343,7 +361,7 @@ namespace DrRobot
         odom.pose.pose.orientation = odom_quat2;
 
         // Set velocity:
-        odom.child_frame_id = "base_link";
+        odom.child_frame_id = "base_footprint";
         odom.twist.twist.linear.x = vx;
         odom.twist.twist.linear.x = vy;
         odom.twist.twist.angular.z = vth;

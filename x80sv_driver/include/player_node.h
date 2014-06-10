@@ -70,6 +70,7 @@ namespace DrRobot
             float m_theta;
             tf::TransformBroadcaster m_odom_broadcaster;
             ros::Publisher m_odom_pub;
+            ros::Publisher m_joint_state;
 
             struct MotorSensorData motorSensorData_;
             struct RangeSensorData rangeSensorData_;
@@ -91,7 +92,7 @@ namespace DrRobot
 
             int cntNum_;
             double ad2Dis(int adValue);
-            void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta);
+            void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle, double scale_factor);
 
     };
 

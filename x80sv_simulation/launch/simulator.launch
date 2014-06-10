@@ -1,22 +1,21 @@
 <launch>
 
-	<param name="robot_description" command="$(find xacro)/xacro.py '$(find x80sv_description)/urdf/x80sv.xacro'" />
+    <include file="$(find x80sv_description)/launch/description.launch"/>
+
 	<rosparam file="$(find x80sv_simulation)/config/x80sv_control.yaml" command="load"/>
 
 	<!-- Laser filter node -->
-	<!--<node name="laser_filter" pkg="x80sv_simulation" type="laser_filter"/>--> <!--integrated into data_verifier-->
 
 	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model x80sv" />
+
+    <!-- Use the joint state publisher
+        TODO: find out if this is really required.
+    
+    -->
+
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" ns="/x80sv" args="joint_state_controller" />
      
-    <!-- Gmapping node: -->
-
-	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/x80sv/laser/scan">
-		<param name="maxRange" value="4.5"/>
-		<param name="maxUrange" value="3.9"/>
-	</node>
 	
 </launch>

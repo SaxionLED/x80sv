@@ -1,0 +1,11 @@
+<launch>
+
+    <!-- Gmapping node: -->
+
+	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/x80sv/laser/scan">
+		<param name="maxRange" value="4.5"/>
+		<param name="maxUrange" value="3.9"/>
+	</node>
+	
+</launch>
+

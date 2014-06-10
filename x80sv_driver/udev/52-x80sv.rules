@@ -1,0 +1,1 @@
+SUBSYSTEMS=="usb", KERNEL=="ttyUSB[0-9]*", ATTRS{idVendor}=="0557", ATTRS{idProduct}=="2008", SYMLINK+="ttyX80SV"

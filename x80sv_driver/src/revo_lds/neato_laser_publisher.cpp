@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
   priv_nh.param("port", port, std::string("/dev/ttyLASER"));  
   priv_nh.param("baud_rate", baud_rate, 115200);
-  priv_nh.param("frame_id", frame_id, std::string("/base_link"));
+  priv_nh.param("frame_id", frame_id, std::string("/laser_scanner"));
   priv_nh.param("firmware_version", firmware_number, 2);
 
   boost::asio::io_service io;

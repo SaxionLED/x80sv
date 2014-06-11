@@ -1,0 +1,11 @@
+
+<launch>
+
+    <!-- skynav_control-->  
+        <include file="$(find skynav_bringup)/launch/skynav.launch"/>
+
+    <!-- x80_drivers-->
+        <include file="$(find x80sv_bringup)/launch/real_robot_driver.launch"/>
+        
+</launch>
+

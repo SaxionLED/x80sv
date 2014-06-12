@@ -197,10 +197,8 @@
   </inertial>
  </link>
 
-
-
   <joint type="fixed" name="laser_scanner_glue">
-   <origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>
+   <origin xyz="0 0 0.05" rpy="0 0 0"/>
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>
@@ -219,8 +217,8 @@
           <horizontal>
             <samples>360</samples>
             <resolution>1</resolution>
-            <min_angle>0</min_angle>
-            <max_angle>${2*M_PI}</max_angle>
+            <min_angle>${0.5*M_PI}</min_angle>
+            <max_angle>${2.5*M_PI}</max_angle>
           </horizontal>
         </scan>
         <range>

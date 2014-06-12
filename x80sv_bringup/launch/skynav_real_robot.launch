@@ -7,5 +7,8 @@
     <!-- x80_drivers-->
         <include file="$(find x80sv_bringup)/launch/real_robot_driver.launch"/>
         
+	<!-- gmapping -->
+		<include file="$(find x80sv_bringup)/launch/x80sv_gmapping.launch"/>
+        
 </launch>
 

@@ -4,7 +4,7 @@
     -->
     <env name="GAZEBO_MODEL_PATH" value="$(find x80sv_simulation)/models/" />
 
-    <arg name="worldfile" default="localnav_world_1.world" />
+    <arg name="worldfile" default="world_1.world" />
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
 		<arg name="world_name" value="$(find x80sv_simulation)/worlds/$(arg worldfile)" />

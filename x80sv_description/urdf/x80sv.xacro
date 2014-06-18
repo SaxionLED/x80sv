@@ -198,7 +198,7 @@
  </link>
 
   <joint type="fixed" name="laser_scanner_glue">
-   <origin xyz="0 0 0.05" rpy="0 0 0"/>
+   <origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>
@@ -210,15 +210,15 @@
    <gazebo reference="laser_scanner">
     <sensor type="ray" name="laser_scanner_sensor">
       <pose>0 0 0 0 0 0</pose>
-      <visualize>true</visualize>
+	  <visualize>true</visualize>
       <update_rate>10</update_rate>
       <ray>
         <scan>
           <horizontal>
             <samples>360</samples>
             <resolution>1</resolution>
-            <min_angle>${0.5*M_PI}</min_angle>
-            <max_angle>${2.5*M_PI}</max_angle>
+            <min_angle>${M_PI}</min_angle>
+            <max_angle>${-M_PI}</max_angle>
           </horizontal>
         </scan>
         <range>

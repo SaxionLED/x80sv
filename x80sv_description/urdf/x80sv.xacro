@@ -2,7 +2,7 @@
 
 <robot name="x80sv" xmlns:xacro="http://www.ros.org/wiki/xacro">
 	
-	<xacro:include filename="$(find erratic_description)/urdf/erratic_wheel.xacro" />
+	<xacro:include filename="$(find x80sv_description)/urdf/wheel.xacro" />
 
  <!--
   Wheel inertia:
@@ -109,14 +109,14 @@
 		<visual>
 			<origin xyz="0 0 -0.08" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
+				<mesh filename="package://x80sv_description/meshes/collada/erratic_caster_support_link.dae"/>
 			</geometry>
 		</visual>
 
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="package://erratic_description/meshes/collada/erratic_caster_support_link.dae"/>
+				<mesh filename="package://x80sv_description/meshes/collada/erratic_caster_support_link.dae"/>
 			</geometry>
 		</collision>
 	</link>	
@@ -150,7 +150,7 @@
 			<visual>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
-					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_wheel_link.dae"/>
+					<mesh filename="package://x80sv_description/meshes/collada/erratic_caster_wheel_link.dae"/>
 				</geometry>
 				<material name="Black"/>
 			</visual>
@@ -158,7 +158,7 @@
 			<collision>
 				<origin xyz="0 0 0" rpy="0 0 0" />
 				<geometry>
-					<mesh filename="package://erratic_description/meshes/collada/erratic_caster_wheel_link.dae"/>
+					<mesh filename="package://x80sv_description/meshes/collada/erratic_caster_wheel_link.dae"/>
 				</geometry>
 			</collision>
 		</link>
@@ -171,13 +171,13 @@
 	</gazebo>
 
 
-	<erratic_wheel suffix="left" parent="base_link">
+	<wheel suffix="left" parent="base_link">
 		<origin xyz="0.0 0.15525 -0.129" rpy="0 0 0" />
-	</erratic_wheel>
+	</wheel>
 
-	<erratic_wheel suffix="right" parent="base_link">
+	<wheel suffix="right" parent="base_link">
 		<origin xyz="0.0 -0.15525 -0.129" rpy="0 0 0" />
-	</erratic_wheel>
+	</wheel>
 
 
 

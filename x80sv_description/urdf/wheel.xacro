@@ -6,7 +6,7 @@ xmlns:xacro="http://www.ros.org/wiki/xacro"
     xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
     xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface">
     
-    <macro name="erratic_wheel" params="suffix parent *origin">
+    <macro name="wheel" params="suffix parent *origin">
         <joint name="${parent}_${suffix}_wheel_joint" type="continuous">
             <insert_block name="origin" />
             <axis xyz="0 1 0" />
@@ -29,7 +29,7 @@ xmlns:xacro="http://www.ros.org/wiki/xacro"
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                    <mesh filename="package://erratic_description/meshes/collada/erratic_front_wheel_link.dae"/>
+                    <mesh filename="package://x80sv_description/meshes/collada/erratic_front_wheel_link.dae"/>
                 </geometry>
                 <material name="Black" />
             </visual>
@@ -37,7 +37,7 @@ xmlns:xacro="http://www.ros.org/wiki/xacro"
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                    <mesh filename="package://erratic_description/meshes/collada/erratic_front_wheel_link.dae"/>
+                    <mesh filename="package://x80sv_description/meshes/collada/erratic_front_wheel_link.dae"/>
                 </geometry>
             </collision>
         </link>

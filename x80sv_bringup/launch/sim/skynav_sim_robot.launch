@@ -8,7 +8,7 @@
         <include file="$(find skynav_bringup)/launch/skynav.launch"/>
 
     <!-- x80_drivers-->
-        <include file="$(find x80sv_bringup)/launch/sim_robot_driver.launch"/>    
+        <include file="$(find x80sv_bringup)/launch/sim/sim_robot_driver.launch"/>    
         
 </launch>
 

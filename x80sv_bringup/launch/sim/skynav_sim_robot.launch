@@ -1,11 +1,14 @@
 
 <launch>
+    <arg name="use_gui" default="true" />
 
 	<!-- gmapping -->
 		<include file="$(find x80sv_bringup)/launch/x80sv_gmapping.launch"/>
 
     <!-- skynav_control-->  
-        <include file="$(find skynav_bringup)/launch/skynav.launch"/>
+        <include file="$(find skynav_bringup)/launch/skynav.launch">
+		<arg name="use_gui" value="$(arg use_gui)"/>
+        </include>
 
     <!-- x80_drivers-->
         <include file="$(find x80sv_bringup)/launch/sim/sim_robot_driver.launch"/>    

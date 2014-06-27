@@ -3,12 +3,13 @@
         roslaunch sim.launch worldfile:=willow_garage.world
     -->
     <env name="GAZEBO_MODEL_PATH" value="$(find x80sv_simulation)/models/" />
-
+	
+	<arg name="use_gui" default="true" />
     <arg name="worldfile" default="world_test.world" />
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
 		<arg name="world_name" value="$(find x80sv_simulation)/worlds/$(arg worldfile)" />
-		<arg name="gui" value="true"/>
+		<arg name="gui" value="$(arg use_gui)"/>
 	</include> 
 
     <include file="$(find x80sv_simulation)/launch/simulator.launch"/>

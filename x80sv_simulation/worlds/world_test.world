@@ -2,7 +2,7 @@
   <world name='world_test'>
     <physics type='ode'>
       <real_time_update_rate>200</real_time_update_rate>
-      <max_step_size>0.004</max_step_size>
+      <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
       <gravity>0 0 -9.8</gravity>
     </physics>
@@ -873,9 +873,9 @@
       <pose>0 -4 0 0 -0 0</pose>
     </model>
     <state world_name='world_test'>
-      <sim_time>5143 404000000</sim_time>
-      <real_time>685 163643015</real_time>
-      <wall_time>1403785960 345031512</wall_time>
+      <sim_time>5655 316000000</sim_time>
+      <real_time>643 132581322</real_time>
+      <wall_time>1404129762 833249145</wall_time>
       <model name='ground_plane'>
         <pose>0 0 0 0 -0 0</pose>
         <link name='link'>
@@ -985,7 +985,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_107'>
-        <pose>-7.9995 -4.80511 0 0 0 -1.5708</pose>
+        <pose>-7.9995 -4.8051 0 0 0 -1.5708</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>-8.5995 -5.4051 0 0 0 -1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1039,7 +1039,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_112'>
-        <pose>-8 0 0 0 0 -1.5708</pose>
+        <pose>-8 -2e-06 0 0 0 -1.5708</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>-8.6 -0.6 0 0 0 -1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1050,7 +1050,7 @@
       <model name='nist_maze_wall_120_113'>
         <pose>-8 1 0 0 0 -1.5708</pose>
         <link name='nist_maze_wall_120_link'>
-          <pose>-8.6 0.4 0 0 0 -1.5708</pose>
+          <pose>-8.6 0.400002 0 0 0 -1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1119,10 +1119,118 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
+      <model name='nist_maze_wall_120_120'>
+        <pose>6.80276 -3.99445 0 0 -0 0</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>7.40276 -4.59445 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_121'>
+        <pose>6.80887 -5.19419 0 0 -0 1.5708</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>7.40887 -4.59419 0 0 -0 1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_122'>
+        <pose>8.00394 -5.18416 0 0 -0 3.14159</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>7.40395 -4.58416 0 0 -0 3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_123'>
+        <pose>7.66345 3.34298 0 0 -0 2.35619</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>7.66345 4.19151 0 0 -0 2.35619</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_124'>
+        <pose>8.00628 3.00018 0 0 -0 2.35619</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>8.00628 3.84871 0 0 -0 2.35619</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_126'>
+        <pose>6 5 0 0 -0 0</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>6.6 4.4 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_127'>
+        <pose>6.808 4.99895 0 0 -0 0</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>7.408 4.39895 0 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_128'>
+        <pose>6.84752 4.15368 0 0 -0 2.35619</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>6.84752 5.00221 0 0 -0 2.35619</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_129'>
+        <pose>-6.81179 4.98098 0 0 0 -3.14159</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>-7.41179 5.58098 0 0 0 -3.14159</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
       <model name='nist_maze_wall_120_13'>
         <pose>-2.99316 -1.82699 0 0 0 -1.5708</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>-3.59316 -2.42699 0 0 0 -1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_130'>
+        <pose>-5.97149 5.82421 0 0 0 -2.35619</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>-6.82002 5.82421 0 0 0 -2.35619</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_131'>
+        <pose>-5.97385 7.01275 0 0 0 -1.5708</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>-6.57385 6.41275 0 0 0 -1.5708</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='nist_maze_wall_120_132'>
+        <pose>2 3 0 0 0 -3.14159</pose>
+        <link name='nist_maze_wall_120_link'>
+          <pose>1.4 3.6 0 0 0 -3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -1317,24 +1425,6 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name='nist_maze_wall_120_33'>
-        <pose>3.02783 3.00341 0 0 0 -3.14159</pose>
-        <link name='nist_maze_wall_120_link'>
-          <pose>2.42783 3.60341 0 0 0 -3.14159</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='nist_maze_wall_120_34'>
-        <pose>2 3 0 0 0 -3.14159</pose>
-        <link name='nist_maze_wall_120_link'>
-          <pose>1.4 3.6 0 0 0 -3.14159</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
       <model name='nist_maze_wall_120_35'>
         <pose>0 -6 0 0 -0 0</pose>
         <link name='nist_maze_wall_120_link'>
@@ -1381,7 +1471,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_4'>
-        <pose>-0.80202 -4.17331 0 0 0 -3.14159</pose>
+        <pose>-0.802018 -4.17332 0 0 0 -3.14159</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>-1.40202 -3.57332 0 0 0 -3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1516,7 +1606,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_53'>
-        <pose>-5.9927 0.885962 0 0 -0 1.5708</pose>
+        <pose>-5.9927 0.885958 0 0 -0 1.5708</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>-5.3927 1.48596 0 0 -0 1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1813,7 +1903,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_83'>
-        <pose>8 0 0 0 -0 1.5708</pose>
+        <pose>8 -2e-06 0 0 -0 1.5708</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>8.6 0.6 0 0 -0 1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1822,7 +1912,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_84'>
-        <pose>8 1 0 0 -0 1.5708</pose>
+        <pose>8 0.999998 0 0 -0 1.5708</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>8.6 1.6 0 0 -0 1.5708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1948,7 +2038,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_97'>
-        <pose>1 7 0 0 -0 3.14159</pose>
+        <pose>0.999998 7 0 0 -0 3.14159</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>0.4 7.6 0 0 -0 3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1957,7 +2047,7 @@
         </link>
       </model>
       <model name='nist_maze_wall_120_98'>
-        <pose>0 7 0 0 -0 3.14159</pose>
+        <pose>-2e-06 7 0 0 -0 3.14159</pose>
         <link name='nist_maze_wall_120_link'>
           <pose>-0.6 7.6 0 0 -0 3.14159</pose>
           <velocity>0 0 0 0 -0 0</velocity>
@@ -1975,18 +2065,18 @@
         </link>
       </model>
       <model name='unit_cylinder_1_0'>
-        <pose>2.46617 3 0.499883 -0 -0 -0</pose>
+        <pose>2.50986 3 0.499883 -0 -0 -2e-06</pose>
         <link name='link'>
-          <pose>2.46617 3 0.499883 -0 -0 -0</pose>
+          <pose>2.50986 3 0.499883 -0 -0 -2e-06</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      </state>
+   </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>4.21127 -8.11108 6.87575 -6.71578e-17 0.597797 1.93296</pose>
+        <pose>0.441779 -14.3403 16.1433 0 0.889796 1.53142</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
@@ -2149,86 +2239,6 @@
         <gravity>1</gravity>
       </link>
       <pose>7 -1 0 0 -0 0</pose>
-    </model>
-    <model name='nist_maze_wall_120_33'>
-      <static>1</static>
-      <link name='nist_maze_wall_120_link'>
-        <pose>0.6 -0.6 0 0 -0 0</pose>
-        <collision name='collision'>
-          <geometry>
-            <mesh>
-              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <bounce/>
-            <friction>
-              <ode/>
-            </friction>
-            <contact>
-              <ode/>
-            </contact>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <mesh>
-              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-        </visual>
-        <velocity_decay>
-          <linear>0</linear>
-          <angular>0</angular>
-        </velocity_decay>
-        <self_collide>0</self_collide>
-        <kinematic>0</kinematic>
-        <gravity>1</gravity>
-      </link>
-      <pose>2 6 0 0 -0 0</pose>
-    </model>
-    <model name='nist_maze_wall_120_34'>
-      <static>1</static>
-      <link name='nist_maze_wall_120_link'>
-        <pose>0.6 -0.6 0 0 -0 0</pose>
-        <collision name='collision'>
-          <geometry>
-            <mesh>
-              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-          <max_contacts>10</max_contacts>
-          <surface>
-            <bounce/>
-            <friction>
-              <ode/>
-            </friction>
-            <contact>
-              <ode/>
-            </contact>
-          </surface>
-        </collision>
-        <visual name='visual'>
-          <geometry>
-            <mesh>
-              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
-              <scale>1 1 1</scale>
-            </mesh>
-          </geometry>
-        </visual>
-        <velocity_decay>
-          <linear>0</linear>
-          <angular>0</angular>
-        </velocity_decay>
-        <self_collide>0</self_collide>
-        <kinematic>0</kinematic>
-        <gravity>1</gravity>
-      </link>
-      <pose>1 6 0 0 -0 0</pose>
     </model>
     <model name='nist_maze_wall_120_37'>
       <static>1</static>
@@ -6085,6 +6095,486 @@
         <gravity>1</gravity>
       </link>
       <pose>-8 -6 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_120'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>7 -4 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_121'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>7 -7 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_122'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>8.45182 -5 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_123'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>7 4 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_124'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>6 4 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_126'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>6 6 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_127'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>5 5 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_128'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>5 5 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_129'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>-8 5 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_130'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>-7 6 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_131'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>-6 6 0 0 -0 0</pose>
+    </model>
+    <model name='nist_maze_wall_120_132'>
+      <static>1</static>
+      <link name='nist_maze_wall_120_link'>
+        <pose>0.6 -0.6 0 0 -0 0</pose>
+        <collision name='collision'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <bounce/>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <mesh>
+              <uri>model://wall/meshes/nist_maze_wall_120.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+        </visual>
+        <velocity_decay>
+          <linear>0</linear>
+          <angular>0</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>
+      </link>
+      <pose>0 1 0 0 -0 0</pose>
     </model>
   </world>
 </sdf>

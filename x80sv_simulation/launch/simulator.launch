@@ -4,18 +4,13 @@
 
 	<rosparam file="$(find x80sv_simulation)/config/x80sv_control.yaml" command="load"/>
 
-	<!-- Laser filter node -->
-
 	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model x80sv" />
 
     <!-- Use the joint state publisher
-        TODO: find out if this is really required.
-    
-    -->
+        TODO: find out if this is really required.-->
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 
 	<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" ns="/x80sv" args="joint_state_controller" />
-     
-	
+     	
 </launch>

@@ -8,5 +8,5 @@ catkin_package(
 CATKIN_DEPENDS roscpp sensor_msgs
 )
 
-add_executable(laser_filter src/laser_filter.cpp)
-target_link_libraries(laser_filter ${catkin_LIBRARIES})
+#add_executable( )
+#target_link_libraries( ${catkin_LIBRARIES})

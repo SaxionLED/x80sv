@@ -198,7 +198,8 @@
  </link>
 
   <joint type="fixed" name="laser_scanner_glue">
-   <origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>
+   <!--<origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>--><!--for simulated robot-->
+   <!--<origin xyz="0 0 0.05" rpy="0 0 0"/>--><!--for real robot-->
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>

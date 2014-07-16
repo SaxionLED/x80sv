@@ -3,11 +3,14 @@ Simulation of the x80sv
 =======================
 
 This ROS package contains simulation scenarios for the x80sv robot. The launch file will load an
-empty world, load controllers and launch a file that listens to the /cmd_vel topic.
+worldfile, load controllers and launch a file that listens to the /cmd_vel topic.
 
 To launch the simulation of the x80sv run:
 
-  roslaunch x80sv_simulation simulation.launch
+  roslaunch x80sv_bringup sim_world.launch
+  
+with the argument "worldfile:=[WORLDFILE_NAME].world", it is possible to change the file that is loaded.
+the argument "use_gui:= [TRUE / FALSE]" can be used to run the simulation with GUI, or withoud it (headless).
 
 You will then see this:
 

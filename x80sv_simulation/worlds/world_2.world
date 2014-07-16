@@ -4,7 +4,7 @@
 
 
 
-  <world name="localnav_world_1">
+  <world name="localnav_world_2">
 
     <include>
       <uri>model://sun</uri>

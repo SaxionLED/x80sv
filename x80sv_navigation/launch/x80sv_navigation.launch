@@ -5,6 +5,11 @@
     <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/laser/scan">
         <param name="maxRange" value="4.5"/>
         <param name="maxUrange" value="3.9"/>
+        <param name="delta" value="0.05" />
+        <param name="xmin" value="-10" />
+        <param name="ymin" value="-10" />
+        <param name="xmax" value="10" />
+        <param name="ymax" value="10" />
     </node>
 
     <node name="move_base" pkg="move_base" type="move_base" output="screen">
@@ -12,6 +17,7 @@
         <rosparam file="$(find x80sv_navigation)/costmap_common_params.yaml" command="load" ns="local_costmap" />
         <rosparam file="$(find x80sv_navigation)/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find x80sv_navigation)/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find x80sv_navigation)/base_local_planner_params.yaml" command="load" />
     </node>
 
 </launch>

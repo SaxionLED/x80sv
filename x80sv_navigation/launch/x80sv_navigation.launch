@@ -6,6 +6,8 @@
 		<param name="maxRange" value="4.5"/>
 		<param name="maxUrange" value="3.9"/>
 	</node>
+
+	<node name="x80sv_move_base" pkg="move_base" type="move_base" />
 	
 </launch>
 

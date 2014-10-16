@@ -4,10 +4,14 @@ This package contains the required files to launch the ros package move_base on 
 
 To launch this package, first launch the x80sv (either simulated or real variant).
 
-TODO
+.. code:: bash
+
+  $ roslaunch x80sv_bringup sim_world.launch
+
 
 Then launch the x80sv_navigation.launch
 
 
-TODO
+.. code:: bash
 
+    $ launch x80sv_navigation x80sv_navigation.launch

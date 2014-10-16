@@ -2,9 +2,10 @@
     <include file="$(find x80sv_description)/launch/description.launch"/>
 
     <rosparam file="$(find x80sv_driver)/x80_config.yaml" command="load"/>
+
     <node pkg="x80sv_driver" name="x80_robot" type="x80_robot" output="screen"/>	
     <node pkg="x80sv_driver" name="neato_laser_publisher" type="neato_laser_publisher" output="screen"/>
     <node pkg="x80sv_driver" name="robot_wrapper" type="robot_wrapper" output="screen"/>
-    <node pkg="x80sv_driver" name="sensor_safety" type="sensor_safety" output="screen"/>		
+    <node pkg="x80sv_driver" name="sensor_safety" type="sensor_safety" output="screen"/>
 
 </launch>

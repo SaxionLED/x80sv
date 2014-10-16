@@ -6,4 +6,6 @@
   <maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>gmapping</run_depend>
+  <run_depend>move_base</run_depend>
 </package>

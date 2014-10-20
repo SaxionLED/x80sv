@@ -4,6 +4,29 @@
     <node pkg="frontier_exploration" type="explore_client" name="explore_client" output="screen" />
     <node pkg="frontier_exploration" type="explore_server" name="explore_server" output="screen">
         <param name="frequency" type="double" value="1.0"/>
+        <param name="goal_aliasing" type="double" value="1.0" />
+        <rosparam ns="explore_costmap" subst_value="true">
+            robot_radius: 0.3
+            update_frequency: 1.0
+            publish_frequency: 0.5
+            transform_tolerance: 0.5
+            global_frame: map
+            robot_base_frame: base_link
+            track_unknown_space: true
+            plugins:
+                - {name: explore_boundary, type: "frontier_exporation::BoundedExploreLayer"}
+                - {name: static_layer, type: "costmap_2d::StaticLayer"}
+                - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+            explore_boundary:
+                resize_to_boundary: true
+                frontier_travel_point: closest
+            inflation_layer:
+                enabled: true
+                inflation_radius: 0.5
+
+            static_layer:
+                enabled: true
+        </rosparam>
     </node>
 
 </launch>

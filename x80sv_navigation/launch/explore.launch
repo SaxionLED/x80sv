@@ -14,7 +14,7 @@
             robot_base_frame: base_link
             track_unknown_space: true
             plugins:
-                - {name: explore_boundary, type: "frontier_exporation::BoundedExploreLayer"}
+                - {name: explore_boundary, type: "frontier_exploration::BoundedExploreLayer"}
                 - {name: static_layer, type: "costmap_2d::StaticLayer"}
                 - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
             explore_boundary:

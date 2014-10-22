@@ -1,0 +1,9 @@
+
+<launch>
+
+    <include file="$(find x80sv_bringup)/launch/sim/sim_world.launch"/>
+    <include file="$(find x80sv_navigation)/launch/x80sv_navigation.launch"/>
+    <node pkg="x80sv_navigation" type="driver_random.py" name="driver_random" output="screen" />
+
+</launch>
+

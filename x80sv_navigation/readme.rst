@@ -14,4 +14,13 @@ Then launch the x80sv_navigation.launch
 
 .. code:: bash
 
-    $ launch x80sv_navigation x80sv_navigation.launch
+    $ roslaunch x80sv_navigation x80sv_navigation.launch
+
+Now you can issue a nav goal in rviz.
+
+
+Or you can use the random drive around script by launching the all in one launch file:
+
+.. code:: base
+    
+    $ roslaunch x80sv_navigation explore_sim_world.launch

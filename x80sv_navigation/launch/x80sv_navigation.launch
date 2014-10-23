@@ -18,6 +18,7 @@
         <rosparam file="$(find x80sv_navigation)/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find x80sv_navigation)/global_costmap_params.yaml" command="load" />
         <rosparam file="$(find x80sv_navigation)/base_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find x80sv_navigation)/move_base_params.yaml" command="load" />
     </node>
 
 </launch>

@@ -1,6 +1,6 @@
 
 
-robot_radius: 0.2
+robot_radius: 0.3
 map_type: costmap
 
 obstacle_layer:
@@ -19,8 +19,8 @@ obstacle_layer:
 
 inflation_layer:
   enabled: true
-  cost_scaling_factor: 5.0
-  inflation_radius: 0.9
+  cost_scaling_factor: 4.0
+  inflation_radius: 1.5
 
 static_layer:
   enabled: true

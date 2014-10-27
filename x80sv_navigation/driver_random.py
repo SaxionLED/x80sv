@@ -24,6 +24,7 @@ if __name__ == '__main__':
     client.wait_for_server()
 
     mode = 'square'
+    # square = [(0,5), (5,5), (5, 0), (5,-5), (0, -5), (-5,-5), (-5, 0), (-5,5)]
     square = [(5,5), (5,-5), (-5,-5), (-5,5)]
     squares = next_square(square)
     while True:

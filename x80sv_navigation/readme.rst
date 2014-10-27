@@ -34,3 +34,9 @@ Or you can use the random drive around script by launching the all in one launch
 Then launch rviz and add several components to visualize the robot state.
 
 .. image:: rviz_navigation2.png
+
+
+See youtube video:
+
+https://www.youtube.com/watch?v=LTBz1SIc5XY
+

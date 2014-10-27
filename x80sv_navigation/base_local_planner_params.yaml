@@ -8,6 +8,17 @@ controller_patience: 3.0
 planner_frequency: 1.0
 planner_patience: 5.0
 
+# Global planner (choose one):
+base_global_planner: global_planner/GlobalPlanner
+# base_global_planner: navfn/NavfnROS
+
+GlobalPlanner:
+  allow_unknown: true
+
+NavfnROS:
+  allow_unknown: true  # Allow space exploration
+
+
 # Select local planner:
 base_local_planner: "dwa_local_planner/DWAPlannerROS"
 # base_local_planner: "base_local_planner/TrajectoryPlannerROS"
@@ -57,7 +68,10 @@ TrajectoryPlannerROS:
   max_vel_theta: 0.6
   min_vel_theta: -0.6
   acc_lim_x: 0.1
+  acc_lim_th: 0.6
   acc_lim_y: 0.0
+
+  # Used in rotate recovery:
   acc_lim_theta: 0.2
 
   dwa: true

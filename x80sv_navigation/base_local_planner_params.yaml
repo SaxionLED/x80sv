@@ -14,15 +14,18 @@ base_local_planner: "dwa_local_planner/DWAPlannerROS"
 
 # For DWA local planner:
 DWAPlannerROS:
-  max_vel_x: 0.4
+  max_vel_x: 0.5
   min_vel_x: 0.01
+
   min_vel_y: 0.0
   max_vel_y: 0.0
+
   max_vel_theta: 0.6
   min_vel_theta: -0.6
-  acc_lim_x: 0.1
+
+  acc_lim_x: 0.3
   acc_lim_y: 0.0
-  acc_lim_theta: 0.5
+  acc_lim_theta: 0.6
 
   # Forward simulation parameters:
   sim_time: 4.0

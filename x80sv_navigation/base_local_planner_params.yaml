@@ -1,10 +1,10 @@
 
 
-controller_frequency: 5.0
+controller_frequency: 3.0
 
 TrajectoryPlannerROS:
   max_vel_x: 0.4
-  min_vel_x: 0.1
+  min_vel_x: 0.01
   max_vel_theta: 0.3
   min_vel_theta: -0.3
   acc_lim_x: 0.1

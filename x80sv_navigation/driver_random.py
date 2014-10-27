@@ -13,17 +13,30 @@ from geometry_msgs.msg import PoseStamped
 def rand(lower, upper):
     return random.random() * (upper - lower) + lower
 
+def next_square(square):
+    while True:
+        for xy in square:
+            yield xy
+
 if __name__ == '__main__':
     rospy.init_node('drive_random')
     client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
     client.wait_for_server()
 
+    mode = 'square'
+    square = [(5,5), (5,-5), (-5,-5), (-5,5)]
+    squares = next_square(square)
     while True:
         goal = MoveBaseGoal()
         goal.target_pose.header.frame_id = 'map'
         goal.target_pose.header.stamp = rospy.get_rostime()
-        goal.target_pose.pose.position.x = rand(-5, 5)
-        goal.target_pose.pose.position.y = rand(-5, 5)
+        if mode == 'square':
+            x, y = next(squares)
+        else:
+            x = rand(-5, 5)
+            y = rand(-5, 5)
+        goal.target_pose.pose.position.x = x
+        goal.target_pose.pose.position.y = y
         goal.target_pose.pose.orientation.w = 1
         client.send_goal(goal)
         rospy.loginfo('Waiting for result')

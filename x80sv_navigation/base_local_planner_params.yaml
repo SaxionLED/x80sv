@@ -9,8 +9,9 @@ planner_frequency: 1.0
 planner_patience: 5.0
 
 # Global planner (choose one):
-base_global_planner: global_planner/GlobalPlanner
-# base_global_planner: navfn/NavfnROS
+# base_global_planner: global_planner/GlobalPlanner
+base_global_planner: navfn/NavfnROS
+# base_global_planner: ompl_global_planner/OmplGlobalPlanner
 
 GlobalPlanner:
   allow_unknown: true
@@ -38,8 +39,12 @@ DWAPlannerROS:
   acc_lim_y: 0.0
   acc_lim_theta: 0.6
 
+  yaw_goal_tolerance: 1
+  xy_goal_tolerance: 0.15
+  latch_xy_goal_tolerance: true
+
   # Forward simulation parameters:
-  sim_time: 4.0
+  sim_time: 3.0
   vx_samples: 7 # default 3
   vy_samples: 1
   vtheta_samples: 20

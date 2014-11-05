@@ -212,16 +212,28 @@ namespace DrRobot
         _comm_interface->open();
 
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
+        pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
 
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);  // only needed when using velocity (1, 0, 170))
+        // only needed when using velocity (1, 0, 170))
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);
+
         drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
 
-        drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000); // PID default is 1000, 5, 10000 (taken from C# src)
-        drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);       // 500, 2, 510 has smoother motion but does not take friction in account
+        // PID default is 1000, 5, 10000 (taken from C# src)
+        drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000);
+        drrobotMotionDriver_->setMotorPositionCtrlPID(1, 500, 5, 10000);
+        // 500, 2, 510 has smoother motion but does not take friction in account
 
         return (0);
     }
 
+    // Apply a raw pwm value on the wheels:
+    void PlayerNode::leftPwmValueReceived(const std_msgs::Int32::ConstPtr& left_pwm)
+    {
+        ROS_INFO("Applying raw PWM value to left wheel");
+        int leftPwm = left_pwm->data;
+        drrobotMotionDriver_->sendMotorCtrlAllCmd(PWM, leftPwm, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
+    }
 
     void PlayerNode::cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel)
     {
@@ -229,7 +241,8 @@ namespace DrRobot
         double t_vel = cmd_vel->angular.z;
 
         double leftWheel = (2 * g_vel - t_vel * wheelDis_) / (2 * wheelRadius_);
-        double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_); // seems the right wheel needs a minor offset to prevent an angle when going straight
+        double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_);
+        // seems the right wheel needs a minor offset to prevent an angle when going straight
 
         int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
         int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
@@ -379,16 +392,15 @@ namespace DrRobot
 
     int PlayerNode::stop()
     {
-            int status = 0;
-            _comm_interface->close();
-            usleep(1000000);
-            return (status);
+        int status = 0;
+        _comm_interface->close();
+        usleep(1000000);
+        return (status);
     }
 
 
     void PlayerNode::doUpdate()
     {
-
         if ((robotConfig1_.boardType == I90_Power) || (robotConfig1_.boardType == Sentinel3_Power)
                 || (robotConfig1_.boardType == Hawk_H20_Power))
         {
@@ -418,8 +430,8 @@ namespace DrRobot
             drrobotMotionDriver_->readMotorSensorData(&motorSensorData_);
             drrobotMotionDriver_->readRangeSensorData(&rangeSensorData_);
             drrobotMotionDriver_->readStandardSensorData(&standardSensorData_);
-
             drrobotMotionDriver_->readCustomSensorData(&customSensorData_);
+
             // Translate from driver data to ROS data
             cntNum_++;
             x80sv_driver::MotorInfoArray motorInfoArray;

@@ -12,6 +12,7 @@
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Int32.h>
 
 #include <x80sv_driver/MotorInfo.h>
 #include <x80sv_driver/MotorInfoArray.h>
@@ -44,6 +45,7 @@ namespace DrRobot
             ros::Publisher customSensor_pub_;
 
             ros::Subscriber cmd_vel_sub_;
+            ros::Subscriber pwm_left_sub_;
             std::string robot_prefix_;
 
             PlayerNode(); 
@@ -52,6 +54,7 @@ namespace DrRobot
             int start();
             int stop();
             void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel);
+            void leftPwmValueReceived(const std_msgs::Int32::ConstPtr& left_pwm);
             void publishOdometry(const x80sv_driver::MotorInfoArray& motorInfo);
             void doUpdate();
             void produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat);

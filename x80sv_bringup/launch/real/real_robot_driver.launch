@@ -8,4 +8,5 @@
     <node pkg="x80sv_driver" name="robot_wrapper" type="robot_wrapper" output="screen"/>
     <node pkg="x80sv_driver" name="sensor_safety" type="sensor_safety" output="screen"/>
 
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 </launch>

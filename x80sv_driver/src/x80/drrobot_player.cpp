@@ -107,14 +107,16 @@ int main(int argc, char** argv)
     updater.add("Motion driver", &drrobotPlayer, &PlayerNode::produce_motion_diagnostics);
 
     // Start up the robot
-    if (drrobotPlayer.start() != 0) {
+    if (drrobotPlayer.start() != 0)
+    {
         exit(-1);
     }
     /////////////////////////////////////////////////////////////////
 
     ros::Rate loop_rate(10); //10Hz
 
-    while (n.ok()) {
+    while (n.ok())
+    {
         drrobotPlayer.doUpdate();
         ros::spinOnce();
         loop_rate.sleep();

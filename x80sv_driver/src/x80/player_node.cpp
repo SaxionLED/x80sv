@@ -124,11 +124,11 @@ namespace DrRobot
         private_nh.getParam("x80_config/MotorDir", motorDir_);
         ROS_INFO("I get MotorDir: [%d]", motorDir_);
 
-        wheelRadius_ = 0.080;
+        wheelRadius_ = 0.085;
         private_nh.getParam("x80_config/WheelRadius", wheelRadius_);
         ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
 
-        wheelDis_ = 0.305;
+        wheelDis_ = 0.28;
         private_nh.getParam("x80_config/WheelDistance", wheelDis_);
         ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
 

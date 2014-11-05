@@ -34,20 +34,26 @@
 
 #include <xv_11_laser_driver/xv11_laser.h>
 
-namespace xv_11_laser_driver {
+namespace xv_11_laser_driver
+{
+
   XV11Laser::XV11Laser(const std::string& port, uint32_t baud_rate, uint32_t firmware, boost::asio::io_service& io): port_(port),
-  baud_rate_(baud_rate), firmware_(firmware), shutting_down_(false), serial_(io, port_) {
+  baud_rate_(baud_rate), firmware_(firmware), shutting_down_(false), serial_(io, port_)
+  {
     serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
   }
 
-  void XV11Laser::poll(sensor_msgs::LaserScan::Ptr scan) {
+  void XV11Laser::poll(sensor_msgs::LaserScan::Ptr scan)
+  {
     uint8_t temp_char;
     uint8_t start_count = 0;
     bool got_scan = false;
     
-    if(firmware_ == 1){ // This is for the old driver, the one that only outputs speed once per revolution
-      boost::array<uint8_t, 1440> raw_bytes;
-      while (!shutting_down_ && !got_scan) {
+    if(firmware_ == 1)
+    {
+        // This is for the old driver, the one that only outputs speed once per revolution
+        boost::array<uint8_t, 1440> raw_bytes;
+        while (!shutting_down_ && !got_scan) {
 	// Wait until the start sequence 0x5A, 0xA5, 0x00, 0xC0 comes around
 	boost::asio::read(serial_, boost::asio::buffer(&temp_char,1));
 	if(start_count == 0) {
@@ -102,12 +108,15 @@ namespace xv_11_laser_driver {
 	  }
 	}
       }
-    } else if(firmware_ == 2) { // This is for the newer driver that outputs packets 4 pings at a time
-      boost::array<uint8_t, 1980> raw_bytes;
-      uint8_t good_sets = 0;
-      uint32_t motor_speed = 0;
-      int index;
-      while (!shutting_down_ && !got_scan) {
+    }
+    else if(firmware_ == 2)
+    { 
+        // This is for the newer driver that outputs packets 4 pings at a time
+        boost::array<uint8_t, 1980> raw_bytes;
+        uint8_t good_sets = 0;
+        uint32_t motor_speed = 0;
+        int index;
+        while (!shutting_down_ && !got_scan) {
 	// Wait until first data sync of frame: 0xFA, 0xA0
 	boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[start_count],1));
 	if(start_count == 0) {

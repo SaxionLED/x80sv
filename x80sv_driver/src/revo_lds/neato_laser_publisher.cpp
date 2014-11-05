@@ -36,42 +36,98 @@
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
 #include <xv_11_laser_driver/xv11_laser.h>
+#include <diagnostic_updater/diagnostic_updater.h>
 
 using namespace xv_11_laser_driver;
 
+
+class LaserUpdater
+{
+    public:
+        LaserUpdater() : _connected(false), _retries(0)
+        {
+        }
+
+        void produce_diagnostics(diagnostic_updater::DiagnosticStatusWrapper &stat)
+        {
+            if (_connected)
+            {
+                stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Laser OK");
+            }
+            else
+            {
+                stat.summary(diagnostic_msgs::DiagnosticStatus::ERROR, "Laser not connected!");
+            }
+
+            stat.add("Retries", _retries);
+        }
+
+        void setConnected(bool connected)
+        {
+            _connected = connected;
+        }
+
+        void incRetries()
+        {
+            _retries++;
+        }
+
+    private:
+        bool _connected;
+        int _retries;
+};
+
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "neato_laser_publisher");
-  ros::NodeHandle n;
-  ros::NodeHandle priv_nh("");
+    ros::init(argc, argv, "neato_laser_publisher");
+    ros::NodeHandle n;
+    ros::NodeHandle priv_nh("");
 
-  std::string port;
-  int baud_rate;
-  std::string frame_id;
-  int firmware_number;
+    std::string port;
+    int baud_rate;
+    std::string frame_id;
+    int firmware_number;
 
-  priv_nh.param("port", port, std::string("/dev/ttyLASER"));  
-  priv_nh.param("baud_rate", baud_rate, 115200);
-  priv_nh.param("frame_id", frame_id, std::string("/laser_scanner"));
-  priv_nh.param("firmware_version", firmware_number, 2);
+    priv_nh.param("port", port, std::string("/dev/ttyLASER"));
+    priv_nh.param("baud_rate", baud_rate, 115200);
+    priv_nh.param("frame_id", frame_id, std::string("/laser_scanner"));
+    priv_nh.param("firmware_version", firmware_number, 2);
 
-  boost::asio::io_service io;
-
-  try {
-    XV11Laser laser(port, baud_rate, firmware_number, io);
+    boost::asio::io_service io;
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("laser/scan", 1000);
 
-    while (ros::ok()) {
-      sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
-      scan->header.frame_id = frame_id;
-      scan->header.stamp = ros::Time::now();
-      laser.poll(scan);
-      laser_pub.publish(scan);
+    diagnostic_updater::Updater updater;
+    updater.setHardwareID("none");
+    LaserUpdater laserUpdater;
+    updater.add("Laser driver", &laserUpdater, &LaserUpdater::produce_diagnostics);
+
+    while (ros::ok())
+    {
+        updater.update();
+        try
+        {
+            XV11Laser laser(port, baud_rate, firmware_number, io);
+
+            laserUpdater.setConnected(true);
+            while (ros::ok())
+            {
+                sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
+                scan->header.frame_id = frame_id;
+                scan->header.stamp = ros::Time::now();
+                laser.poll(scan);
+                laser_pub.publish(scan);
+                updater.update();
+            }
+
+            laser.close();
+        }
+        catch (boost::system::system_error ex)
+        {
+            laserUpdater.setConnected(false);
+            ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
+            ROS_INFO("Retrying to open laser in 2 seconds");
+            ros::Duration(2.0).sleep();
+            laserUpdater.incRetries();
+        }
     }
-    laser.close();
-    return 0;
-  } catch (boost::system::system_error ex) {
-    ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
-    return -1;
-  }
 }

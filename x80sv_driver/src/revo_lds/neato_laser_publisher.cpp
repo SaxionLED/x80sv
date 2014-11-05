@@ -77,6 +77,16 @@ class LaserUpdater
         int _retries;
 };
 
+
+void filter_scan_between_angles(sensor_msgs::LaserScan::Ptr& scan, int from, int to)
+{
+    for (int i = from; i < to; i++)
+    {
+        scan->ranges[i] = 0;
+    }
+}
+
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "neato_laser_publisher");
@@ -115,6 +125,8 @@ int main(int argc, char **argv)
                 scan->header.frame_id = frame_id;
                 scan->header.stamp = ros::Time::now();
                 laser.poll(scan);
+                // Filter out back of robot:
+                filter_scan_between_angles(scan, 0, 180);
                 laser_pub.publish(scan);
                 updater.update();
             }

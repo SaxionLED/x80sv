@@ -31,7 +31,7 @@ recovery_behaviors:
 # For DWA local planner:
 DWAPlannerROS:
   max_vel_x: 0.5
-  min_vel_x: 0.01
+  min_vel_x: 0.2
 
   min_vel_y: 0.0
   max_vel_y: 0.0

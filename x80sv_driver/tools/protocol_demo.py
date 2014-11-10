@@ -27,7 +27,14 @@ class Protocol:
   #define DATA_PING                       0x00
   #define DATA_URGENT_DATA        0x02
   #define DATA_SKIPPACKET         0x03
+
+  const unsigned char COM_TYPE_MOT = 0x01;
+  const unsigned char COM_TYPE_MOT_PLUS = 0x8b;         // for Sentinel3 Hawk, and H20
     """
+    COM_STX0 = 0x5E
+    COM_STX1 = 0x02
+    COM_ETX0 = 0x5E
+    COM_ETX1 = 0x0D
     def __init__(self):
         self.logger = logging.getLogger('protocol')
         self.state = 0
@@ -46,7 +53,7 @@ class Protocol:
         data = self.msg[4:-1]
         # crc may be last byte?
         if ln == len(data):
-            self.logger.debug('Valid packet: dst={}, sn={}, typ={}'.format(dst, sn, typ))
+            # self.logger.debug('Valid packet: dst={}, sn={}, typ={}'.format(dst, sn, typ))
 
             # Check if callback is registered, and if so, call it:
             if self.process_msg:
@@ -56,27 +63,27 @@ class Protocol:
 
     def handle_byte(self, b):
         if self.state == 0:
-            if b == 0x5E:
+            if b == self.COM_STX0:
                 self.state = 1
             else:
                 # Ignore byte
                 pass
         elif self.state == 1:
-            if b == 0x02:
+            if b == self.COM_STX1:
                 # Start of packet!
                 self.msg = bytearray()
                 self.state = 2
             else:
                 self.state = 0
         elif self.state == 2:
-            if b == 0x5e:
+            if b == self.COM_ETX0:
                 # End of packet
                 self.state = 3
             else:
                 # data byte:
                 self.msg.append(b)
         elif self.state == 3:
-            if b == 0xD:
+            if b == self.COM_ETX1:
                 # self.logger.debug('Got packet: {}'.format(self.msg))
                 self.check_msg()
                 self.state = 0
@@ -89,6 +96,12 @@ class Protocol:
     def add_bytes(self, data):
         for b in data:
             self.handle_byte(b)
+
+    def make_msg(self, typ, data, dst=0, sn=0):
+        data = bytearray(data)
+        msg = bytearray([self.COM_STX0, self.COM_STX1, dst, sn, typ, len(data)]) + data + bytearray([0, self.COM_ETX0, self.COM_ETX1])
+        # TODO: calculate CRC
+        return msg
 
 
 class DataPanel(QWidget):
@@ -114,7 +127,7 @@ class DataPanel(QWidget):
 class MotorDataPanel(DataPanel):
     def __init__(self):
         super().__init__()
-        self.add_properties(['enc0', 'enc1', 'pos0', 'pos1'])
+        self.add_properties(['enc0', 'enc1', 'pos0', 'pos1', 'vel0', 'vel1'])
 
 
 class InfoDataPanel(DataPanel):
@@ -131,9 +144,14 @@ class ControlPanel(QWidget):
         super().__init__()
         self.logger = logging.getLogger('controlpanel')
         l = QVBoxLayout(self)
-        b = QPushButton("Do")
-        b.clicked.connect(self.do_connect)
+        b = QPushButton("Gas")
+        b.clicked.connect(self.do_go)
         l.addWidget(b)
+
+        b2 = QPushButton("Bremsen")
+        b2.clicked.connect(self.do_stop)
+        l.addWidget(b2)
+
         self.motor_panel = MotorDataPanel()
         self.info_panel = InfoDataPanel()
         l.addWidget(self.info_panel)
@@ -141,6 +159,7 @@ class ControlPanel(QWidget):
 
         self.protocol = Protocol()
         self.protocol.process_msg = self.process_msg
+        self.msg_cntr = 0
 
         # Construct port:
         self.port = QSerialPort(self)
@@ -149,6 +168,7 @@ class ControlPanel(QWidget):
 
         # open port:
         self.do_open()
+        self.do_go()
 
     def closeEvent(self, event):
         self.port.close()
@@ -180,6 +200,8 @@ class ControlPanel(QWidget):
             Dissect the contents of the message.
               #define COMTYPE_MOTOR           40
         """
+        self.msg_cntr += 1
+        self.info_panel.msgcnt = self.msg_cntr
         COMTYPE_SYSTEM = 0xFF
         COMTYPE_MOTOR_SENSOR = 0x7B
         COMTYPE_CUSTOM_SENSOR = 0x7C
@@ -192,17 +214,54 @@ class ControlPanel(QWidget):
             self.motor_panel.pos1 = pos1
             self.motor_panel.enc0 = enc0
             self.motor_panel.enc1 = enc1
+            self.motor_panel.vel0 = vel0
+            self.motor_panel.vel1 = vel1
         elif typ == COMTYPE_SENSOR:
-            self.logger.warning('Sensor data')
+            #self.logger.warning('Sensor data')
+            pass
         elif typ == COMTYPE_CUSTOM_SENSOR:
-            self.logger.warning('Custom sensor data')
+            #self.logger.warning('Custom sensor data')
+            pass
         elif typ == COMTYPE_STANDARD_SENSOR:
-            self.logger.warning('Standard sensor data')
+            #self.logger.warning('Standard sensor data')
+            pass
         else:
             self.logger.warning('Unknown packet type {}'.format(typ))
 
-    def do_connect(self):
+    def send_msg(self, typ, data):
+        msg = self.protocol.make_msg(typ, data)
+        print(msg)
+
+    def set_motor_velctrl_pid(self, channel, kp, ki, kd):
+        """
+  const unsigned char POSITIONPID = 7;
+  const unsigned char MOTORVELOCITYCTRL = 26;
+  const unsigned char MOTORVELOCITYCTRLALL = 27;
+
+  const unsigned char SERVOCTRL = 28;
+  const unsigned char SERVOCTRLALL = 29;
+  const unsigned char MOTORENABLE = 0x1e;
+
+  const unsigned char MOTORFRICCOMP = 31;
+  const unsigned char CUSTOMIO = 22;
+  const unsigned char POWERCTRL = 22;
+
+        """
+        MOTORPARAMETERSETTING = 7
+        VELOCITYPID = 8
+        KP_ID = 1
+        KD_ID = 2
+        KI_ID = 3
+        msg = struct.pack('<BB BH BH BH', VELOCITYPID, channel, KP_ID, kp, KD_ID, ki, KI_ID, ki)
+        assert len(msg) == 11, str(msg)
+        self.send_msg(MOTORPARAMETERSETTING, msg)
+        
+    def do_go(self):
         self.logger.debug('Connect!')
+        self.set_motor_velctrl_pid(0, 1, 0, 1)
+
+    def do_stop(self):
+        self.logger.debug('Stop!')
 
 
 if __name__ == '__main__':

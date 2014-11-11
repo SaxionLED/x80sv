@@ -10,6 +10,26 @@ from PyQt5.QtSerialPort import QSerialPort
 # Force python 3:
 assert sys.version_info.major == 3
 
+def crc8(data):
+    register = 0
+    for d in data:
+        for _ in range(8):
+            data_bit = d & 0x1
+            sr_lsb = register & 0x1
+            fb_bit = (data_bit ^ sr_lsb)
+
+            # Update registers:
+            register >>= 1
+            if fb_bit == 1:
+                register ^= 0x8C
+            d >>= 1
+            register &= 0xFF
+            print('register={}'.format(hex(register)))
+    print(hex(register))
+    return register
+    
+
+assert crc8('123456789'.encode('ascii')) == 0xcc
 
 class Protocol:
     """ Protocol packetizer

@@ -182,7 +182,12 @@ void XV11Laser::poll(sensor_msgs::LaserScan::Ptr scan)
                       }
                     }
 
-                    scan->time_increment = motor_speed/good_sets/1e8;
+                    double rotation_speed_rpm = (motor_speed / good_sets) / 64.0; // RPM
+                    double rotations_per_second = rotation_speed_rpm / 60.0;
+                    double seconds_per_rotation = 1 / rotations_per_second;
+                    double seconds_per_scan = seconds_per_rotation / 360.0;
+                    // printf("Motor speed: %f RPM, seconds per rotation: %f\n", rotation_speed_rpm, seconds_per_rotation);
+                    scan->time_increment = seconds_per_scan;
                 }
             }
         }

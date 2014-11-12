@@ -125,6 +125,10 @@ int main(int argc, char **argv)
                 scan->header.frame_id = frame_id;
                 scan->header.stamp = ros::Time::now();
                 laser.poll(scan);
+
+                // Determine scan time:
+                scan->scan_time = (ros::Time::now() - scan->header.stamp).toSec();
+
                 // Filter out back of robot:
                 filter_scan_between_angles(scan, 0, 180);
                 laser_pub.publish(scan);

@@ -51,7 +51,7 @@
 	</link>
 
 	<joint name="base_footprint_joint" type="fixed">
-		<origin xyz="0.063 0 0.128" rpy="0 0 0" />
+		<origin xyz="0 0 0.128" rpy="0 0 0" />
 		<parent link="base_footprint"/>
 		<child link="base_link" />
 	</joint>
@@ -197,9 +197,10 @@
   </inertial>
  </link>
 
+    <!-- Laser is positioned 13 cm +/- 1 cm forward of the robot wheel axis and 19 cm above ground level. -->
   <joint type="fixed" name="laser_scanner_glue">
    <!-- <origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>--> <!--for simulated robot-->
-   <origin xyz="0 0 0.05" rpy="0 0 0"/><!--for real robot-->
+   <origin xyz="0.13 0 0.05" rpy="0 0 0"/><!--for real robot-->
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>

@@ -303,6 +303,8 @@ namespace DrRobot
         motor 0 is the left wheel, motor 1 the right wheel.
 
         The x axis is forward, the y axis is to the left, and the z is upwards.
+
+        The base footprint is exactly between the wheels. The base link is the center of the robot.
     */
     void PlayerNode::publishOdometry(const x80sv_driver::MotorInfoArray& motorInfo)
     {

@@ -197,10 +197,12 @@
   </inertial>
  </link>
 
-    <!-- Laser is positioned 13 cm +/- 1 cm forward of the robot wheel axis and 19 cm above ground level. -->
+    <!-- Laser is positioned 13 cm +/- 1 cm forward of the robot wheel axis and 19 cm above ground level.
+        The X axis of the laser points to the left. X of the robot itself is forwards.
+    -->
   <joint type="fixed" name="laser_scanner_glue">
    <!-- <origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>--> <!--for simulated robot-->
-   <origin xyz="0.13 0 0.05" rpy="0 0 0"/><!--for real robot-->
+   <origin xyz="0.13 0 0.05" rpy="0 0 ${0.5*M_PI}"/><!--for real robot-->
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>

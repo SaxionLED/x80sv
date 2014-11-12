@@ -15,33 +15,6 @@ using namespace std;
 namespace DrRobot
 {
 
-    class EncoderFilter
-    {
-        public:
-            EncoderFilter();
-
-            void reset()
-            {
-                initialized = false;
-            }
-
-            void update()
-            {
-                vx = 0;
-            }
-
-            float vx;
-
-        private:
-            bool initialized;
-    };
-
-    EncoderFilter::EncoderFilter()
-    {
-        reset();
-    }
-
-
     double PlayerNode::ad2Dis(int adValue)
     {
         double temp = 0;
@@ -96,16 +69,6 @@ namespace DrRobot
         private_nh.getParam("x80_config/RobotCommMethod", robotCommMethod_);
         ROS_INFO("I get ROBOT_CommMethod: [%s]", robotCommMethod_.c_str());
 
-        robotIP_ = "192.168.0.201";
-        private_nh.getParam("x80_config/RobotBaseIP", robotIP_);
-        ROS_INFO("I get ROBOT_IP: [%s]", robotIP_.c_str());
-
-        int commPortNum_;
-
-        commPortNum_ = 10001;
-        private_nh.getParam("x80_config/RobotPortNum", commPortNum_);
-        ROS_INFO("I get ROBOT_PortNum: [%d]", commPortNum_);
-
         std::string robotSerialPort_;
         robotSerialPort_ = "/dev/ttyS0";
         private_nh.getParam("x80_config/RobotSerialPort", robotSerialPort_);
@@ -134,7 +97,8 @@ namespace DrRobot
         private_nh.getParam("x80_config/WheelRadius", wheelRadius_);
         ROS_INFO("I get Wheel Radius: [%f]", wheelRadius_);
 
-        wheelDis_ = 0.28;
+        // Wheel distance is 28.2 cm +/- 0.2 cm
+        wheelDis_ = 0.283;
         private_nh.getParam("x80_config/WheelDistance", wheelDis_);
         ROS_INFO("I get Wheel Distance: [%f]", wheelDis_);
 
@@ -192,6 +156,8 @@ namespace DrRobot
         standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
         customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
         actual_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("actual_wheel_velocities", 1);
+        requested_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("requested_wheel_velocities", 1);
+        smoothed_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("filtered_wheel_velocities", 1);
 
         m_odom_pub = node_.advertise<nav_msgs::Odometry>("odom", 1);
         m_joint_state = node_.advertise<sensor_msgs::JointState>("joint_states", 1);
@@ -224,14 +190,15 @@ namespace DrRobot
         _comm_interface->open();
 
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
-        pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
+        // pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
         cmd_wheel_velocities_sub_ = node_.subscribe<x80sv_driver::WheelVelocities>("cmd_wheel_velocities", 1, boost::bind(&PlayerNode::wheelVelReceived, this, _1));
 
         // Gain tuning 12 november 10:49:
         // Kp=22, Ki=170, Kd=0 yields reasonable results. Not optimal, but better
+        // Kp=10, Ki=170, Kd=0 yields better results. Still not optimal.
         // only needed when using velocity (1, 0, 170))
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 22, 0, 170); // channel, p, d, i
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 22, 0, 170);
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 10, 0, 170); // channel, p, d, i
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 10, 0, 170);
 
         // PID default is 1000, 5, 10000 (taken from C# src)
         drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000);
@@ -279,11 +246,22 @@ namespace DrRobot
     // Apply rotation to the wheels in terms of radians per second:
     void PlayerNode::wheelVelReceived(const x80sv_driver::WheelVelocities::ConstPtr& wheel_velocities)
     {
-        // seems the right wheel needs a minor offset to prevent an angle when going straight
-        int leftWheelCmd = -motorDir_ * wheel_velocities->left * encoderOneCircleCnt_ / (2 * M_PI);
-        int rightWheelCmd = motorDir_ * wheel_velocities->right * encoderOneCircleCnt_ / (2 * M_PI);
+        // Echo topic to outside world:
+        requested_wheel_velocities_pub_.publish(wheel_velocities);
 
-        ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+        // Echo smoothed value:
+        x80sv_driver::WheelVelocities filtered_wheel_velocities;
+        //filtered_wheel_velocities.left = _left_wheel_filter.feed(wheel_velocities->left);
+        //filtered_wheel_velocities.right = _right_wheel_filter.feed(wheel_velocities->right);
+        filtered_wheel_velocities.left = wheel_velocities->left;
+        filtered_wheel_velocities.right = wheel_velocities->right;
+        smoothed_wheel_velocities_pub_.publish(filtered_wheel_velocities);
+
+        // seems the right wheel needs a minor offset to prevent an angle when going straight
+        int leftWheelCmd = -motorDir_ * filtered_wheel_velocities.left * encoderOneCircleCnt_ / (2 * M_PI);
+        int rightWheelCmd = motorDir_ * filtered_wheel_velocities.right * encoderOneCircleCnt_ / (2 * M_PI);
+
+        // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
         drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
     }
 
@@ -306,14 +284,14 @@ namespace DrRobot
 
             int encoderDelta = encoderPrevious - mtr.encoder_pos;
 
-            movementDelta = (((wheelRadius_ * 2 * M_PI) / encoderOneCircleCnt_) * encoderDelta) * scale_factor;
+            movementDelta = wheelRadius_ * encoder2rad(encoderDelta) * scale_factor;
         }
         else
         {
             movementDelta = 0;
         }
 
-        joint_angle = ((mtr.encoder_pos * 2 * M_PI) / encoderOneCircleCnt_) * scale_factor;
+        joint_angle = encoder2rad(mtr.encoder_pos) * scale_factor;
         encoderPrevious = mtr.encoder_pos;
     }
 
@@ -341,8 +319,10 @@ namespace DrRobot
             time_delta = 0.0001;
         }
 
-        double d_left = 0, left_joint_angle;
-        double d_right = 0, right_joint_angle;
+        double d_left = 0;
+        double left_joint_angle;
+        double d_right = 0;
+        double right_joint_angle;
 
         x80sv_driver::MotorInfo mtr0 = motorInfo.motorInfos.at(0); // Left motor
         x80sv_driver::MotorInfo mtr1 = motorInfo.motorInfos.at(1); // Right motor
@@ -366,10 +346,13 @@ namespace DrRobot
         double vy = 0;
         double vth = deltaAngle / time_delta;
 
+
         // update pose:
         m_theta += deltaAngle;
         m_x += delta_x;
         m_y += delta_y;
+
+        // ROS_INFO("Robot pos: %f, %f", m_x, m_y);
 
         // Send out joint state via topic:
         // The joint name is a combination of the erratic wheel and the xacro description.

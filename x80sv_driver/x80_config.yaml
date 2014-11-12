@@ -7,7 +7,7 @@ x80_config: {
     RobotType: X80,
     MotorDir: 1,
     WheelRadius: 0.085,
-    WheelDistance: 0.28,
+    WheelDistance: 0.283,
     EncoderCircleCnt: 756,
     MinSpeed: 0.1,
     MaxSpeed: 1.0,

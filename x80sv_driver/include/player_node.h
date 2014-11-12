@@ -27,6 +27,8 @@
 #include <x80sv_driver/CustomSensor.h>
 #include <x80sv_driver/WheelVelocities.h>
 
+#include "signalprocessing.h"
+
 #define MOTOR_NUM       6
 #define IR_NUM          7
 #define US_NUM          3
@@ -83,6 +85,10 @@ namespace DrRobot
 
             ros::Subscriber cmd_wheel_velocities_sub_;
             ros::Publisher actual_wheel_velocities_pub_;
+            ros::Publisher requested_wheel_velocities_pub_;
+            ros::Publisher smoothed_wheel_velocities_pub_;
+            SignalProcessing::IirFilter _left_wheel_filter;
+            SignalProcessing::IirFilter _right_wheel_filter;
 
             // Dynamic reconfigure part:
             dynamic_reconfigure::Server<x80sv_driver::x80svConfig> _dyn_reconf_server;

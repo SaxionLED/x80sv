@@ -137,8 +137,8 @@ int main(int argc, char **argv)
         {
             laserUpdater.setConnected(false);
             ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
-            ROS_INFO("Retrying to open laser in 10 seconds");
-            ros::Duration(10.0).sleep();
+            ROS_INFO("Retrying to open laser in 60 seconds");
+            ros::Duration(60.0).sleep();
             laserUpdater.incRetries();
         }
     }

@@ -218,6 +218,7 @@ namespace DrRobot
 
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
         pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
+        wheel_velocities_sub_ = node_.subscribe<x80sv_driver::WheelVelocities>("/wheel_velocities", 1, boost::bind(&PlayerNode::wheelVelReceived, this, _1));
 
         // only needed when using velocity (1, 0, 170))
         drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);
@@ -254,22 +255,25 @@ namespace DrRobot
         double g_vel = cmd_vel->linear.x;
         double t_vel = cmd_vel->angular.z;
 
+        // Extract left and right wheel speeds:
         double leftWheel = (2 * g_vel - t_vel * wheelDis_) / (2 * wheelRadius_);
         double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_);
-        // seems the right wheel needs a minor offset to prevent an angle when going straight
 
-        int leftWheelCmd = -motorDir_ * leftWheel * encoderOneCircleCnt_ / (2 * M_PI);
-        int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
-
-        // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
-        drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
+        // Call lower level function, we could also publish the topic.
+        x80sv_driver::WheelVelocities wheel_velocities;
+        wheel_velocities.left = leftWheel;
+        wheel_velocities.right = rightWheel;
+        wheelVelReceived(x80sv_driver::WheelVelocities::ConstPtr(&wheel_velocities));
     }
 
     // Apply rotation to the wheels in terms of radians per second:
     void PlayerNode::wheelVelReceived(const x80sv_driver::WheelVelocities::ConstPtr& wheel_velocities)
     {
-        int leftWheelCmd = wheel_velocities->left;
-        int rightWheelCmd = wheel_velocities->right;
+        // seems the right wheel needs a minor offset to prevent an angle when going straight
+        int leftWheelCmd = -motorDir_ * wheel_velocities->left * encoderOneCircleCnt_ / (2 * M_PI);
+        int rightWheelCmd = motorDir_ * wheel_velocities->right * encoderOneCircleCnt_ / (2 * M_PI);
+
+        ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
         drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
     }
 

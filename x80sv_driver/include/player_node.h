@@ -81,6 +81,8 @@ namespace DrRobot
             ros::Publisher m_odom_pub;
             ros::Publisher m_joint_state;
 
+            ros::Subscriber wheel_velocities_sub_;
+
             // Dynamic reconfigure part:
             dynamic_reconfigure::Server<x80sv_driver::x80svConfig> _dyn_reconf_server;
             void dynamic_reconfigure_callback(x80sv_driver::x80svConfig &config, uint32_t level);

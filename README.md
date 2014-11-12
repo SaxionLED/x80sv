@@ -13,12 +13,12 @@ Container for x80svn description, simulation and drivers
 -------------------
 quick install notes:
 -------------------
-- Install ubuntu 12.04-LTS  
+- Install ubuntu 14.04-LTS  
 _http://www.ubuntu.com/_
 
-- Install ros hydro  
+- Install ros indigo
 _http://www.ros.org/install/_  
-_http://wiki.ros.org/hydro/Installation/Ubuntu_
+_http://wiki.ros.org/indigo/Installation/Ubuntu_
 
 - Setup catkin workspace _/home/[USER]/catkin_ws_  
 _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_  

@@ -270,10 +270,10 @@ namespace DrRobot
         double rightWheel = (t_vel * wheelDis_ + 2 * g_vel) / (2 * wheelRadius_);
 
         // Call lower level function, we could also publish the topic.
-        x80sv_driver::WheelVelocities wheel_velocities;
-        wheel_velocities.left = leftWheel;
-        wheel_velocities.right = rightWheel;
-        wheelVelReceived(x80sv_driver::WheelVelocities::ConstPtr(&wheel_velocities));
+        x80sv_driver::WheelVelocities *wheel_velocities = new x80sv_driver::WheelVelocities();
+        wheel_velocities->left = leftWheel;
+        wheel_velocities->right = rightWheel;
+        wheelVelReceived(x80sv_driver::WheelVelocities::ConstPtr(wheel_velocities));
     }
 
     // Apply rotation to the wheels in terms of radians per second:

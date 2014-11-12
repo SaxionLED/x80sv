@@ -151,6 +151,10 @@ namespace DrRobot
                 }
 
             }
+            else
+            {
+                ROS_WARN("Cannot send data to closed port");
+            }
         }
         return -1;
     }

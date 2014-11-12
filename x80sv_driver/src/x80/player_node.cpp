@@ -199,6 +199,11 @@ namespace DrRobot
         m_x = 0;
         m_y = 0;
         m_theta = 0;
+
+        // Register dynamic reconfigure:
+        dynamic_reconfigure::Server<x80sv_driver::x80svConfig>::CallbackType dyn_reconf_callback(
+            boost::bind(&PlayerNode::dynamic_reconfigure_callback, this, _1, _2));
+        _dyn_reconf_server.setCallback(dyn_reconf_callback);
     }
 
 
@@ -216,7 +221,6 @@ namespace DrRobot
 
         // only needed when using velocity (1, 0, 170))
         drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);
-
         drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
 
         // PID default is 1000, 5, 10000 (taken from C# src)
@@ -225,6 +229,16 @@ namespace DrRobot
         // 500, 2, 510 has smoother motion but does not take friction in account
 
         return (0);
+    }
+
+    // 
+    void PlayerNode::dynamic_reconfigure_callback(x80sv_driver::x80svConfig &config, uint32_t level)
+    {
+        ROS_INFO("Reconfigure Request: Kp=%d, Ki=%d, Kd=%d", config.Kp, config.Ki, config.Kd);
+
+        // Set kp, kd and ki:
+        // call signature: channel, kp, kd, ki:
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, config.Kp, config.Kd, config.Ki);
     }
 
     // Apply a raw pwm value on the wheels:
@@ -248,6 +262,14 @@ namespace DrRobot
         int rightWheelCmd = motorDir_ * rightWheel * encoderOneCircleCnt_ / (2 * M_PI);
 
         // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
+        drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
+    }
+
+    // Apply rotation to the wheels in terms of radians per second:
+    void PlayerNode::wheelVelReceived(const x80sv_driver::WheelVelocities::ConstPtr& wheel_velocities)
+    {
+        int leftWheelCmd = wheel_velocities->left;
+        int rightWheelCmd = wheel_velocities->right;
         drrobotMotionDriver_->sendMotorCtrlAllCmd(Velocity, leftWheelCmd, rightWheelCmd, NOCONTROL, NOCONTROL, NOCONTROL, NOCONTROL);
     }
 

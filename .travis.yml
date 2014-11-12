@@ -21,6 +21,7 @@ before_install:
   - sudo apt-get install python-catkin-pkg python-empy python-rospkg
   - pip install catkin_pkg
   - pip install empy
+  - pip install rospkg
   - sudo rosdep init
   - rosdep update
 install:

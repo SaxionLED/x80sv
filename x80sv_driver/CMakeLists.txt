@@ -7,6 +7,7 @@ find_package(Boost REQUIRED)
 add_message_files(
   FILES
   CustomSensor.msg
+  WheelVelocities.msg
   MotorInfo.msg
   MotorInfoArray.msg
   PowerInfo.msg

@@ -8,6 +8,10 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
+#include <dynamic_reconfigure/server.h>
+
+// Generated config file:
+#include <x80sv_driver/x80svConfig.h>
 
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Twist.h>
@@ -21,6 +25,7 @@
 #include <x80sv_driver/PowerInfo.h>
 #include <x80sv_driver/StandardSensor.h>
 #include <x80sv_driver/CustomSensor.h>
+#include <x80sv_driver/WheelVelocities.h>
 
 #define MOTOR_NUM       6
 #define IR_NUM          7
@@ -54,6 +59,7 @@ namespace DrRobot
             int start();
             int stop();
             void cmdVelReceived(const geometry_msgs::Twist::ConstPtr& cmd_vel);
+            void wheelVelReceived(const x80sv_driver::WheelVelocities::ConstPtr& wheel_velocities);
             void leftPwmValueReceived(const std_msgs::Int32::ConstPtr& left_pwm);
             void publishOdometry(const x80sv_driver::MotorInfoArray& motorInfo);
             void doUpdate();
@@ -74,6 +80,11 @@ namespace DrRobot
             tf::TransformBroadcaster m_odom_broadcaster;
             ros::Publisher m_odom_pub;
             ros::Publisher m_joint_state;
+
+            // Dynamic reconfigure part:
+            dynamic_reconfigure::Server<x80sv_driver::x80svConfig> _dyn_reconf_server;
+            void dynamic_reconfigure_callback(x80sv_driver::x80svConfig &config, uint32_t level);
+
 
             struct MotorSensorData motorSensorData_;
             struct RangeSensorData rangeSensorData_;

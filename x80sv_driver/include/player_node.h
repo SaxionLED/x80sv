@@ -81,7 +81,8 @@ namespace DrRobot
             ros::Publisher m_odom_pub;
             ros::Publisher m_joint_state;
 
-            ros::Subscriber wheel_velocities_sub_;
+            ros::Subscriber cmd_wheel_velocities_sub_;
+            ros::Publisher actual_wheel_velocities_pub_;
 
             // Dynamic reconfigure part:
             dynamic_reconfigure::Server<x80sv_driver::x80svConfig> _dyn_reconf_server;
@@ -109,6 +110,7 @@ namespace DrRobot
             int cntNum_;
             double ad2Dis(int adValue);
             void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle, double scale_factor);
+            double encoder2rad(int enc_value);
 
     };
 

@@ -72,6 +72,12 @@ namespace DrRobot
         return irad2Dis;
     }
 
+    // Convert encoder ticks to radians:
+    double PlayerNode::encoder2rad(int enc_value)
+    {
+        return (enc_value * 2 * M_PI) / encoderOneCircleCnt_;
+    }
+
 
     PlayerNode::PlayerNode()
     {
@@ -185,6 +191,7 @@ namespace DrRobot
         sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
         standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
         customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
+        actual_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("actual_wheel_velocities", 1);
 
         m_odom_pub = node_.advertise<nav_msgs::Odometry>("odom", 1);
         m_joint_state = node_.advertise<sensor_msgs::JointState>("joint_states", 1);
@@ -218,11 +225,13 @@ namespace DrRobot
 
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
         pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
-        wheel_velocities_sub_ = node_.subscribe<x80sv_driver::WheelVelocities>("/wheel_velocities", 1, boost::bind(&PlayerNode::wheelVelReceived, this, _1));
+        cmd_wheel_velocities_sub_ = node_.subscribe<x80sv_driver::WheelVelocities>("cmd_wheel_velocities", 1, boost::bind(&PlayerNode::wheelVelReceived, this, _1));
 
+        // Gain tuning 12 november 10:49:
+        // Kp=22, Ki=170, Kd=0 yields reasonable results. Not optimal, but better
         // only needed when using velocity (1, 0, 170))
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 1, 5, 170);
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 1, 5, 170);
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 22, 0, 170); // channel, p, d, i
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 22, 0, 170);
 
         // PID default is 1000, 5, 10000 (taken from C# src)
         drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000);
@@ -240,6 +249,7 @@ namespace DrRobot
         // Set kp, kd and ki:
         // call signature: channel, kp, kd, ki:
         drrobotMotionDriver_->setMotorVelocityCtrlPID(0, config.Kp, config.Kd, config.Ki);
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, config.Kp, config.Kd, config.Ki);
     }
 
     // Apply a raw pwm value on the wheels:
@@ -481,6 +491,12 @@ namespace DrRobot
                 motorInfoArray.motorInfos[i].motor_pwm = motorSensorData_.motorSensorPWM[i];
             }
 
+            // Calculate and publish wheel velocities:
+            x80sv_driver::WheelVelocities actual_wheel_velocities;
+            actual_wheel_velocities.left = encoder2rad(motorSensorData_.motorSensorEncoderVel[0]);
+            actual_wheel_velocities.right = encoder2rad(motorSensorData_.motorSensorEncoderVel[1]);
+            actual_wheel_velocities_pub_.publish(actual_wheel_velocities);
+
             //ROS_INFO("publish motor info array");
             motorInfo_pub_.publish(motorInfoArray);
             publishOdometry(motorInfoArray);
@@ -488,8 +504,10 @@ namespace DrRobot
 
             x80sv_driver::RangeArray rangerArray;
             rangerArray.ranges.resize(US_NUM);
-            if (enable_sonar_) {
-                for (uint32_t i = 0; i < US_NUM; ++i) {
+            if (enable_sonar_)
+            {
+                for (uint32_t i = 0; i < US_NUM; ++i)
+                {
 
                     rangerArray.ranges[i].header.stamp = ros::Time::now();
                     rangerArray.ranges[i].header.frame_id = string("drrobot_sonar_");
@@ -507,9 +525,11 @@ namespace DrRobot
             }
 
 
-            if (enable_ir_) {
+            if (enable_ir_)
+            {
                 rangerArray.ranges.resize(IR_NUM);
-                for (uint32_t i = 0; i < IR_NUM; ++i) {
+                for (uint32_t i = 0; i < IR_NUM; ++i)
+                {
                     rangerArray.ranges[i].header.stamp = ros::Time::now();
                     rangerArray.ranges[i].header.frame_id = string("drrobot_ir_");
                     rangerArray.ranges[i].header.frame_id += boost::lexical_cast<std::string>(i);

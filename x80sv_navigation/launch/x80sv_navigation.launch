@@ -6,6 +6,10 @@
         <param name="maxRange" value="4.5"/>
         <param name="maxUrange" value="3.9"/>
         <param name="delta" value="0.05" />
+        <param name="srr" value="0.01" />
+        <param name="srt" value="0.02" />
+        <param name="str" value="0.01" />
+        <param name="stt" value="0.02" />
         <param name="xmin" value="-10" />
         <param name="ymin" value="-10" />
         <param name="xmax" value="10" />

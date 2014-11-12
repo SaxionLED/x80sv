@@ -189,6 +189,7 @@ namespace DrRobot
     {
         _comm_interface->open();
 
+        // TODO: why subscribe here?
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
         // pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
         cmd_wheel_velocities_sub_ = node_.subscribe<x80sv_driver::WheelVelocities>("cmd_wheel_velocities", 1, boost::bind(&PlayerNode::wheelVelReceived, this, _1));
@@ -347,7 +348,6 @@ namespace DrRobot
         double vx = averageDistance / time_delta;
         double vy = 0;
         double vth = deltaAngle / time_delta;
-
 
         // update pose:
         m_theta += deltaAngle;

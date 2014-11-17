@@ -332,17 +332,22 @@ namespace DrRobot
 
         // ROS_INFO("Encoder values: %u, %u", mtr0.encoder_pos, mtr1.encoder_pos);
 
-        calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left, left_joint_angle, -1);
-        calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right, right_joint_angle, 1);
+        calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left, left_joint_angle, 1);
+        calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right, right_joint_angle, -1);
 
         // average distance between 2 wheels = actual distance from center
         double averageDistance = (d_left + d_right) / 2.0;
 
         // difference in angle from last encoder values, distance between wheel centers in m
         // When the right wheel moves forward, the angle
-        double deltaAngle = atan2((d_left - d_right), wheelDis_);
-        double delta_x = averageDistance * cos(m_theta + M_PI);
-        double delta_y = averageDistance * sin(m_theta + M_PI);
+        double deltaAngle = atan2((d_right - d_left), wheelDis_);
+        // ROS_INFO("Left movement %f, right %f, angle=%f", d_left, d_right, deltaAngle);
+        double delta_x = averageDistance * cos(m_theta);
+        double delta_y = averageDistance * sin(m_theta);
+
+        // x is in forward direction
+        // y is sideways.
+        // Angle is zero when facing forwards.
 
         // TODO: retrieve velocities:
         double vx = averageDistance / time_delta;

@@ -4,7 +4,7 @@
 
     <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/laser/scan">
         <param name="maxRange" value="4.5"/>
-        <param name="maxUrange" value="3"/>
+        <param name="maxUrange" value="4"/>
         <param name="delta" value="0.05" />
         <param name="srr" value="0.1" />
         <param name="srt" value="0.2" />

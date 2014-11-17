@@ -199,10 +199,16 @@
 
     <!-- Laser is positioned 13 cm +/- 1 cm forward of the robot wheel axis and 19 cm above ground level.
         The X axis of the laser points to the left. X of the robot itself is forwards.
+
+        The gmapping node expects scan data centered around x axis of scan. Scans are recorded from 0
+        to 360 degrees from -pi to pi. The modeled axis of the scanner points right. This is also used
+        as frame. The actual x-axis of the scanner points right. This is where the scan starts.
+        With x-axis pointing left, the data is centered around the x-axis!
+
+        Works for both real and simulated robot.
     -->
   <joint type="fixed" name="laser_scanner_glue">
-   <!-- <origin xyz="0 0 0.05" rpy="0 0 ${0.5*M_PI}"/>--> <!--for simulated robot-->
-   <origin xyz="0.13 0 0.05" rpy="0 0 ${-0.5*M_PI}"/><!--for real robot-->
+   <origin xyz="0.13 0 0.05" rpy="0 0 ${-0.5*M_PI}"/>
   <child link="laser_scanner"/>
   <parent link="base_link" />
   </joint>

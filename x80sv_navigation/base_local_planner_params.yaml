@@ -7,6 +7,7 @@ controller_patience: 3.0
 
 planner_frequency: 0.1
 planner_patience: 1.0
+recovery_behavior_enabled: false  # default true, disable recovery
 
 # Global planner (choose one):
 base_global_planner: global_planner/GlobalPlanner

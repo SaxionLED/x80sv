@@ -21,8 +21,8 @@ NavfnROS:
 
 
 # Select local planner:
-base_local_planner: "dwa_local_planner/DWAPlannerROS"
-# base_local_planner: "base_local_planner/TrajectoryPlannerROS"
+# base_local_planner: "dwa_local_planner/DWAPlannerROS"
+base_local_planner: "base_local_planner/TrajectoryPlannerROS"
 
 recovery_behaviors:
   - name: 'rotate_clear'

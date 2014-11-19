@@ -162,5 +162,8 @@ CMakeFiles/
 msg_gen/
 srv_gen/
 CMakeCache.txt
-Makefile
 cmake_install.cmake
+
+
+*.aux
+

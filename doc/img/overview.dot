@@ -1,0 +1,35 @@
+
+digraph {
+    // rankdir=LR;
+    brain[label="High level"];
+    brain -> global[label="Go to x, y"];
+    global -> brain[label="status"];
+    subgraph cluster_0 {
+        label="Navigation";
+        slam -> global[label="map/robot position"];
+        global -> local[label="Follow this path"];
+        local->global[label="Done/Fail"];
+        odometry -> slam[label="position since start"];
+    }
+
+    local -> pid[label="velocity setpoint"];
+    encoder -> odometry [label="wheel velocity"];
+
+    subgraph cluster_1 {
+        {rank=same wheel encoder}
+        label="Control (2x)";
+        pid;
+        pid -> motor;
+        motor -> wheel;
+        wheel -> encoder;
+        encoder -> pid[label="actual position"];
+    }
+
+    laser -> slam;
+
+    subgraph cluster_2 {
+        label="Sensors";
+        laser[label="Laser scanner"];
+    }
+}
+

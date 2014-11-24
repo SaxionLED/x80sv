@@ -36,6 +36,11 @@ namespace smooth_local_planner
                 _target = x;
             }
 
+            void setLimit(double x)
+            {
+                _limit = x;
+            }
+
             void calculate()
             {
                 double err = _target - _current;

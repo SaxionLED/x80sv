@@ -85,8 +85,13 @@ namespace smooth_local_planner
         return true;
     }
 
+    // Compute velocity based on current orientation and velocity.
     bool SmoothLocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel)
     {
+        double fs = 3.0;
+        double dt = 1.0 / fs;
+        double omega_max = 1.0;
+
         // ROS_INFO("Compute velocity");
         if (!_has_plan)
         {
@@ -100,7 +105,8 @@ namespace smooth_local_planner
 
         // Determine current position:
         tf::Stamped<tf::Pose> global_pose;
-        if (!_costmap_ros->getRobotPose(global_pose)) {
+        if (!_costmap_ros->getRobotPose(global_pose))
+        {
             return false;
         }
 
@@ -113,7 +119,7 @@ namespace smooth_local_planner
         geometry_msgs::Pose target = (*_global_plan)[_plan_index].pose;
 
         // Check if we are close enough to head to the next point:
-        while (my_distance(current, target) < 0.7)
+        while (my_distance(current, target) < 0.2)
         {
             ROS_INFO("Going to next point");
             _plan_index++;
@@ -142,7 +148,7 @@ namespace smooth_local_planner
 
         // Determine the speed (Kp control):
         double v = pos_error * 3;
-        double omega = angle_diff * 2;
+        double omega = angle_diff * 0.2;
 
         // If the angle difference is large, first rotate in place, do not speed up:
         if (abs(angle_diff) > 0.6)
@@ -150,11 +156,13 @@ namespace smooth_local_planner
             v = 0;
         }
 
+        // v = 0;
         // Limit output speeds:
         limit(v, -0.5, 0.5);
         limit(omega, -0.5, 0.5);
 
         // limit rate:
+        _omega_limiter.setLimit(omega_max * dt);
         _v_limiter.setInput(v);
         _omega_limiter.setInput(omega);
 

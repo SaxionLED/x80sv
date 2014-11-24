@@ -1,0 +1,25 @@
+<package>
+  <name>smooth_local_planner</name>
+  <version>0.0.1</version>
+  <description>
+    Simple local planner that stops on obstacle and yields to global planner.
+    Further is a simple setpoint generator, given the current path and robot
+    constraints.
+  </description>
+  <maintainer email="windel.bouwman@gmail.com">Windel Bouwman</maintainer>
+  <license>BSD</license>
+
+  <author>Windel Bouwman</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>costmap_2d</build_depend>
+  <build_depend>nav_core</build_depend>
+
+  <run_depend>costmap_2d</run_depend>
+  <run_depend>nav_core</run_depend>
+  <export>
+      <nav_core plugin="${prefix}/smooth_local_planner_plugin.xml" />
+  </export>
+
+</package>

@@ -1,0 +1,7 @@
+<library path="lib/libsmooth_local_planner_lib">
+  <class name="smooth_local_planner/SmoothLocalPlanner" type="smooth_local_planner::SmoothLocalPlanner" base_class_type="nav_core::BaseLocalPlanner">
+    <description>
+      Smooth local planner
+    </description>
+  </class>
+</library>

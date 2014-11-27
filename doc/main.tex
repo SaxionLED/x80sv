@@ -16,8 +16,6 @@
 
 \tableofcontents
 
-\clearpage
-
 \section{Introduction}
 
 This document describes how the problem of 2d-navigation was solved on a real robot.
@@ -165,7 +163,33 @@ data. To implement this for a two wheeled robot the following formulas are used:
 
 These are implemented in the x80 node.
 
+\subsection{robot description}
+To use the robot with the ROS system, an urdf model must be created. The model of the x80sv is
+located in the folder \url{x80sv_description}. The xacro macro system is used to simplify the
+writing of the urdf file. The urdf description contains a description of what links and joints
+the robot consists of. The model is used by rviz for visualization and by gazebo to construct
+the physical model of the robot to simulate it. The weights, shapes and materials of the links
+are also specified in this file.
+
+\section{ROS concepts}
+\subsection{rviz}
+Rviz is an indispensible tool when debugging a robotic system. With rviz one can visualize a robot
+and its environment. The tool consists of a main window and a pane to the left where various data
+visualizers can be added.
+
+\subsection{rqt}
+Another helpful tool when debugging a ros system is rqt. This tool is a plugin container where plugins
+can be selected. Plugins exists for tf tree visualization, node interconnect, topic inspection,
+logging viewer, diagnostics viewer and more.
+
+\subsection{tf}
+The tf (\url{http://wiki.ros.org/tf}) system of ROS is used to describe the various parts of 
+a robot in space. The TF-tree of a robot is the relative position of all bodies of a robot
+with respect to eachother.
+
 \section{Slam}
+Simultaneous localization and mapping (SLAM), is a required component for navigation.
+The gmapping node was used in the case of the x80sv.
 
 \subsection{gmapping}
 
@@ -244,7 +268,12 @@ The \rospackage{ros-indigo-navfn} package provides another plugin for move-base 
 
 \subsection{move-base-ompl}
 This package contains a plugin wrapper for ompl. Ompl is a motion planning library using random trees.
-Random trees.
+Random trees follow the idea of randomly exploding a tree of all possible state of a robot
+given its current position and vehicle dynamics.
+
+\url{https://github.com/windelbouwman/move-base-ompl}
+
+\url{http://ompl.kavrakilab.org/}
 
 \section{Local planning}
 
@@ -262,7 +291,9 @@ The dwa local planner is also a standard ROS planner. It is contained in the pac
 
 \subsection{Smooth planner}
 The smooth planner is own work, and is located at github (
-\url{https://github.com/SaxionLED/x80sv/tree/master/smooth_local_planner})
+\url{https://github.com/SaxionLED/x80sv/tree/master/smooth_local_planner}).
+This planner follow the global path and when confronted with an obstacle simply
+reports that the plan has failed and waits for new commands from the global planner.
 
 \section{Future work}
 

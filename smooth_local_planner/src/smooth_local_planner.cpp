@@ -95,7 +95,8 @@ namespace smooth_local_planner
         p.x = x;
         p.y = y;
 
-        double cost = _costmap_model->footprintCost(p, _costmap_ros->getRobotFootprint(), 0.2, 0.3);
+        std::vector<geometry_msgs::Point> footprint = _costmap_ros->getRobotFootprint();
+        double cost = _costmap_model->footprintCost(p, footprint, 0.2, 0.3);
         ROS_INFO("Cost: %f", cost);
 
         return true;
@@ -137,8 +138,8 @@ namespace smooth_local_planner
         // Check if we are close enough to head to the next point:
         while (my_distance(current, target) < 0.2)
         {
-            ROS_INFO("Going to next point");
             _plan_index++;
+            ROS_INFO("Going to next point %d", _plan_index);
             if (isGoalReached())
             {
                 return false;
@@ -173,7 +174,7 @@ namespace smooth_local_planner
         }
 
         // If obstructed, stop
-        if (!pathFree(current.position.x, current.position.y, 0, 0))
+        if (!pathFree(current.position.x, current.position.y, current_angle, _v_limiter.getOutput()))
         {
             v = 0;
         }
@@ -184,7 +185,9 @@ namespace smooth_local_planner
         limit(omega, -0.5, 0.5);
 
         // limit rate:
-        _omega_limiter.setLimit(omega_max * dt);
+        _omega_limiter.setLimit(0.1 * dt);
+        _v_limiter.setLimit(0.1 * dt);
+
         _v_limiter.setInput(v);
         _omega_limiter.setInput(omega);
 

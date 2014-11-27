@@ -129,6 +129,8 @@ In the next step, the wheel velocities are translated into encoder velocities.
  rightWheelCmd = motorDir * v_{right} * encoderOneCircleCnt / (2 \pi)
 \end{equation}
 
+These equations are implemented in the real robot drivers (\url{https://github.com/SaxionLED/x80sv/tree/master/x80sv_driver}). In case of simulation, these equations are done by gazebo.
+
 \subsection{Odometry}
 The task of the odometry system is to keep track of the robot position using wheel encoder
 data. To implement this for a two wheeled robot the following formulas are used:
@@ -161,7 +163,7 @@ data. To implement this for a two wheeled robot the following formulas are used:
  y += \delta y
 \end{equation}
 
-These are implemented in the x80 node.
+These equations are implemented in the real robot drivers (\url{https://github.com/SaxionLED/x80sv/tree/master/x80sv_driver}). In case of simulation, these equations are done by gazebo.
 
 \subsection{robot description}
 To use the robot with the ROS system, an urdf model must be created. The model of the x80sv is

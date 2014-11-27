@@ -5,7 +5,7 @@ shutdown_costmaps: false
 controller_frequency: 3.0
 controller_patience: 3.0
 
-planner_frequency: 0.1  # 0 is only replan when new plan received.
+planner_frequency: 0 # 0.1  # 0 is only replan when new plan received.
 planner_patience: 1.0
 recovery_behavior_enabled: true  # default true, disable recovery
 
@@ -22,9 +22,9 @@ NavfnROS:
 
 
 # Select local planner:
-base_local_planner: "dwa_local_planner/DWAPlannerROS"
+#base_local_planner: "dwa_local_planner/DWAPlannerROS"
 # base_local_planner: "base_local_planner/TrajectoryPlannerROS"
-#base_local_planner: "smooth_local_planner/SmoothLocalPlanner"
+base_local_planner: "smooth_local_planner/SmoothLocalPlanner"
 
 
 recovery_behaviors:

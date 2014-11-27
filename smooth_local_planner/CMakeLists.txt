@@ -4,6 +4,7 @@ project(smooth_local_planner)
 find_package(catkin REQUIRED
   COMPONENTS
     costmap_2d
+    base_local_planner
 )
 
 catkin_package(
@@ -11,6 +12,7 @@ catkin_package(
   LIBRARIES smooth_local_planner_lib
   CATKIN_DEPENDS
     costmap_2d
+    base_local_planner
 )
 
 include_directories(

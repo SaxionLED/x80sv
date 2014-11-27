@@ -55,6 +55,7 @@ namespace smooth_local_planner
         costmap_2d::Costmap2DROS* costmap_ros)
     {
         _costmap_ros = costmap_ros;
+        _costmap_model = new base_local_planner::CostmapModel(*costmap_ros->getCostmap());
         ros::NodeHandle private_nh("smooth_local_planner");
         _next_pose_pub = private_nh.advertise<geometry_msgs::PoseStamped>("next_pose", 1);
     }
@@ -81,6 +82,21 @@ namespace smooth_local_planner
         {
             return false;
         }
+
+        return true;
+    }
+
+    // Calculate if the path is free to go:
+    bool SmoothLocalPlanner::pathFree(double x, double y, double theta, double v)
+    {
+        // Assume some sort of cone in current direction:
+        // footprintCost (const geometry_msgs::Point &position, const std::vector< geometry_msgs::Point > &footprint, double inscribed_radius, double circumscribed_radius)
+        geometry_msgs::Point p;
+        p.x = x;
+        p.y = y;
+
+        double cost = _costmap_model->footprintCost(p, _costmap_ros->getRobotFootprint(), 0.2, 0.3);
+        ROS_INFO("Cost: %f", cost);
 
         return true;
     }
@@ -152,6 +168,12 @@ namespace smooth_local_planner
 
         // If the angle difference is large, first rotate in place, do not speed up:
         if (abs(angle_diff) > 0.6)
+        {
+            v = 0;
+        }
+
+        // If obstructed, stop
+        if (!pathFree(current.position.x, current.position.y, 0, 0))
         {
             v = 0;
         }

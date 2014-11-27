@@ -3,6 +3,7 @@
 #define SMOOTH_LOCAL_PLANNER_H
 
 #include <nav_core/base_local_planner.h>
+#include <base_local_planner/costmap_model.h>
 
 namespace smooth_local_planner
 {
@@ -68,8 +69,11 @@ namespace smooth_local_planner
             virtual bool setPlan(const std::vector<geometry_msgs::PoseStamped>& global_plan);
             virtual bool isGoalReached();
         private:
+            bool pathFree(double x, double y, double theta, double v);
+
             // TODO 
-            costmap_2d::Costmap2DROS* _costmap_ros;
+            costmap_2d::Costmap2DROS*           _costmap_ros;
+            base_local_planner::CostmapModel*   _costmap_model;
             ros::Publisher              _next_pose_pub;
 
             // Local copy of plan:

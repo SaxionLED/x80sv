@@ -17,13 +17,13 @@ from diagnostic_msgs.msg import DiagnosticArray
 def issubset(a, b):
     return len(a - b) == 0
 
-
 red = 0x80, 0, 0
 green = 0, 0x80, 0
 orange = 0xff, 0x8c, 0
 black = 0, 0, 0
 
 class StatusLed:
+    """ Uses a blink(1) to indicate robot state """
     required_nodes = {'neato_laser_publisher', 'x80_robot'}
 
     def __init__(self):
@@ -43,7 +43,6 @@ class StatusLed:
 
     def on_diagnostic(self, data):
         for status in data.status:
-            print(status)
             self.state = status.level == 0
 
     def check_nodes(self):
@@ -74,7 +73,6 @@ class StatusLed:
     def run(self):
         r = rospy.Rate(2)
         while not rospy.is_shutdown():
-            rospy.loginfo('Updating state')
             self.check_nodes()
             self.toggle = not self.toggle
             self.update_led()

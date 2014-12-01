@@ -45,7 +45,8 @@ _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_
 >_$ useradd -G dialout [USER]_    
   
 - Export the files from __x80sv/x80sv_driver/udev__ folder to __/etc/udev/rules.d__   
-	  for resolving the robot specific USB connections
+	  for resolving the robot specific USB connections. These include usb to serial for controllerboard
+      and the lrs. Also the blink1 status led.
 
 - RUN
   - To build the project  

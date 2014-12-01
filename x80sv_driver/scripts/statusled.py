@@ -55,7 +55,7 @@ class StatusLed:
         self.alive = issubset(self.required_nodes, nodes)
 
     def update_led(self):
-        rospy.loginfo("State: alive: {} state: {} diags: {}".format(self.alive, self.state, self.diags))
+        rospy.loginfo("Nodes alive: {} diags: {}".format(self.alive, self.diags))
         if self.toggle:
             if self.alive:
                 if self.state:

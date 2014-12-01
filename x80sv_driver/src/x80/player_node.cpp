@@ -408,7 +408,7 @@ namespace DrRobot
         // Set velocity:
         odom.child_frame_id = "base_footprint";
         odom.twist.twist.linear.x = vx;
-        odom.twist.twist.linear.x = vy;
+        odom.twist.twist.linear.y = vy;
         odom.twist.twist.angular.z = vth;
 
         // Publish the message:

@@ -4,7 +4,7 @@
 File to determine the maximum accelerations of the robot.
 
 1. Log data and drive robot at full speed.
-   $ rosbag odom cmd_vel
+   $ rosbag record odom cmd_vel
 2. Convert to csv file:
    $ rostopic echo -b 2014-12-01-14-44-27.bag -p /odom/twist > measurement.txt
 3. Run this file :)

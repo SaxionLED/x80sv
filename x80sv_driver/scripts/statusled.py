@@ -22,6 +22,7 @@ green = 0, 0x80, 0
 orange = 0xff, 0x8c, 0
 black = 0, 0, 0
 
+
 class StatusLed:
     """ Uses a blink(1) to indicate robot state """
     required_nodes = {'neato_laser_publisher', 'x80_robot'}
@@ -29,7 +30,8 @@ class StatusLed:
     def __init__(self):
         rospy.loginfo('statusled')
         self.diagnostic_sub = rospy.Subscriber('diagnostics', DiagnosticArray, self.on_diagnostic)
-        self.state = False
+        self.state = False  # True if all diagnostics are OK
+        self.diags = {}
         # self.interact()
         self.toggle = False
 
@@ -43,7 +45,8 @@ class StatusLed:
 
     def on_diagnostic(self, data):
         for status in data.status:
-            self.state = status.level == 0
+            self.diags[status.name] = status.level
+        self.state = all(status == 0 for status in self.diags.values())
 
     def check_nodes(self):
         """ Check if all required nodes are alive """
@@ -52,8 +55,7 @@ class StatusLed:
         self.alive = issubset(self.required_nodes, nodes)
 
     def update_led(self):
-        state = self.alive and self.state
-        rospy.loginfo("State: alive: {} state: {}".format(self.alive, self.state))
+        rospy.loginfo("State: alive: {} state: {} diags: {}".format(self.alive, self.state, self.diags))
         if self.toggle:
             if self.alive:
                 if self.state:
@@ -67,7 +69,7 @@ class StatusLed:
         self.set_led(*color)
 
     def set_led(self, r, g, b):
-        exe = os.path.join(os.path.dirname(__file__), 'blink1-mini-tool')
+        exe = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'blink1-mini-tool')
         os.system('{} rgb {},{},{}'.format(exe, r, g, b))
 
     def run(self):

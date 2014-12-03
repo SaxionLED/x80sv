@@ -113,7 +113,7 @@ int main(int argc, char** argv)
     }
     /////////////////////////////////////////////////////////////////
 
-    ros::Rate loop_rate(10); //10Hz
+    ros::Rate loop_rate(5); //10Hz
 
     while (n.ok())
     {

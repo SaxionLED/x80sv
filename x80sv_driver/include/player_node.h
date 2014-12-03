@@ -116,7 +116,7 @@ namespace DrRobot
 
             int cntNum_;
             double ad2Dis(int adValue);
-            void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle, double scale_factor);
+            void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle);
             double encoder2rad(int enc_value);
 
     };

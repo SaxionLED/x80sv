@@ -199,9 +199,14 @@ namespace DrRobot
         // Gain tuning 12 november 10:49:
         // Kp=22, Ki=170, Kd=0 yields reasonable results. Not optimal, but better
         // Kp=10, Ki=170, Kd=0 yields better results. Still not optimal.
+
+        // Gain tuning on 3 december 2014 by Abeje and Windel:
+        // Kp=20 and Ki=0 and Kd=0, not using of Kd and Ki yields ok results.
+        // Kp =25 is at the margin of stability.
+
         // only needed when using velocity (1, 0, 170))
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 10, 0, 170); // channel, p, d, i
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 10, 0, 170);
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 20, 0, 0); // channel, p, d, i
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 20, 0, 0);
 
         // PID default is 1000, 5, 10000 (taken from C# src)
         drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000);
@@ -241,7 +246,7 @@ namespace DrRobot
 
         // Call lower level function, we could also publish the topic.
         x80sv_driver::WheelVelocities *wheel_velocities = new x80sv_driver::WheelVelocities();
-        wheel_velocities->left = leftWheel;
+        wheel_velocities->left = -leftWheel;  // If the left wheel rotates, the robot moves backwards.
         wheel_velocities->right = rightWheel;
         wheelVelReceived(x80sv_driver::WheelVelocities::ConstPtr(wheel_velocities));
     }
@@ -261,7 +266,7 @@ namespace DrRobot
         smoothed_wheel_velocities_pub_.publish(filtered_wheel_velocities);
 
         // seems the right wheel needs a minor offset to prevent an angle when going straight
-        int leftWheelCmd = -motorDir_ * filtered_wheel_velocities.left * encoderOneCircleCnt_ / (2 * M_PI);
+        int leftWheelCmd = motorDir_ * filtered_wheel_velocities.left * encoderOneCircleCnt_ / (2 * M_PI);
         int rightWheelCmd = motorDir_ * filtered_wheel_velocities.right * encoderOneCircleCnt_ / (2 * M_PI);
 
         // ROS_INFO("Received control command: [%d, %d]", leftWheelCmd, rightWheelCmd);
@@ -270,31 +275,41 @@ namespace DrRobot
 
 
     // Calculate the rotation of the wheel relative to a previous time:
-    void PlayerNode::calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle, double scale_factor)
+    // movement delta in radians.
+    void PlayerNode::calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle)
     {
         const uint encoderMax = 32768;
 
         if (encoderPrevious != -1)
         {
-            if (encoderPrevious < 5000 && mtr.encoder_pos > 25000)
+            int encoderDelta = 0;
+
+            if (encoderPrevious < 1000 && mtr.encoder_pos > 31000)
             {
-                encoderPrevious = mtr.encoder_pos - encoderPrevious;
+                // When the encoder wrap around from lower to upper value
+                // moving backwards. Encoderdelta must be negative number:
+                encoderDelta = -((encoderMax - mtr.encoder_pos) + encoderPrevious);
             }
-            else if (encoderPrevious > 25000 && mtr.encoder_pos < 5000)
+            else if (encoderPrevious > 31000 && mtr.encoder_pos < 1000)
             {
-                encoderPrevious = mtr.encoder_pos + (encoderMax - encoderPrevious);
+                // When moving from top to bottom, we move forward, so
+                // delta must be positive:
+                encoderDelta = (encoderMax - encoderPrevious) + mtr.encoder_pos;
+            }
+            else
+            {
+                // The 'normal' case:
+                encoderDelta = mtr.encoder_pos - encoderPrevious;
             }
 
-            int encoderDelta = encoderPrevious - mtr.encoder_pos;
-
-            movementDelta = wheelRadius_ * encoder2rad(encoderDelta) * scale_factor;
+            movementDelta = encoder2rad(encoderDelta);
         }
         else
         {
             movementDelta = 0;
         }
 
-        joint_angle = encoder2rad(mtr.encoder_pos) * scale_factor;
+        joint_angle = encoder2rad(mtr.encoder_pos);
         encoderPrevious = mtr.encoder_pos;
     }
 
@@ -324,9 +339,7 @@ namespace DrRobot
             time_delta = 0.0001;
         }
 
-        double d_left = 0;
         double left_joint_angle;
-        double d_right = 0;
         double right_joint_angle;
 
         x80sv_driver::MotorInfo mtr0 = motorInfo.motorInfos.at(0); // Left motor
@@ -334,14 +347,31 @@ namespace DrRobot
 
         // ROS_INFO("Encoder values: %u, %u", mtr0.encoder_pos, mtr1.encoder_pos);
 
-        calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left, left_joint_angle, 1);
-        calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right, right_joint_angle, -1);
+        double left_movement_delta;
+        double right_movement_delta;
 
-	// Publish wheel positions:
-    	x80sv_driver::WheelVelocities actual_wheel_positions;
-    	actual_wheel_positions.left = left_joint_angle;
-    	actual_wheel_positions.right = right_joint_angle;
-	actual_wheel_positions_pub_.publish(actual_wheel_positions);
+        calculateMovementDelta(mtr0, mEncoderPreviousLeft, left_movement_delta, left_joint_angle);
+        calculateMovementDelta(mtr1, mEncoderPreviousRight, right_movement_delta, right_joint_angle);
+
+        {
+            // Publish wheel positions:
+    	    x80sv_driver::WheelVelocities actual_wheel_positions;
+            actual_wheel_positions.left = left_joint_angle;
+            actual_wheel_positions.right = right_joint_angle;
+            actual_wheel_positions_pub_.publish(actual_wheel_positions);
+        }
+
+        {
+            // Calculate and publish wheel velocities:
+            x80sv_driver::WheelVelocities actual_wheel_velocities;
+            actual_wheel_velocities.left = left_movement_delta / time_delta;
+            actual_wheel_velocities.right = right_movement_delta / time_delta;
+            actual_wheel_velocities_pub_.publish(actual_wheel_velocities);
+        }
+
+        // TODO: take into account the wheel direction:
+        double d_left = -left_movement_delta * wheelRadius_;
+        double d_right = right_movement_delta * wheelRadius_;
 
         // average distance between 2 wheels = actual distance from center
         double averageDistance = (d_left + d_right) / 2.0;
@@ -488,12 +518,6 @@ namespace DrRobot
                 }
                 motorInfoArray.motorInfos[i].motor_pwm = motorSensorData_.motorSensorPWM[i];
             }
-
-            // Calculate and publish wheel velocities:
-            x80sv_driver::WheelVelocities actual_wheel_velocities;
-            actual_wheel_velocities.left = encoder2rad(motorSensorData_.motorSensorEncoderVel[0]);
-            actual_wheel_velocities.right = encoder2rad(motorSensorData_.motorSensorEncoderVel[1]);
-            actual_wheel_velocities_pub_.publish(actual_wheel_velocities);
 
 
             //ROS_INFO("publish motor info array");

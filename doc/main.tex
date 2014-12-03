@@ -3,7 +3,24 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{url}
+\usepackage{MnSymbol}
 \usetikzlibrary{arrows}
+
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,
+showstringspaces=false,
+commentstyle=\color{red},
+numbers=left,
+linewidth=12.1cm
+}
+
+\lstset{breaklines=true, breakatwhitespace=true}
+\lstset{prebreak=\raisebox{0ex}[0ex][0ex]
+        {\ensuremath{\rhookswarrow}}}
+\lstset{postbreak=\raisebox{0ex}[0ex][0ex]
+        {\ensuremath{\rcurvearrowse\space}}}
+
 
 \newcommand{\rospackage}[1]{\textbf{\textit{#1}}}
 \begin{document}
@@ -172,6 +189,51 @@ writing of the urdf file. The urdf description contains a description of what li
 the robot consists of. The model is used by rviz for visualization and by gazebo to construct
 the physical model of the robot to simulate it. The weights, shapes and materials of the links
 are also specified in this file.
+
+\subsection{Robot limitations}
+In order to perform good navigation, certain robot parameters must be known. These include the
+robot maximum acceleration and maximum velocity for both linear and rotational motion. To
+Determine this, the robot was driven at its maximum speed, and the velocities as measured by
+the encoders was logged. This was done using the ROS x80 driver, see listing \ref{lst:robotlimits}.
+At line 1, the real robot driver is launched. The robot can now be controlled via rqt.
+Line 2 starts a recording of the odom and cmd\_vel topics into a bag file. Now, the robot
+was moved using the robot steering plugin of rqt. At line 3 the rosbag file is converted to
+a csv file. Line 4 activates a script that plots the csv file into figure \ref{fig:robotlimits}.
+
+From figure \ref{fig:robotlimits} the following robot limitations are determined:
+
+\begin{tabular}{ | l | l | }
+  \hline                       
+  Parameter & Value \\
+  \hline                       
+  \hline                       
+  $vmax_{linear}$ & 0.4 \\
+  \hline                       
+  $amax_{linear}$ & 1.0 \\
+  \hline                       
+  $vmax_{rotational}$ & 2.0 \\
+  \hline                       
+  $amax_{rotational}$ & 5.0 \\
+  \hline  
+\end{tabular}
+
+\begin{lstlisting}[language=bash,caption={commands to determine robot limitations},
+    label=lst:robotlimits]
+launch x80sv_bringup real_robot_driver.launch
+rosbag record odom cmd_vel
+rostopic echo -b 2014-12-01-14-44-27.bag -p /odom/twist > measurement.txt
+python3 plot_acceleration.py
+\end{lstlisting}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/v.png}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/omega.png}
+  \caption{Measured velocities}
+  \label{fig:robotlimits}
+\end{figure}
+
 
 \section{ROS concepts}
 \subsection{rviz}

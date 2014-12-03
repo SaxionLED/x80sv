@@ -43,6 +43,7 @@ plt.plot(t[:-1], np.diff(omega)/dt)
 plt.ylabel('rad/s2')
 plt.xlabel('Time [s]')
 plt.grid(True)
+plt.savefig('omega.png')
 
 plt.figure(2)
 plt.plot(np.diff(t))
@@ -59,6 +60,8 @@ plt.plot(t[:-1], np.diff(v)/dt)
 plt.ylabel('m/s2')
 plt.xlabel('Time [s]')
 plt.grid(True)
+
+plt.savefig('v.png')
 
 plt.show()
 

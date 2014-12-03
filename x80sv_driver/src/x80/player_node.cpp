@@ -158,6 +158,7 @@ namespace DrRobot
         actual_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("actual_wheel_velocities", 1);
         requested_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("requested_wheel_velocities", 1);
         smoothed_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("filtered_wheel_velocities", 1);
+	actual_wheel_positions_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("actual_wheel_positions", 1);
 
         m_odom_pub = node_.advertise<nav_msgs::Odometry>("odom", 1);
         m_joint_state = node_.advertise<sensor_msgs::JointState>("joint_states", 1);
@@ -193,6 +194,7 @@ namespace DrRobot
         cmd_vel_sub_ = node_.subscribe<geometry_msgs::Twist>("/cmd_vel", 1, boost::bind(&PlayerNode::cmdVelReceived, this, _1));
         // pwm_left_sub_ = node_.subscribe<std_msgs::Int32>("/pwm_left", 1, boost::bind(&PlayerNode::leftPwmValueReceived, this, _1));
         cmd_wheel_velocities_sub_ = node_.subscribe<x80sv_driver::WheelVelocities>("cmd_wheel_velocities", 1, boost::bind(&PlayerNode::wheelVelReceived, this, _1));
+
 
         // Gain tuning 12 november 10:49:
         // Kp=22, Ki=170, Kd=0 yields reasonable results. Not optimal, but better
@@ -334,6 +336,12 @@ namespace DrRobot
 
         calculateMovementDelta(mtr0, mEncoderPreviousLeft, d_left, left_joint_angle, 1);
         calculateMovementDelta(mtr1, mEncoderPreviousRight, d_right, right_joint_angle, -1);
+
+	// Publish wheel positions:
+    	x80sv_driver::WheelVelocities actual_wheel_positions;
+    	actual_wheel_positions.left = left_joint_angle;
+    	actual_wheel_positions.right = right_joint_angle;
+	actual_wheel_positions_pub_.publish(actual_wheel_positions);
 
         // average distance between 2 wheels = actual distance from center
         double averageDistance = (d_left + d_right) / 2.0;
@@ -486,6 +494,7 @@ namespace DrRobot
             actual_wheel_velocities.left = encoder2rad(motorSensorData_.motorSensorEncoderVel[0]);
             actual_wheel_velocities.right = encoder2rad(motorSensorData_.motorSensorEncoderVel[1]);
             actual_wheel_velocities_pub_.publish(actual_wheel_velocities);
+
 
             //ROS_INFO("publish motor info array");
             motorInfo_pub_.publish(motorInfoArray);

@@ -33,18 +33,18 @@ recovery_behaviors:
 
 # For DWA local planner:
 DWAPlannerROS:
-  max_vel_x: 0.5
-  min_vel_x: 0.2
+  max_vel_x: 0.4
+  min_vel_x: 0.0
 
   min_vel_y: 0.0
   max_vel_y: 0.0
 
-  max_vel_theta: 0.6
-  min_vel_theta: -0.6
+  max_vel_theta: 2.0
+  min_vel_theta: -2.0
 
-  acc_lim_x: 0.3
+  acc_lim_x: 1.0
   acc_lim_y: 0.0
-  acc_lim_theta: 0.6
+  acc_lim_theta: 5.0
 
   yaw_goal_tolerance: 1
   xy_goal_tolerance: 0.15

@@ -86,6 +86,7 @@ namespace DrRobot
             ros::Subscriber cmd_wheel_velocities_sub_;
             ros::Publisher actual_wheel_velocities_pub_;
             ros::Publisher requested_wheel_velocities_pub_;
+	ros::Publisher actual_wheel_positions_pub_;
             ros::Publisher smoothed_wheel_velocities_pub_;
             SignalProcessing::IirFilter _left_wheel_filter;
             SignalProcessing::IirFilter _right_wheel_filter;

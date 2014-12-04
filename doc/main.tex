@@ -26,7 +26,7 @@ linewidth=12.1cm
 \begin{document}
 
 \title{Implementation of 2d navigation for a moving base using ROS
-(version 0.1)
+(version 0.2)
 }
 \date{\today}
 \author{Windel Bouwman}
@@ -113,6 +113,19 @@ the robot.
   \caption{Photo of the x80sv equiped with laptop and LRS}
 \end{figure}
 
+\begin{tabular}{ | l | l | l |}
+  \hline                       
+  Parameter & Value & Description\\
+  \hline 
+  \hline 
+  $N_{enc}$ & 756 [-] & Encoder ticks per wheel revolution \\
+  \hline
+  $r_{wheel}$ & 0.085 [m] & Wheel radius\\
+  \hline
+  $l_{base}$ & 0.283 [m] & Distance between left and right wheel\\
+  \hline
+\end{tabular}
+
 \subsection{Installation}
 
 To use the robot, install ROS indigo on ubuntu 14.04 on the robot laptop. Download the 
@@ -121,10 +134,47 @@ instruction in the readme.
 
 \subsection{Kinematics}
 
-Two-wheeled vehicles have the following kinematic equations of motion:
+Two-wheeled vehicles have the following kinematic equations of motion.
+Given $\Delta_{left}$ and $\Delta_{right}$ as the traveled distance for the left and
+right wheels, we can calculate the traveled distance forward and rotation.
 
-TODO
+\begin{figure}[h!]
+ \centering
+ \begin{tikzpicture}
+  \draw (0,0) circle (2);
+  \draw[thick,->] (0,0) -- (0,3) node[anchor=north west] {$\Delta x$};
 
+  \draw (-2.3,-0.8) rectangle (-2.1,0.8);
+  \draw (2.1,-0.8) rectangle (2.3,0.8);
+  \draw[thick,->] (-2.4,0) -- (-2.4,1.6) node[anchor=north east] {$\Delta _{left}$};
+  \draw[thick,->] (2.4,0) -- (2.4,2) node[anchor=north west] {$\Delta _{right}$};
+  \draw[thick,->] (1,0) arc (0:30:1) node[anchor=west] {$\Delta \theta$};
+  \draw[thick,<->] (-2,-2.2) -- (2,-2.2);
+  \draw[thick,<->] (2.6,0) -- (2.6,-0.8) node[anchor=south west] {$r_{wheel}$};
+  \node at (0, -2.5) {$l_{base}$};
+ \end{tikzpicture}
+ \caption{Robot kinematics}
+\end{figure}
+
+\begin{equation}
+\Delta x = \frac{\Delta_{left} + \Delta_{right}}{2}
+\end{equation}
+
+\begin{equation}
+\Delta \theta = tan^{-1}(\frac{\Delta_{right} - \Delta_{left}}{l_{base}})
+\end{equation}
+
+Given these traversed deltas we can now compute the new position and orientation
+of the robot in world coordinates.
+\begin{equation}
+ x_{x+1} = x_{n} + \cos(\theta_n) \Delta x
+\end{equation}
+\begin{equation}
+ y_{x+1} = y_{n} + \sin(\theta_n) \Delta x
+\end{equation}
+\begin{equation}
+ \theta_{x+1} = \theta_{n} + \Delta \theta
+\end{equation}
 
 \subsection{Control}
 
@@ -133,19 +183,19 @@ the controllerboard are wheel velocities in encoder ticks. A conversion from lin
 and angular velocities to wheel velocities is required.
 
 \begin{equation}
-        v_{left} = (2 * v_{linear} - v_{angular} * wheelDistance) / (2 * wheelRadius)
+        v_{left} = \frac{2 * v_{x} - v_{\theta} * l_{base}}{2 * r_{wheel}}
 \end{equation}
 \begin{equation}
-        v_{right} = (v_{angular} * wheelDistance + 2 * v_{linear}) / (2 * wheelRadius)
+        v_{right} = \frac{v_{\theta} * l_{base} + 2 * v_{x}}{2 * r_{wheel}}
 \end{equation}
 
 In the next step, the wheel velocities are translated into encoder velocities.
 
 \begin{equation}
-  leftWheelCmd = -motorDir * v_{left} * encoderOneCircleCnt / (2 \pi)
+  leftWheelCmd = \frac{-motorDir * v_{left} * N_{enc}}{2 \pi}
 \end{equation}
 \begin{equation}
- rightWheelCmd = motorDir * v_{right} * encoderOneCircleCnt / (2 \pi)
+ rightWheelCmd = \frac{motorDir * v_{right} * N_{enc}}{2 \pi}
 \end{equation}
 
 These equations are implemented in the real robot drivers (\url{https://github.com/SaxionLED/x80sv/tree/master/x80sv_driver}). In case of simulation, these equations are done by gazebo.
@@ -192,7 +242,7 @@ the robot consists of. The model is used by rviz for visualization and by gazebo
 the physical model of the robot to simulate it. The weights, shapes and materials of the links
 are also specified in this file.
 
-\subsection{Robot limitations}
+\subsection{Robot physical limits}
 In order to perform good navigation, certain robot parameters must be known. These include the
 robot maximum acceleration and maximum velocity for both linear and rotational motion. To
 Determine this, the robot was driven at its maximum speed, and the velocities as measured by

@@ -127,21 +127,6 @@ namespace DrRobot
         {
             robotConfig1_.boardType = Jaguar;
         }
-        else if (robotType_ == "I90")
-        {
-            robotConfig1_.boardType = I90_Power;
-            robotConfig2_.boardType = I90_Motion;
-        }
-        else if (robotType_ == "Sentinel3")
-        {
-            robotConfig1_.boardType = Sentinel3_Power;
-            robotConfig2_.boardType = Sentinel3_Motion;
-        }
-        else if (robotType_ == "Hawk_H20")
-        {
-            robotConfig1_.boardType = Hawk_H20_Power;
-            robotConfig2_.boardType = Hawk_H20_Motion;
-        }
         else if (robotType_ == "X80")
         {
             robotConfig1_.boardType = X80SV;
@@ -453,7 +438,6 @@ namespace DrRobot
         m_odom_pub.publish(odom);
     }
 
-
     int PlayerNode::stop()
     {
         int status = 0;
@@ -462,32 +446,8 @@ namespace DrRobot
         return (status);
     }
 
-
     void PlayerNode::doUpdate()
     {
-        if ((robotConfig1_.boardType == I90_Power) || (robotConfig1_.boardType == Sentinel3_Power)
-                || (robotConfig1_.boardType == Hawk_H20_Power))
-        {
-            if (_comm_interface->isOpen())
-            {
-                drrobotPowerDriver_->readPowerSensorData(&powerSensorData_);
-                x80sv_driver::PowerInfo powerInfo;
-                powerInfo.ref_vol = 1.5 * 4095 / (double) powerSensorData_.refVol;
-
-                powerInfo.bat1_vol = (double) powerSensorData_.battery1Vol * 8 / 4095 * powerInfo.ref_vol;
-                powerInfo.bat2_vol = (double) powerSensorData_.battery2Vol * 8 / 4095 * powerInfo.ref_vol;
-
-                powerInfo.bat1_temp = powerSensorData_.battery1Thermo;
-                powerInfo.bat2_temp = powerSensorData_.battery2Thermo;
-
-                powerInfo.dcin_vol = (double) powerSensorData_.dcINVol * 8 / 4095 * powerInfo.ref_vol;
-                powerInfo.charge_path = powerSensorData_.powerChargePath;
-                powerInfo.power_path = powerSensorData_.powerPath;
-                powerInfo.power_status = powerSensorData_.powerStatus;
-
-                powerInfo_pub_.publish(powerInfo);
-            }
-        }
 
         if (_comm_interface->isOpen())
         {
@@ -500,7 +460,8 @@ namespace DrRobot
             cntNum_++;
             x80sv_driver::MotorInfoArray motorInfoArray;
             motorInfoArray.motorInfos.resize(MOTOR_NUM);
-            for (uint32_t i = 0; i < MOTOR_NUM; ++i) {
+            for (uint32_t i = 0; i < MOTOR_NUM; ++i)
+            {
                 motorInfoArray.motorInfos[i].header.stamp = ros::Time::now();
                 motorInfoArray.motorInfos[i].header.frame_id = string("drrobot_motor_");
                 motorInfoArray.motorInfos[i].header.frame_id += boost::lexical_cast<std::string>(i);
@@ -508,14 +469,7 @@ namespace DrRobot
                 motorInfoArray.motorInfos[i].encoder_pos = motorSensorData_.motorSensorEncoderPos[i];
                 motorInfoArray.motorInfos[i].encoder_vel = motorSensorData_.motorSensorEncoderVel[i];
                 motorInfoArray.motorInfos[i].encoder_dir = motorSensorData_.motorSensorEncoderDir[i];
-                if (robotConfig1_.boardType == Hawk_H20_Motion) {
-                    motorInfoArray.motorInfos[i].motor_current = (float) motorSensorData_.motorSensorCurrent[i] * 3 / 4096;
-                    ;
-                } else if (robotConfig1_.boardType != Jaguar) {
-                    motorInfoArray.motorInfos[i].motor_current = (float) motorSensorData_.motorSensorCurrent[i] / 728;
-                } else {
-                    motorInfoArray.motorInfos[i].motor_current = 0.0;
-                }
+                motorInfoArray.motorInfos[i].motor_current = (float) motorSensorData_.motorSensorCurrent[i] / 728;
                 motorInfoArray.motorInfos[i].motor_pwm = motorSensorData_.motorSensorPWM[i];
             }
 
@@ -524,14 +478,12 @@ namespace DrRobot
             motorInfo_pub_.publish(motorInfoArray);
             publishOdometry(motorInfoArray);
 
-
             x80sv_driver::RangeArray rangerArray;
             rangerArray.ranges.resize(US_NUM);
             if (enable_sonar_)
             {
                 for (uint32_t i = 0; i < US_NUM; ++i)
                 {
-
                     rangerArray.ranges[i].header.stamp = ros::Time::now();
                     rangerArray.ranges[i].header.frame_id = string("drrobot_sonar_");
                     rangerArray.ranges[i].header.frame_id += boost::lexical_cast<std::string>(i);
@@ -546,7 +498,6 @@ namespace DrRobot
 
                 sonar_pub_.publish(rangerArray);
             }
-
 
             if (enable_ir_)
             {
@@ -581,11 +532,7 @@ namespace DrRobot
             standardSensor.boardPowerVol = (double) standardSensorData_.boardPowerVol * 9 / 4095;
             standardSensor.servoPowerVol = (double) standardSensorData_.servoPowerVol * 9 / 4095;
 
-            if (robotConfig1_.boardType != Jaguar) {
-                standardSensor.motorPowerVol = (double) standardSensorData_.motorPowerVol * 24 / 4095;
-            } else {
-                standardSensor.motorPowerVol = (double) standardSensorData_.motorPowerVol * 34.498 / 4095;
-            }
+            standardSensor.motorPowerVol = (double) standardSensorData_.motorPowerVol * 24 / 4095;
             standardSensor.refVol = (double) standardSensorData_.refVol / 4095 * 6;
             standardSensor.potVol = (double) standardSensorData_.potVol / 4095 * 6;
             standardSensor_pub_.publish(standardSensor);
@@ -595,9 +542,11 @@ namespace DrRobot
             customSensor.header.stamp = ros::Time::now();
             customSensor.header.frame_id = string("drrobot_customsensor");
 
-            for (uint32_t i = 0; i < 8; i++) {
+            for (uint32_t i = 0; i < 8; i++)
+            {
                 customSensor.customADData[i] = customSensorData_.customADData[i];
             }
+
             customSensor.customIO = (uint8_t) (customSensorData_.customIO & 0xff);
             customSensor_pub_.publish(customSensor);
         }

@@ -44,7 +44,7 @@ using namespace xv_11_laser_driver;
 class LaserUpdater
 {
     public:
-        LaserUpdater() : _connected(false), _retries(0)
+        LaserUpdater() : _connected(false), _retries(0), _scans(0)
         {
         }
 
@@ -60,6 +60,7 @@ class LaserUpdater
             }
 
             stat.add("Retries", _retries);
+            stat.add("Scans", _scans);
         }
 
         void setConnected(bool connected)
@@ -72,9 +73,15 @@ class LaserUpdater
             _retries++;
         }
 
+        void incScans()
+        {
+            _scans++;
+        }
+
     private:
         bool _connected;
         int _retries;
+        int _scans;
 };
 
 
@@ -132,6 +139,7 @@ int main(int argc, char **argv)
                 // Filter out back of robot:
                 filter_scan_between_angles(scan, 0, 180);
                 laser_pub.publish(scan);
+                laserUpdater.incScans();
                 updater.update();
             }
 

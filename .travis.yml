@@ -18,6 +18,7 @@ before_install:
   - sudo apt-get install ros-hydro-nav-msgs ros-hydro-sensor-msgs ros-hydro-laser-geometry ros-hydro-pcl-ros
   - sudo apt-get install ros-hydro-catkin ros-hydro-ros ros-hydro-diagnostics
   - sudo apt-get install ros-hydro-controller-manager ros-hydro-costmap-2d ros-hydro-navigation
+  - sudo apt-get install ros-hydro-global-planner ros-hydro-gmapping ros-hydro-dwa-local-planner
   - sudo apt-get install python-catkin-pkg python-empy python-rospkg
   - pip install catkin_pkg
   - pip install empy

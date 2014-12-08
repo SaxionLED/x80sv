@@ -401,6 +401,8 @@ location several path options are simulated in advance and the one with the leas
 
 This planner has several parameters that must be tuned.
 
+
+
 \subsection{DWA local planner}
 The dwa local planner is also a standard ROS planner. It is contained in the package
 \rospackage{ros-indigo-dwa-local-planner}.
@@ -410,6 +412,17 @@ The smooth planner is own work, and is located at github (
 \url{https://github.com/SaxionLED/x80sv/tree/master/smooth_local_planner}).
 This planner follow the global path and when confronted with an obstacle simply
 reports that the plan has failed and waits for new commands from the global planner.
+
+\subsection{Recovery behavior}
+Sometimes the robot may come in a situation where the navigation fails. In this case, the 
+\rospackage{move-base} package
+has something that is called recovery behaviors. When both local and global navigation fail in
+steering the robot, several recovery behaviors can be configured.
+
+One of those is the rotate
+recovery behavior. This behavior rotates the robot about its axis and records the map using its lases
+scanner. Obstacles that were closeby, may be removed by this action, so after a rotation normal navigation
+can be retried.
 
 \section{Future work}
 

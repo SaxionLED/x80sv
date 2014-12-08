@@ -2,14 +2,15 @@
 
 shutdown_costmaps: false
 
-controller_frequency: 3.0
+# controller_frequency: 20.0
+controller_frequency: 4.0
 controller_patience: 3.0
 
 planner_frequency: 0  # 0 is only replan when new plan received.
 planner_patience: 1.0
 recovery_behavior_enabled: true  # default true, disable recovery
 oscillation_distance: 0.5
-oscillation_timeout: 5.0
+oscillation_timeout: 10.0
 
 # Global planner (choose one):
 base_global_planner: global_planner/GlobalPlanner
@@ -53,10 +54,10 @@ DWAPlannerROS:
   latch_xy_goal_tolerance: true
 
   # Forward simulation parameters:
-  sim_time: 3.0
-  vx_samples: 7 # default 3
+  sim_time: 2.0
+  vx_samples: 4 # default 3
   vy_samples: 1
-  vtheta_samples: 20
+  vtheta_samples: 10
 
   dwa: true
 

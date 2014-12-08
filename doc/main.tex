@@ -1,10 +1,12 @@
 
 \documentclass[a4paper]{article}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{tikz}
 \usepackage{url}
 \usepackage{MnSymbol}
 \usetikzlibrary{arrows}
+\usetikzlibrary{calc}
 
 \usepackage{xcolor}
 \usepackage{listings}
@@ -22,7 +24,7 @@ linewidth=12.1cm
         {\ensuremath{\rcurvearrowse\space}}}
 
 
-\newcommand{\rospackage}[1]{\textbf{\textit{#1}}}
+\newcommand{\rospackage}[1]{\textbf{\textit{ros-indigo-#1}}}
 \begin{document}
 
 \title{Implementation of 2d navigation for a moving base using ROS
@@ -35,24 +37,60 @@ linewidth=12.1cm
 
 \tableofcontents
 
+\section*{List of symbols}
+
+\begin{tabular}{ | l | l | l | }
+  \hline                       
+  Symbol & Unit & Description \\
+  \hline                       
+  $l_{base}$ & $[m]$ & Distance between the two wheels of the robot. \\
+  \hline                       
+  $r_{wheel}$ & $[m]$ & Radius of the wheel. \\
+  \hline                       
+  $N_{enc}$ & $[-]$ & Number of pulses per rotation of the encoders \\
+  \hline                       
+  $v_{max}$ & $[m/s]$ & Maximum forward velocity. \\
+  \hline                       
+  $a_{max}$ & $[m/s^2]$ & Maximum forward acceleration. \\
+  \hline                       
+  $\omega_{max}$ & $[rad/s]$ & Rotational maximum velocity. \\
+  \hline                       
+  $\alpha_{max}$ & $[rad/s^2]$ & Rotational maximum acceleration. \\
+  \hline                       
+  $v$ & $[m/s]$ & Forward velocity of the robot. \\
+  \hline                       
+  $\omega$ & $[m/s]$ & Rotational velocity of the robot. \\
+  \hline                       
+  $\omega_{left}$ & $[rad/s]$ & Rotational velocity of the left wheel. \\
+  \hline                       
+  $\omega_{right}$ & $[rad/s]$ & Rotational velocity of the right wheel. \\
+  \hline                       
+  $\theta$ & $[rad]$ & Rotation of the robot with respect to the world. \\
+  \hline                       
+\end{tabular}
+
 \section{Introduction}
 
 This document describes how the problem of 2d-navigation was solved on a real robot.
-The goal of navigation is to safely move a robot from a to b. The robot used
-was moving base, the x80sv.
+The goal of navigation is to safely move a robot from a to b.
 
-\section{Navigation overview}
-
-The task of navigation can be split up into the following tasks (see also figure \ref{fig:overview}):
+The task of navigation can be split up into the following tasks (see figure \ref{fig:overview}):
 
 \begin{itemize}
-  \item Robot control. This task is concerned with controlling the seperate wheels of the robot. Typically this is done using PID control or something alike.
+  \item Robot control. This task is concerned with controlling the seperate wheels of the robot.
+  Typically this is done using PID control or something alike.
   \item Odometry calculation. By keeping track of wheel motions, the robot position can be
 calculated. This method is subjective to drift.
-  \item Position and mapping, also known as SLAM, is the task of determining location of the robot in the world, and at the same time reconstructing the world.
-  \item Global planning is the task of determining a path through a known map. This requires a search like A* or something like that.
-  \item Local planning takes as input the global path and generated the appropriate motion commands for the robot control. It is some sort of setpoint generator. This layer is also responsible for obstacles. When an obstacle is observed, the path may be adjusted.
-  \item Semantic interpretation is the process of converting a task into a sequence of locations to be reached. For example the conversion of the sentence "fetch beer" into a path from the current location to nearest fridge.
+  \item Position and mapping, also known as SLAM, is the task of determining location of the robot in 
+  the world, and at the same time reconstructing the world.
+  \item Global planning is the task of determining a path through a known map. This requires a search
+  like A* or something like that.
+  \item Local planning takes as input the global path and generated the appropriate motion commands for
+  the robot control. It is some sort of setpoint generator. This layer is also responsible for obstacles.
+  When an obstacle is observed, the path may be adjusted.
+  \item Semantic interpretation is the process of converting a task into a sequence of locations to be
+  reached. For example the conversion of the sentence "fetch beer" into a path from the current location
+  to nearest fridge.
 \end{itemize}
 
 \begin{figure}
@@ -62,42 +100,80 @@ calculated. This method is subjective to drift.
 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3cm,
   thick,main node/.style={rectangle,fill=blue!20,draw}]
 
-  \node[main node] (1) {controller};
-  \node[main node] (2) [right of=1] {motor};
+  \node[main node] (C) {controller};
+  \node[main node] (2) [right of=C] {motor};
   \node[main node] (3) [right of=2] {wheel};
   \node[main node] (4) [right of=3] {encoder};
-  \node[main node] (5) [above of=1] {local planner};
+  \node[main node] (5) [above of=C] {local planner};
+  \node[main node] (GP) [above of=5] {global planner};
   \node[main node] (7) [right of=5] {slam};
-  \node[main node] (6) [above of=5] {global planner};
   \node[main node] (8) [above of=4] {laser};
-  \node[main node] (9) [above of=8] {semantic parser};
+  \node[main node] (9) [above of=GP] {semantic parser};
+  \node[main node] (10) [above of=7] {costmap};
+  \node[main node] (11) [above of=8] {sensors};
+  
+  \draw[thick,dotted]     ($(GP.north west)+(-0.5,0.3)$) rectangle ($(7.south east)+(0.6,-0.3)$);
+  \node[font=\bf] at ($(10.north east)+(0.6,0.6) $) {Navigation};
+
+  \draw[thick,dotted]     ($(C.north west)+(-0.5,0.3)$) rectangle ($(4.south east)+(0.6,-2.0)$);
+  \node[font=\bf] at ($(3.north east)+(0.6,0.6) $) {Motion control};
 
   \path[every node/.style={font=\sffamily\small}]
-    (1)
-        edge node [above] {Pwm} (2)
-    (2) 
-        edge node [above] {Motion} (3)
-    (3) 
-        edge node[above] {Motion} (4)
-    (4) 
-        edge [bend left] node [below] {velocity} (1)
-    (5) edge node [left] {set velocity} (1)
-    (6) edge node [left] {path} (5)
-    (7) edge node [right] {position} (6)
+    (C) edge node [above] {pwm} (2)
+    (2) edge node [above] {motion} (3)
+    (3) edge node[above] {motion} (4)
+    (4) edge [bend left] node [below] {velocity} (C)
+    (5) edge node [left] {velocity} (C)
+    (GP) edge node [left] {path} (5)
+    (7) edge [bend left] node [right] {position} (GP)
     (7) edge node [below] {position} (5)
-    (1) edge node [right] {odometry} (7)
-    (8) edge node [above] {scan data} (7)
-    (9) edge node [below] {target} (6)
+    (7) edge node [right] {map} (10)
+    (C) edge node [right] {odometry} (7)
+    (8) edge node [above] {scan} (7)
+    (8) edge node [right] {scan} (10)
+    (9) edge node [left] {target} (GP)
+    (10) edge node [above] {cost} (GP)
+    (10) edge [bend right] node [right] {cost} (5)
+    (11) edge node [above] {obstacle} (10)
     ;
 \end{tikzpicture}
-  \caption{Subjects involved in the task of navigation}
+  \caption{The building blocks involved in the task of navigation. Inside the rectangle is the core functionality.}
   \label{fig:overview}
 \end{figure}
 
 
-The rest of this document describes all the tasks listed above as applied to the x80sv using the robot operating system (ROS).
+The rest of this document describes all the tasks listed above as applied to the x80sv using
+the robot operating system (ROS).
 
 \clearpage
+
+\section{ROS concepts}
+\subsection{basics}
+ROS is a robotic operation system. Is provides infrastructure to build robot applications.
+A ROS system consists of nodes, these are running programs performing some task. Nodes can
+interchange data via topics via a publish subscribe mechanism. Other concepts are services
+and parameters.
+
+\subsection{rviz}
+Rviz is an indispensible tool when debugging a robotic system. With rviz one can visualize a robot
+and its environment. The tool consists of a main window and a pane to the left where various data
+visualizers can be added.
+
+\subsection{rqt}
+Another helpful tool when debugging a ros system is rqt. This tool is a plugin container where plugins
+can be selected. Plugins exists for tf tree visualization, node interconnect, topic inspection,
+logging viewer, diagnostics viewer and more.
+
+\subsection{tf}
+The tf (\url{http://wiki.ros.org/tf}) system of ROS is used to describe the various parts of 
+a robot in space. The TF-tree of a robot is the relative position of all bodies of a robot
+with respect to eachother.
+
+\subsection{gazebo}
+Gazebo is a physics simulator, which can be in combination with ROS. In gazebo entire worlds
+can be modelled. In this world, all kind of objects can be inserted. For example a motor can
+be inserted, which is coupled with a ROS topic. Gazebo is a physics simulator, so every friction
+and contact force can be modelled.
 
 \section{Robot setup}
 The robot used in this setup is the x80sv of drrobot. This robot has three wheels, of which
@@ -183,19 +259,19 @@ the controllerboard are wheel velocities in encoder ticks. A conversion from lin
 and angular velocities to wheel velocities is required.
 
 \begin{equation}
-        v_{left} = \frac{2 * v_{x} - v_{\theta} * l_{base}}{2 * r_{wheel}}
+        \omega_{left} = \frac{v - \frac{1}{2} * \omega * l_{base}}{r_{wheel}}
 \end{equation}
 \begin{equation}
-        v_{right} = \frac{v_{\theta} * l_{base} + 2 * v_{x}}{2 * r_{wheel}}
+        \omega_{right} = \frac{\frac{1}{2} * \omega * l_{base} + v}{r_{wheel}}
 \end{equation}
 
 In the next step, the wheel velocities are translated into encoder velocities.
 
 \begin{equation}
-  leftWheelCmd = \frac{-motorDir * v_{left} * N_{enc}}{2 \pi}
+  leftWheelCmd = \frac{- \omega_{left} * N_{enc}}{2 \pi}
 \end{equation}
 \begin{equation}
- rightWheelCmd = \frac{motorDir * v_{right} * N_{enc}}{2 \pi}
+ rightWheelCmd = \frac{\omega_{right} * N_{enc}}{2 \pi}
 \end{equation}
 
 These equations are implemented in the real robot drivers (\url{https://github.com/SaxionLED/x80sv/tree/master/x80sv_driver}). In case of simulation, these equations are done by gazebo.
@@ -259,13 +335,13 @@ From figure \ref{fig:robotlimits} the following robot limitations are determined
   Parameter & Value \\
   \hline                       
   \hline                       
-  $vmax_{linear}$ & 0.4 \\
+  $v_{max}$ & $0.4 [m/s] $ \\
   \hline                       
-  $amax_{linear}$ & 1.0 \\
+  $a_{max}$ & $ 1.0 [m/s^2] $\\
   \hline                       
-  $vmax_{rotational}$ & 2.0 \\
+  $\omega_{vmax}$ & $ 2.0 [rad/s] $ \\
   \hline                       
-  $amax_{rotational}$ & 5.0 \\
+  $\alpha_{max}$ & $ 5.0 [rad/s^2] $ \\
   \hline  
 \end{tabular}
 
@@ -280,36 +356,22 @@ python3 plot_acceleration.py
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/v.png}
-  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/omega.png}
+  \begin{subfigure}[b]{0.8\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/v.png}
+    \caption{Measured linear velocity and calculated acceleration}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.8\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/omega.png}
+    \caption{Measured rotational velocity and calculated acceleration}
+  \end{subfigure}
   \caption{Measured velocities}
   \label{fig:robotlimits}
 \end{figure}
 
 
-\section{ROS concepts}
-\subsection{rviz}
-Rviz is an indispensible tool when debugging a robotic system. With rviz one can visualize a robot
-and its environment. The tool consists of a main window and a pane to the left where various data
-visualizers can be added.
-
-\subsection{rqt}
-Another helpful tool when debugging a ros system is rqt. This tool is a plugin container where plugins
-can be selected. Plugins exists for tf tree visualization, node interconnect, topic inspection,
-logging viewer, diagnostics viewer and more.
-
-\subsection{tf}
-The tf (\url{http://wiki.ros.org/tf}) system of ROS is used to describe the various parts of 
-a robot in space. The TF-tree of a robot is the relative position of all bodies of a robot
-with respect to eachother.
-
-\section{Slam}
-Simultaneous localization and mapping (SLAM), is a required component for navigation.
-The gmapping node was used in the case of the x80sv.
-
 \subsection{gmapping}
 
-For slam the standard package \rospackage{ros-indigo-gmapping} [1] can be used. 
+For slam the standard package \rospackage{gmapping} [1] can be used. 
 
 [1] http://wiki.ros.org/gmapping
 
@@ -324,10 +386,9 @@ scan is symmetric around zero angle. This means that a laserscan message with ra
 
 \includegraphics[width=0.5\textwidth,height=\textheight,keepaspectratio]{img/laser_orientation.png}
 
-\section{Simulation}
+\subsection{Simulation}
 Instead of trying to run everything on the real robot, a simulated version of the x80sv
-was created. This was done using the gazebo simulator. Gazebo is a physics simulator, which can be
-used with ROS.
+was created.
 
 With this simulation it is possible to run the exact same navigation software with the real
 robot as well as with the simulated variant.
@@ -339,23 +400,32 @@ robot as well as with the simulated variant.
 \end{figure}
 
 \begin{figure}[h!]
+  \centering
   \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/simulatie_nodes.png}
   \caption{The nodes involved in the simulation}
 \end{figure}
 
+
 \section{Navigation}
+This chapter describes the general case of navigation.
 
 \subsection{Framework}
 
 There is an existing framework for 2d mobile base navigation \url{http://wiki.ros.org/move_base}.
 Another framework is the skynav framework developed at saxion \url{https://github.com/SaxionLED/skynav}
 
+\subsection{Slam}
+Simultaneous localization and mapping (SLAM), is a required component for navigation.
+The gmapping node was used in the case of the x80sv.
+
 \subsection{skynav}
 TODO
 
+\section{Navigation on the x80sv}
+
 \subsection{move base}
 
-The \rospackage{ros-indigo-move-base} package provides a sort of infrastructure for 2d mobile base
+The \rospackage{move-base} package provides a sort of infrastructure for 2d mobile base
 navigation. It provides a structure into which plugins can be inserted.
 Among plugins are costmap function, recovery behaviors, local planner and global planner.
 
@@ -366,23 +436,24 @@ Among plugins are costmap function, recovery behaviors, local planner and global
 \end{figure}
 
 \subsection{costmap2d}
-The \rospackage{ros-indigo-costmap-2d} is a ros package that can create a costmap of the environment
+The \rospackage{costmap-2d} is a ros package that can create a costmap of the environment
 of the robot.
 The costmap is then used by both global and local planning to determine the path.
 The costmap consists of several input layers. The static layer takes the map as determined by
 gmapping and inflates it somehwat. The obstacle layer can incorporate different sensors.
 Rviz can be used to visualize these costmaps.
 
-\section{Global planning}
+\subsection{Global planning}
 
-\subsection{global planner}
-The \rospackage{ros-indigo-global-planner} package contains a global planner that uses simple search
+\subsubsection{global planner}
+The \rospackage{global-planner} package contains a global planner that uses simple search
 for an optimal path given a costmap. It is a plugin for use with move-base.
 
-\subsection{navfn planner}
-The \rospackage{ros-indigo-navfn} package provides another plugin for move-base for global navigation.
+\subsubsection{navfn planner}
+The \rospackage{navfn} package provides another plugin for move-base for global navigation.
+This is an existing ROS module. It was tried on the x80sv, and is an alternative to \rospackage{global-planner}.
 
-\subsection{move-base-ompl}
+\subsubsection{move-base-ompl}
 This package contains a plugin wrapper for ompl. Ompl is a motion planning library using random trees.
 Random trees follow the idea of randomly exploding a tree of all possible state of a robot
 given its current position and vehicle dynamics.
@@ -391,23 +462,23 @@ given its current position and vehicle dynamics.
 
 \url{http://ompl.kavrakilab.org/}
 
-\section{Local planning}
+\subsection{Local planning}
 
-\subsection{base local planner}
+\subsubsection{base local planner}
 
-The default planner of the move base package for ROS is the base local planner.
+The default planner of the \rospackage{move-base} package for ROS is the base local planner.
 This planner uses dynamic window approach (DWA) to plan a path. This means that from the current 
 location several path options are simulated in advance and the one with the least cost is selected.
-
 This planner has several parameters that must be tuned.
 
 
-
-\subsection{DWA local planner}
+\subsubsection{DWA local planner}
 The dwa local planner is also a standard ROS planner. It is contained in the package
-\rospackage{ros-indigo-dwa-local-planner}.
+\rospackage{dwa-local-planner}.
+It is simpler than the base local planner,
+that is why this package is chosen as currently the best solution.
 
-\subsection{Smooth planner}
+\subsubsection{Smooth planner}
 The smooth planner is own work, and is located at github (
 \url{https://github.com/SaxionLED/x80sv/tree/master/smooth_local_planner}).
 This planner follow the global path and when confronted with an obstacle simply

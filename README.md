@@ -18,22 +18,18 @@ _http://www.ubuntu.com/_
 
 - Install ros indigo
 _http://www.ros.org/install/_  
-_http://wiki.ros.org/indigo/Installation/Ubuntu_
 
-- Setup catkin workspace _/home/[USER]/catkin_ws_  
+- Setup catkin workspace
 _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_  
 
 - Setup .bashrc  
   - Source the workspace  
     ___source ~/catkin_ws/devel/setup.bash___  
-  - Set gazebo model path for offline gazebo models in the model database  
-    ___export GAZEBO_MODEL_PATH=~/catkin_ws/src/x80sv/x80sv_simulation/models/___
-  - Set automatic cd to catkin_ws  
-    ___roscd___  
-    ___cd___ ___..___ 
 
-- Git clone skynav and x80sv in the catkin_ws/src folder,  
-	_(or clone somewhere else (**~/GIT/**) and create a symbolic link to the files in the catkin_ws/src folder.)_  
+- Install dependencies:
+    - apt-get install ros-indigo-global-planner ros-indigo-gmapping ros-indigo-dwa-local-planner ros-indigo-move-base ros-indigo-controller-manager ros-indigo-base-local-planner ros-indigo-costmap-2d
+
+- Clone skynav and x80sv in the catkin_ws/src folder. (or clone somewhere else (**~/GIT/**) and create a symbolic link to the files in the catkin_ws/src folder.)
   
 	- for the navigation software: 
 >_$ git clone https://github.com/SaxionLED/skynav.git_  

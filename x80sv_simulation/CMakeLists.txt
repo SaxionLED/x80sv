@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(x80sv_simulation)
 
-find_package(catkin REQUIRED roscpp sensor_msgs)
+find_package(catkin REQUIRED roscpp sensor_msgs
+controller_manager)
 
 
 catkin_package(

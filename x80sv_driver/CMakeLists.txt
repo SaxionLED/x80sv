@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(x80sv_driver)
 
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp tf rostest nav_msgs dynamic_reconfigure)
+find_package(catkin REQUIRED COMPONENTS
+	message_generation roscpp tf rostest
+	nav_msgs dynamic_reconfigure
+	)
 find_package(Boost REQUIRED)
 
 add_message_files(

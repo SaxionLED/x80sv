@@ -44,7 +44,7 @@ using namespace xv_11_laser_driver;
 class LaserUpdater
 {
     public:
-        LaserUpdater() : _connected(false), _retries(0), _scans(0)
+        LaserUpdater() : _connected(true), _retries(0), _scans(0)
         {
         }
 
@@ -61,6 +61,11 @@ class LaserUpdater
 
             stat.add("Retries", _retries);
             stat.add("Scans", _scans);
+        }
+
+        bool isConnected()
+        {
+            return _connected;
         }
 
         void setConnected(bool connected)
@@ -147,9 +152,14 @@ int main(int argc, char **argv)
         }
         catch (boost::system::system_error ex)
         {
-            laserUpdater.setConnected(false);
-            ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
+            if (laserUpdater.isConnected())
+            {
+                laserUpdater.setConnected(false);
+                ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
+            }
+
             ROS_INFO("Retrying to open laser in 10 seconds");
+            
             for (int i = 0; i < 10; i++)
             {
                 updater.update();

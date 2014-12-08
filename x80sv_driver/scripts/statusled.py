@@ -3,6 +3,7 @@
 # Python part:
 import sys
 import os
+import subprocess
 import code
 import readline
 import rlcompleter
@@ -19,7 +20,6 @@ def issubset(a, b):
 
 red = 0x80, 0, 0
 green = 0, 0x80, 0
-orange = 0xff, 0x8c, 0
 black = 0, 0, 0
 
 
@@ -55,13 +55,14 @@ class StatusLed:
         self.alive = issubset(self.required_nodes, nodes)
 
     def update_led(self):
-        rospy.loginfo("Nodes alive: {} diags: {}".format(self.alive, self.diags))
+        # rospy.loginfo("Nodes alive: {} diags: {}".format(self.alive, self.diags))
+        self.toggle = not self.toggle
         if self.toggle:
             if self.alive:
                 if self.state:
                     color = green
                 else:
-                    color = orange
+                    color = red
             else:
                 color = red
         else:
@@ -70,13 +71,12 @@ class StatusLed:
 
     def set_led(self, r, g, b):
         exe = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'blink1-mini-tool')
-        os.system('{} rgb {},{},{}'.format(exe, r, g, b))
+        res = subprocess.check_output([exe, 'rgb', str(r), str(g), str(b)], stderr=subprocess.STDOUT)
 
     def run(self):
         r = rospy.Rate(2)
         while not rospy.is_shutdown():
             self.check_nodes()
-            self.toggle = not self.toggle
             self.update_led()
             r.sleep()
         rospy.loginfo('Done!')

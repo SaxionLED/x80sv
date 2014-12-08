@@ -56,13 +56,9 @@ class StatusLed:
 
     def update_led(self):
         # rospy.loginfo("Nodes alive: {} diags: {}".format(self.alive, self.diags))
-        self.toggle = not self.toggle
         if self.toggle:
-            if self.alive:
-                if self.state:
-                    color = green
-                else:
-                    color = red
+            if self.alive and self.state:
+                color = green
             else:
                 color = red
         else:
@@ -71,11 +67,13 @@ class StatusLed:
 
     def set_led(self, r, g, b):
         exe = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'blink1-mini-tool')
-        res = subprocess.check_output([exe, 'rgb', str(r), str(g), str(b)], stderr=subprocess.STDOUT)
+        cmd = [exe, 'rgb', ','.join(str(x) for x in [r,g,b])]
+        res = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
     def run(self):
         r = rospy.Rate(2)
         while not rospy.is_shutdown():
+            self.toggle = not self.toggle
             self.check_nodes()
             self.update_led()
             r.sleep()

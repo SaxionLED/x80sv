@@ -189,9 +189,12 @@ namespace DrRobot
         // Kp=20 and Ki=0 and Kd=0, not using of Kd and Ki yields ok results.
         // Kp =25 is at the margin of stability.
 
+        // Wbo at 8 december 2014:
+        // Gain kp=20 is sometimes shaky
+
         // only needed when using velocity (1, 0, 170))
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 20, 0, 0); // channel, p, d, i
-        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 20, 0, 0);
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(0, 15, 0, 0); // channel, p, d, i
+        drrobotMotionDriver_->setMotorVelocityCtrlPID(1, 15, 0, 0);
 
         // PID default is 1000, 5, 10000 (taken from C# src)
         drrobotMotionDriver_->setMotorPositionCtrlPID(0, 500, 5, 10000);

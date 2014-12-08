@@ -6,6 +6,14 @@
 
     <env name="GAZEBO_MODEL_PATH" value="$(find x80sv_simulation)/models/" />
 
+
+    <!--
+	Bugfix for error of gazebo:
+	http://answers.gazebosim.org/question/5518/i-have-installed-gazebo-1-9-and-there-is-some/
+	-->
+    <env name="LC_NUMERIC" value="C" />
+
+
     <arg name="use_gui" default="true" />
     <arg name="worldfile" default="world_test.world" />
 

@@ -415,9 +415,11 @@ The \rospackage{navfn} package provides another plugin for move-base for global 
 This is an existing ROS module. It was tried on the x80sv, and is an alternative to \rospackage{global-planner}.
 
 \subsubsection{move-base-ompl}
-This package contains a plugin wrapper for ompl. Ompl is a motion planning library using random trees.
+Ompl is a motion planning library using random trees.
 Random trees follow the idea of randomly exploding a tree of all possible state of a robot
 given its current position and vehicle dynamics.
+An attempt was made to construct a global planner that uses the ompl library.
+The node runs, but the results are poor.
 
 \url{https://github.com/windelbouwman/move-base-ompl}
 

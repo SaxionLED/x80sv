@@ -164,28 +164,28 @@ the robot operating system (ROS).
 \clearpage
 
 \section{ROS concepts}
-\subsection{basics}
+\subsection{Basics}
 ROS is a robotic operation system. Is provides infrastructure to build robot applications.
 A ROS system consists of nodes, these are running programs performing some task. Nodes can
 interchange data via topics via a publish subscribe mechanism. Other concepts are services
 and parameters.
 
-\subsection{rviz}
+\subsection{Rviz}
 Rviz is an indispensible tool when debugging a robotic system. With rviz one can visualize a robot
 and its environment. The tool consists of a main window and a pane to the left where various data
 visualizers can be added.
 
-\subsection{rqt}
+\subsection{Rqt}
 Another helpful tool when debugging a ros system is rqt. This tool is a plugin container where plugins
 can be selected. Plugins exists for tf tree visualization, node interconnect, topic inspection,
 logging viewer, diagnostics viewer and more.
 
-\subsection{tf}
+\subsection{Tf}
 The tf (\url{http://wiki.ros.org/tf}) system of ROS is used to describe the various parts of 
 a robot in space. The TF-tree of a robot is the relative position of all bodies of a robot
 with respect to eachother.
 
-\subsection{gazebo}
+\subsection{Gazebo}
 Gazebo is a physics simulator, which can be in combination with ROS. In gazebo entire worlds
 can be modelled. In this world, all kind of objects can be inserted. For example a motor can
 be inserted, which is coupled with a ROS topic. Gazebo is a physics simulator, so every friction
@@ -371,7 +371,7 @@ data. To implement this for a two wheeled robot the following formulas are used:
 
 These equations are implemented in the real robot drivers (\url{https://github.com/SaxionLED/x80sv/tree/master/x80sv_driver}). In case of simulation, these equations are done by gazebo.
 
-\subsection{gmapping}
+\subsection{Gmapping}
 
 Simultaneous localization and mapping (SLAM), is a required component for navigation.
 The task of the SLAM module in a robotic system is determining the robots position
@@ -447,7 +447,7 @@ These changes also resulted in the simulated and the real robot behave the same.
   \label{fig:laserorientation}
 \end{figure}
 
-\subsection{move base}
+\subsection{Move base}
 
 The \rospackage{move-base} package provides a sort of infrastructure for 2d mobile base
 navigation. It provides a structure into which plugins can be inserted.
@@ -460,7 +460,7 @@ Among plugins are costmap function, recovery behaviors, local planner and global
   \label{fig:navrviz}
 \end{figure}
 
-\subsection{costmap2d}
+\subsection{Costmap2d}
 The \rospackage{costmap-2d} is a ros package that can create a costmap of the environment
 of the robot.
 The costmap is then used by both global and local planning to determine the path.
@@ -470,15 +470,15 @@ Rviz can be used to visualize these costmaps.
 
 \subsection{Global planning}
 
-\subsubsection{global planner}
+\subsubsection{Global planner}
 The \rospackage{global-planner} package contains a global planner that uses simple search
 for an optimal path given a costmap. It is a plugin for use with move-base.
 
-\subsubsection{navfn planner}
+\subsubsection{Navfn planner}
 The \rospackage{navfn} package provides another plugin for move-base for global navigation.
 This is an existing ROS module. It was tried on the x80sv, and is an alternative to \rospackage{global-planner}.
 
-\subsubsection{move-base-ompl}
+\subsubsection{Move-base-ompl}
 Ompl is a motion planning library using random trees.
 Random trees follow the idea of randomly exploding a tree of all possible state of a robot
 given its current position and vehicle dynamics.
@@ -545,7 +545,7 @@ python3 plot_acceleration.py
 The default planner of the \rospackage{move-base} package for ROS is the base local planner.
 This planner uses dynamic window approach (DWA) to plan a path. This means that from the current 
 location several path options are simulated in advance and the one with the least cost is selected.
-This planner has several parameters that must be tuned.
+This planner has several parameters that must be tuned to a specific robot.
 
 \subsubsection{DWA local planner}
 The dwa local planner is also a standard ROS planner. It is contained in the package
@@ -585,15 +585,52 @@ See figure \ref{fig:navigationresults}.
   \centering
   \begin{subfigure}[b]{0.8\textwidth}
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/navigation_simulation_rviz.png}
-    \caption{rviz view of the navigation software in a simulated environment}
+    \caption{rviz view}
   \end{subfigure}
   \begin{subfigure}[b]{0.8\textwidth}
     \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/gmapping_simulation_map.png}
-    \caption{resulting map of the simulated environment}
+    \caption{resulting map}
   \end{subfigure}
-  \caption{Experiments}
+  \caption{Experiments in the simulator}
   \label{fig:navigationresults}
 \end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.8\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/navigation_real_rviz.png}
+    \caption{rviz view}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.8\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/gmapping_real_map.png}
+    \caption{resulting map}
+  \end{subfigure}
+  \caption{Experiments in the real world}
+  \label{fig:navigationresults}
+\end{figure}
+
+\subsection{Issues encountered}
+\subsubsection{Extrapolation error}
+An issue encountered was that when running the navigation software on the robot,
+the move-base node reports an error:
+
+\begin{lstlisting}[caption=Error message when running on different pc]
+[ INFO] [1418207278.346072074]: Got new plan
+[ERROR] [1418207278.346767687]: Extrapolation Error: Lookup would require extrapolation into the future.  Requested time 1418207278.408950434 but the latest data is at time 1418207278.374471708, when looking up transform from frame [odom] to frame [map]
+
+[ERROR] [1418207278.346911345]: Global Frame: odom Plan Frame size 31: map
+
+[ WARN] [1418207278.347037572]: Could not transform the global plan to the frame of the controller
+[ERROR] [1418207278.347137469]: Could not get local plan
+Registering Scans:Done
+[ INFO] [1418207278.596014219]: Got new plan
+\end{lstlisting}
+
+The source of this error is that the time synchronization between the laptop and the pc is accurate enough.
+One solution was to run all navigation software on the laptop on the robot.
+Another solution is to always use the map frame. Usually the odom frame is used for local navigation,
+but we can
+use the map frame as well.
 
 \section{Conclusions}
 The odometry and the gmapping localization were realized on the x80sv platform.

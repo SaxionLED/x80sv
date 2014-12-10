@@ -1,6 +1,6 @@
 
 local_costmap:
-  global_frame: odom
+  global_frame: map
   robot_base_frame: base_link
   # rolling_window: true
   update_frequency: 5.0

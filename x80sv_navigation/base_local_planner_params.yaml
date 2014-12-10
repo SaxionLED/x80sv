@@ -4,7 +4,7 @@ shutdown_costmaps: false
 
 # controller_frequency: 20.0
 controller_frequency: 4.0
-controller_patience: 3.0
+controller_patience: 10.0
 
 planner_frequency: 0  # 0 is only replan when new plan received.
 planner_patience: 1.0
@@ -66,12 +66,12 @@ DWAPlannerROS:
 
   # Obstacle avoidance heaviness:
   # and other factors to influence how much to stick to global path and how much to avoid obstacles.
-  path_distance_bias: 64.0  # default: 32
-  goal_distance_bias: 11.0  # default: 24
-  occdist_scale: 0.6  # default: 0.01
+  path_distance_bias: 32.0  # default: 32
+  goal_distance_bias: 24.0  # default: 24
+  occdist_scale: 0.01  # default: 0.01
   publish_traj_pc: true
   publish_cost_grid_pc: true
-  global_frame_id: odom
+  global_frame_id: map
 
 
 # Other planner parameters:

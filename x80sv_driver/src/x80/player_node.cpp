@@ -451,6 +451,8 @@ namespace DrRobot
 
     void PlayerNode::doUpdate()
     {
+        x80sv_driver::MotorInfoArray motorInfoArray;
+        motorInfoArray.motorInfos.resize(MOTOR_NUM);
 
         if (_comm_interface->isOpen())
         {
@@ -461,7 +463,6 @@ namespace DrRobot
 
             // Translate from driver data to ROS data
             cntNum_++;
-            x80sv_driver::MotorInfoArray motorInfoArray;
             motorInfoArray.motorInfos.resize(MOTOR_NUM);
             for (uint32_t i = 0; i < MOTOR_NUM; ++i)
             {
@@ -476,10 +477,8 @@ namespace DrRobot
                 motorInfoArray.motorInfos[i].motor_pwm = motorSensorData_.motorSensorPWM[i];
             }
 
-
             //ROS_INFO("publish motor info array");
             motorInfo_pub_.publish(motorInfoArray);
-            publishOdometry(motorInfoArray);
 
             x80sv_driver::RangeArray rangerArray;
             rangerArray.ranges.resize(US_NUM);
@@ -553,6 +552,9 @@ namespace DrRobot
             customSensor.customIO = (uint8_t) (customSensorData_.customIO & 0xff);
             customSensor_pub_.publish(customSensor);
         }
+
+        // Publish the odometry in any case:
+        publishOdometry(motorInfoArray);
     }
 
     void PlayerNode::produce_motion_diagnostics(diagnostic_updater::DiagnosticStatusWrapper& stat)

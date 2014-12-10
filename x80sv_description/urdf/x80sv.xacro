@@ -272,7 +272,7 @@
 		<odometryTopic>odom</odometryTopic>
 		<odometryFrame>odom</odometryFrame>
 		<robotBaseFrame>base_footprint</robotBaseFrame>
-		<publishWheelTF>true</publishWheelTF>
+		<publishWheelTF>false</publishWheelTF>
 		<publishTf>1</publishTf>
 		<rosDebugLevel>na</rosDebugLevel>
 		<odometrySource>odom</odometrySource>

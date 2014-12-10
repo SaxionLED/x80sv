@@ -18,10 +18,8 @@ linewidth=12.1cm
 }
 
 \lstset{breaklines=true, breakatwhitespace=true}
-\lstset{prebreak=\raisebox{0ex}[0ex][0ex]
-        {\ensuremath{\rhookswarrow}}}
-\lstset{postbreak=\raisebox{0ex}[0ex][0ex]
-        {\ensuremath{\rcurvearrowse\space}}}
+\lstset{prebreak= }
+\lstset{postbreak=}
 
 
 \newcommand{\rospackage}[1]{\textbf{\textit{ros-indigo-#1}}}
@@ -68,6 +66,21 @@ linewidth=12.1cm
   $\theta$ & $[rad]$ & Rotation of the robot with respect to the world. \\
   \hline                       
 \end{tabular}
+
+\begin{thebibliography}{1}
+
+  \bibitem{gmapping} ROS gmapping \url{http://wiki.ros.org/gmapping}
+
+  \bibitem{x80sv} x80sv software \url{https://github.com/SaxionLED/x80sv}
+
+  \bibitem{globalompl} Ompl plugin
+\url{https://github.com/windelbouwman/move-base-ompl}
+
+  \bibitem{ompl} Ompl library \url{http://ompl.kavrakilab.org/}
+
+\end{thebibliography}
+
+\clearpage
 
 \section{Introduction}
 
@@ -178,6 +191,16 @@ can be modelled. In this world, all kind of objects can be inserted. For example
 be inserted, which is coupled with a ROS topic. Gazebo is a physics simulator, so every friction
 and contact force can be modelled.
 
+\subsection{Urdf}
+To describe robotic systems in ROS the urdf file format is used. An urdf file is a xml file
+with tags describing links and joints of a robot. The file format can be used by both gazebo
+and rviz. It also contains information about how a robot must be visualized by textures, shapes
+and colors. The physical parameters are also described with this file.
+
+To simplify the writing of urdf, the macro language xacro can be used. Xacro files can be
+automatically expanded into urdf files via the xacro script. Usually this is done when the
+urdf is loaded.
+
 \section{Robot setup}
 The robot used in this setup is the x80sv of drrobot. This robot has three wheels, of which
 two are controlled. Other sensors are range sensors, infrared and ultrasonic.
@@ -207,10 +230,10 @@ the robot.
 
 \subsection{Installation}
 To use the robot, install ROS indigo on ubuntu 14.04 on the robot laptop. Download the 
-x80sv software from the github repository (\url{https://github.com/saxionled/x80sv}). Follow 
+x80sv software from the github repository \cite{x80sv}. Follow 
 instruction in the readme.
 
-\subsection{robot description}
+\subsection{Robot description}
 To use the robot with the ROS system, an urdf model must be created. The model of the x80sv is
 located in the folder \url{x80sv_description}. The xacro macro system is used to simplify the
 writing of the urdf file. The urdf description contains a description of what links and joints
@@ -355,31 +378,72 @@ The task of the SLAM module in a robotic system is determining the robots positi
 in space, and while doing that, determine a map of the environment. There exist
 several packages to do this.
 
-For the x80sv the package \rospackage{gmapping} [1] was used.
+For the x80sv the package \rospackage{gmapping} \cite{gmapping} was used.
 This node takes as input the odometry data from the control layer and the laser scan
 data. It then is capable of generating a map and determining the drift that occurred
 since odometry start.
 
-[1] http://wiki.ros.org/gmapping
-
-\subsubsection{Laser orientation}
-
-The orientation of the laser is important for the gmapping node. The node assumes that
-scan is symmetric around zero angle. This means that a laserscan message with range
-0 to 2 pi will not work. A range from -pi to pi will work!
+The tf tree is visualized in figure~\ref{fig:tftreesim}. The map
+frame is the world frame. The gmapping node determines the transform between map and odom
+frame. The odom frame is the frame in which the robot started to drive. The transform
+betweet odom and base footprint is the transform as recorded by the odometry system.
+In the case of the simulation, gazebo takes care of this transform. When using the
+real robot, the x80 driver records the transformation. From the base footprint the rest
+of the mobile base consists of links which have static transforms.
 
 \begin{figure}[h!]
   \centering
- \begin{tikzpicture}
-  \draw (0,0) circle (2);
-  \draw (0,1) circle (0.7);
-  \draw[thick,->] (0,2) -- (0,3) node[anchor=north west] {$x$};
-  \draw (-2.3,-0.8) rectangle (-2.1,0.8);
-  \draw (2.1,-0.8) rectangle (2.3,0.8);
-  \draw[thick,->] (-0.8,1) arc (180:530:0.8) node[anchor=south east] {$ 360$};
-  \draw[thick,-] (-0.8,1) arc (180:190:0.8) node[anchor=north east] {$ 0$};
- \end{tikzpicture}
-  \caption{Laser orientation}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/tf_tree_simulation.png}
+  \caption{tf tree visualized with rqt tf tree plugin}
+  \label{fig:tftreesim}
+\end{figure}
+
+\subsubsection{Laser orientation}
+The orientation of the laser is important for the gmapping node. The gmapping node assumes that
+the scan data is symmetric around zero angle.
+
+This was discovered during experiments with the gmapping node.
+The minimum and maximum range
+$0 .. 2\pi$ did not work. A range from $-\pi .. \pi$ did work!
+The scan data contains the same bytes, but the minimum and maximum angle
+as defined in the scan message was adjusted. Also the reference frame
+of the laser scanner had to be adjusted. All these changes could be done
+without the laser scanner being physically remounted!
+
+These changes also resulted in the simulated and the real robot behave the same.
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \begin{tikzpicture}
+    \draw (0,0) circle (2);
+    \draw (0,0.95) circle (0.6);
+    \draw[thick,->] (0,2) -- (0,3) node[anchor=north west] {$x$};
+    \draw[thick,->] (0,0.95) -- (-0.4,0.95) node[anchor=south west] {$x$};
+    \draw[thick,->] (0,0.95) -- (0.0,0.55) node[anchor=south west] {$y$};
+    \draw (-2.3,-0.8) rectangle (-2.1,0.8);
+    \draw (2.1,-0.8) rectangle (2.3,0.8);
+    \draw[thick,->] (-0.8,0.8) arc (190:530:0.8) node[anchor=south east] {$ 2\pi$};
+    \draw[thick,-] (-0.8,0.8) arc (190:190:0.8) node[anchor=north east] {$ 0$};
+    \end{tikzpicture}
+    \caption{Laser orientation and scan angles that did not work}
+  \end{subfigure}
+  ~~~
+  \begin{subfigure}[b]{0.4\textwidth}
+    \begin{tikzpicture}
+    \draw (0,0) circle (2);
+    \draw (0,0.95) circle (0.6);
+    \draw[thick,->] (0,2) -- (0,3) node[anchor=north west] {$x$};
+    \draw[thick,->] (0,0.95) -- (0.4,0.95) node[anchor=north east] {$x$};
+    \draw[thick,->] (0,0.95) -- (0.0,1.35) node[anchor=north east] {$y$};
+    \draw (-2.3,-0.8) rectangle (-2.1,0.8);
+    \draw (2.1,-0.8) rectangle (2.3,0.8);
+    \draw[thick,->] (-0.8,0.8) arc (190:530:0.8) node[anchor=south east] {$ \pi$};
+    \draw[thick,-] (-0.8,0.8) arc (190:190:0.8) node[anchor=north east] {$-\pi$};
+    \end{tikzpicture}
+    \caption{Laser orientation and scan angles that did work}
+  \end{subfigure}
+  \caption{Laser reference frame and minimum and maximum angles appeared to be important for the gmapping node}
   \label{fig:laserorientation}
 \end{figure}
 
@@ -421,9 +485,8 @@ given its current position and vehicle dynamics.
 An attempt was made to construct a global planner that uses the ompl library.
 The node runs, but the results are poor.
 
-\url{https://github.com/windelbouwman/move-base-ompl}
-
-\url{http://ompl.kavrakilab.org/}
+\cite{globalompl}
+\cite{ompl}
 
 \subsection{Local planning}
 
@@ -507,6 +570,38 @@ One of those is the rotate
 recovery behavior. This behavior rotates the robot about its axis and records the map using its lases
 scanner. Obstacles that were closeby, may be removed by this action, so after a rotation normal navigation
 can be retried.
+
+\section{Results}
+
+The odometry on the real robot was checked by driving the robot around and visualizing the
+laser in rviz with a decay time of about 30 seconds. All scans were registered over
+each other.
+
+
+The move-base package was tried both in a simulated and a real world environment.
+See figure \ref{fig:navigationresults}.
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.8\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/navigation_simulation_rviz.png}
+    \caption{rviz view of the navigation software in a simulated environment}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.8\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/gmapping_simulation_map.png}
+    \caption{resulting map of the simulated environment}
+  \end{subfigure}
+  \caption{Experiments}
+  \label{fig:navigationresults}
+\end{figure}
+
+\section{Conclusions}
+The odometry and the gmapping localization were realized on the x80sv platform.
+The \rospackage{gmapping} package yields good results for mapping and positioning.
+The move-base package was used to navigate the robot. Several alternative planners were
+tried. The \rospackage{global-planner} package was the best global planner. The \rospackage{dwa-local-planner}
+was the best evaluated local planner.
+
 
 \section{Future work}
 

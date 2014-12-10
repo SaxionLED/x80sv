@@ -71,8 +71,8 @@
 			</geometry>
 		</visual>
 		<inertial>
-			<mass value="0.2" />
-			<origin xyz="0 0 0" />
+			<mass value="2.0" />
+			<origin xyz="-0.1 0 0" />
 			<inertia ixx="1.0" ixy="0.0" ixz="0.0"
 				iyy="1.0" iyz="0.0" 
 				izz="1.0" />

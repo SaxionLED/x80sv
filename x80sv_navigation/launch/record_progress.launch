@@ -1,0 +1,11 @@
+
+<launch>
+
+    <node pkg="hector_geotiff" type="geotiff_node" name="hector_geotiff" output="screen">
+        <remap from="map" to="dynamic_map"/>
+        <param name="geotiff_save_period" type="double" value="1" />
+        <param name="plugins" type="string" value="hector_geotiff_plugins/TrajectoryMapWriter" />
+    </node>
+
+</launch>
+

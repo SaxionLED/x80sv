@@ -23,6 +23,7 @@ linewidth=12.1cm
 
 
 \newcommand{\rospackage}[1]{\textbf{\textit{ros-indigo-#1}}}
+\newcommand{\rostopic}[1]{\textbf{\textit{#1}}}
 \begin{document}
 
 \title{Implementation of 2d navigation for a moving base using ROS
@@ -32,6 +33,11 @@ linewidth=12.1cm
 \author{Windel Bouwman}
 
 \maketitle
+\begin{abstract}
+This document describes the application of navigation software
+as available in ROS to the modified x80sv robot. Different ROS
+packages were evaluated on the robot.
+\end{abstract}
 
 \tableofcontents
 
@@ -78,6 +84,9 @@ linewidth=12.1cm
 
   \bibitem{ompl} Ompl library \url{http://ompl.kavrakilab.org/}
 
+  \bibitem{amcl} \url{http://wiki.ros.org/amcl}
+
+  \bibitem{tuningguide} \url{http://wiki.ros.org/navigation/Tutorials/Navigation%20Tuning%20Guide}
 \end{thebibliography}
 
 \clearpage
@@ -266,7 +275,10 @@ robot as well as with the simulated variant.
 
 There is an existing framework for 2d mobile base navigation \url{http://wiki.ros.org/move_base}.
 Another framework is the skynav framework developed at saxion \url{https://github.com/SaxionLED/skynav}
-Those two should be interchangable. For this project the move-base navigation
+Those two should be interchangable. They both publish the \rostopic{cmd\_vel} topic,
+subscribe to sensors such as laser, infrared and ultrasonic, and they receive
+navigation goals from a higher level module.
+For this project the move-base navigation
 stack was selected.
 
 \subsection{Kinematics}
@@ -468,27 +480,9 @@ The costmap consists of several input layers. The static layer takes the map as 
 gmapping and inflates it somehwat. The obstacle layer can incorporate different sensors.
 Rviz can be used to visualize these costmaps.
 
-\subsection{Global planning}
-
-\subsubsection{Global planner}
-The \rospackage{global-planner} package contains a global planner that uses simple search
-for an optimal path given a costmap. It is a plugin for use with move-base.
-
-\subsubsection{Navfn planner}
-The \rospackage{navfn} package provides another plugin for move-base for global navigation.
-This is an existing ROS module. It was tried on the x80sv, and is an alternative to \rospackage{global-planner}.
-
-\subsubsection{Move-base-ompl}
-Ompl is a motion planning library using random trees.
-Random trees follow the idea of randomly exploding a tree of all possible state of a robot
-given its current position and vehicle dynamics.
-An attempt was made to construct a global planner that uses the ompl library.
-The node runs, but the results are poor.
-
-\cite{globalompl}
-\cite{ompl}
-
 \subsection{Local planning}
+To implement local planning on the x80sv, the navigation tuning guide was followed closely
+\cite{tuningguide}.
 
 \subsubsection{Robot physical limits}
 In order to perform good navigation, certain robot parameters must be known. These include the
@@ -560,6 +554,27 @@ This planner follow the global path and when confronted with an obstacle simply
 reports that the plan has failed and waits for new commands from the global planner.
 This planner can be extended to include smooth motion profiles to the wheel base.
 
+\subsection{Global planning}
+
+\subsubsection{Global planner}
+The \rospackage{global-planner} package contains a global planner that uses simple search
+for an optimal path given a costmap. It is a plugin for use with move-base.
+This was the global navigation plugin that was used for the x80sv.
+
+\subsubsection{Navfn planner}
+The \rospackage{navfn} package provides another plugin for move-base for global navigation.
+This is an existing ROS module. It was tried on the x80sv, and is an alternative to \rospackage{global-planner}.
+
+\subsubsection{Move-base-ompl}
+Ompl is a motion planning library using random trees.
+Random trees follow the idea of randomly exploding a tree of all possible state of a robot
+given its current position and vehicle dynamics.
+During this project a wrapper was made around the ompl library, so that it
+is usable as a global planner.
+The node works as a plugin, but the results are poor. This must be investigated further.
+\cite{globalompl}
+\cite{ompl}
+
 \subsection{Recovery behavior}
 Sometimes the robot may come in a situation where the navigation fails. In this case, the 
 \rospackage{move-base} package
@@ -572,7 +587,34 @@ scanner. Obstacles that were closeby, may be removed by this action, so after a 
 can be retried.
 
 \subsection{Commanding the planner}
-The move-base node can be commanded via the actionlib package. There
+Once the global and local planners are in place, a navigation goal must be given.
+The move-base node can be commanded via the actionlib package. An action
+cannot be easily given via command line, but is possible using rviz.
+In rviz select "2d nav goal" and click a point on the map where the robot should go.
+Other nodes that publish navigation actions are the random driver and the frontier
+exploration.
+
+\subsubsection{Random driver}
+During this project, a python script was developed to steer the robot to predefined positions.
+This was done by using a simple action client object and sending these objects
+goals. By using simple action client, the goal could be sent and the result checked.
+
+\subsubsection{frontier exploration}
+The \rospackage{frontier-exploration} package contains a node that checks the map and 
+commands the move-base system to various goals in order to explore unknown space.
+To use this package, install it, and launch it with:
+
+\begin{lstlisting}[language=bash,caption={commands to determine robot limitations},
+    label=lst:robotlimits]
+roslaunch frontier_exploration global_map.launch
+\end{lstlisting}
+
+Then in rviz, click publish point and click four points in the map. This will create
+a polygon in which the frontier exploration will explore. To view the polygon,
+add a polygon marker in rviz for the exploration\_polygon\_marker topic.
+Finally publish a point inside the polygon. The move base system will now receive
+goal positions.
+
 
 \section{Results}
 
@@ -686,7 +728,30 @@ was the best evaluated local planner.
   \item The laptop on the robot should be replaced by an embedded solution, capable of
     running the navigation stack.
   \item The smooth-planner should be further fine-tuned and extended.
+  \item As an alternative for gmapping, the hector-slam module and amcl \cite{amcl}
+    should be tried as an alternative.
 \end{itemize}
 
+\appendix
+
+\section{Demo manual}
+To demo the robot with the navigation software, follow the following steps:
+
+Launch the robot driver on the robot:
+\begin{lstlisting}
+roslaunch x80sv_bringup real_robot_driver.launch
+\end{lstlisting}
+
+Now open rqt and use the robot steering plugin to verify that the robot moves.
+
+If the robot moves correctly, launch the navigation stack:
+\begin{lstlisting}
+roslaunch x80sv_navigation x80sv_navigation.launch
+\end{lstlisting}
+
+Now open rviz and give a navigation goal.
+
+
 \end{document}
+
 

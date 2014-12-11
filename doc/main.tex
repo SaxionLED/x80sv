@@ -26,7 +26,7 @@ linewidth=12.1cm
 \begin{document}
 
 \title{Implementation of 2d navigation for a moving base using ROS
-(version 0.2)
+(version 1.0)
 }
 \date{\today}
 \author{Windel Bouwman}
@@ -619,6 +619,30 @@ rosrun hector_trajectory_server hector_trajectory_server
 rosrun hector_geotiff geotiff_node map:=dynamic_map
 rostopic pub -r 1 /syscommand std_msgs/String "data: 'savegeotiff'"
 \end{lstlisting}
+
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/move_square/1.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/move_square/2.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/move_square/3.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/move_square/4.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/move_square/5.png}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{img/move_square/6.png}
+  \end{subfigure}
+  \caption{Simulated robot exploration and planning}
+\end{figure}
 
 
 \subsection{Issues encountered}

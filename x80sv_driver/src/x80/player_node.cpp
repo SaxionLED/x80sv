@@ -8,6 +8,7 @@
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose.h>
 #include <sensor_msgs/JointState.h>
+#include <sensor_msgs/PointCloud.h>
 
 
 using namespace std;
@@ -138,6 +139,7 @@ namespace DrRobot
         powerInfo_pub_ = node_.advertise<x80sv_driver::PowerInfo>("drrobot_powerinfo", 1);
         ir_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_ir", 1);
         sonar_pub_ = node_.advertise<x80sv_driver::RangeArray>("drrobot_sonar", 1);
+        range_cloud_pub_ = node_.advertise<sensor_msgs::PointCloud>("range_cloud", 3);
         standardSensor_pub_ = node_.advertise<x80sv_driver::StandardSensor>("drrobot_standardsensor", 1);
         customSensor_pub_ = node_.advertise<x80sv_driver::CustomSensor>("drrobot_customsensor", 1);
         actual_wheel_velocities_pub_ = node_.advertise<x80sv_driver::WheelVelocities>("actual_wheel_velocities", 1);
@@ -477,13 +479,14 @@ namespace DrRobot
                 motorInfoArray.motorInfos[i].motor_pwm = motorSensorData_.motorSensorPWM[i];
             }
 
-            //ROS_INFO("publish motor info array");
             motorInfo_pub_.publish(motorInfoArray);
 
-            x80sv_driver::RangeArray rangerArray;
-            rangerArray.ranges.resize(US_NUM);
+            sensor_msgs::PointCloud pointCloud;
+
             if (enable_sonar_)
             {
+                x80sv_driver::RangeArray rangerArray;
+                rangerArray.ranges.resize(US_NUM);
                 for (uint32_t i = 0; i < US_NUM; ++i)
                 {
                     rangerArray.ranges[i].header.stamp = ros::Time::now();
@@ -494,8 +497,10 @@ namespace DrRobot
                     // around 30 degrees
                     rangerArray.ranges[i].field_of_view = 0.5236085;
                     rangerArray.ranges[i].max_range = 0.81;
-                    rangerArray.ranges[i].min_range = 0;
+                    rangerArray.ranges[i].min_range = 0.1;
                     rangerArray.ranges[i].radiation_type = sensor_msgs::Range::ULTRASOUND;
+
+                    addRangeToCloud(rangerArray.ranges[i], pointCloud);
                 }
 
                 sonar_pub_.publish(rangerArray);
@@ -503,6 +508,7 @@ namespace DrRobot
 
             if (enable_ir_)
             {
+                x80sv_driver::RangeArray rangerArray;
                 rangerArray.ranges.resize(IR_NUM);
                 for (uint32_t i = 0; i < IR_NUM; ++i)
                 {
@@ -511,9 +517,24 @@ namespace DrRobot
                     rangerArray.ranges[i].header.frame_id += boost::lexical_cast<std::string>(i);
                     rangerArray.ranges[i].range = ad2Dis(rangeSensorData_.irRangeSensor[i]);
                     rangerArray.ranges[i].radiation_type = sensor_msgs::Range::INFRARED;
+
+                    // TODO: check these limits?
+                    rangerArray.ranges[i].max_range = 0.50;
+                    rangerArray.ranges[i].min_range = 0.10;
+
+                    addRangeToCloud(rangerArray.ranges[i], pointCloud);
                 }
 
                 ir_pub_.publish(rangerArray);
+            }
+
+            // Publish obstacle data in cloud form:
+            if (pointCloud.points.size() > 0)
+            {
+                pointCloud.header.stamp = ros::Time::now();
+                pointCloud.header.frame_id = "/base_link";
+                range_cloud_pub_.publish(pointCloud);
+                // TODO: publish in topic of type pointcloud2
             }
 
             x80sv_driver::StandardSensor standardSensor;
@@ -582,4 +603,124 @@ namespace DrRobot
             stat.add("power packets error", packets_error);
     }
 
+
+    // Convert range to coordinates and add it into point cloud
+    // This can be used to take both ir and us range data into a single pointcloud.
+    // This function is aware of positions of the sensors
+    void PlayerNode::addRangeToCloud(const sensor_msgs::Range& range, sensor_msgs::PointCloud& pointCloud)
+    {
+        // convert range arrays here to RangeDefinedArray (this means adding the angle and distance toward centroid of robot)
+        float angleFromCenterDegrees = 0;
+        float distanceFromCenterMM = 0;
+        float yOffsetFromCenterMM = 0;
+
+        if (range.radiation_type == sensor_msgs::Range::ULTRASOUND)
+        {
+            // get sensor id number from the header.frame_id string
+            string frame_id = range.header.frame_id;
+
+            uint8_t sensorID = frame_id.at(14) - 48; // drrobot_sonar_# where # is the number we want, the prefix is defined in the drrobot_player.cpp file
+
+            switch (sensorID)
+            {
+                // add angle and distance from centroid in this switchcase
+
+                case 0: // front left
+                    angleFromCenterDegrees = 45; //in degrees
+                    distanceFromCenterMM = 194.08; // in mm
+                    yOffsetFromCenterMM = -2.36;
+                    break;
+                case 1: // middle
+                    angleFromCenterDegrees = 0;
+                    distanceFromCenterMM = 191.50;
+                    yOffsetFromCenterMM = 0;
+                    break;
+                case 2: // front right
+                    angleFromCenterDegrees = -45;
+                    distanceFromCenterMM = 194.08;
+                    yOffsetFromCenterMM = 2.36;
+                    break;
+                default:
+                    ROS_ERROR("invalid SONAR sensor ID found: %u", sensorID);
+                    return;
+            }
+
+        }
+        else if (range.radiation_type == sensor_msgs::Range::INFRARED)
+        {
+            // get sensor id number from the header.frame_id string
+            string frame_id = range.header.frame_id;
+
+            uint8_t sensorID = frame_id.at(11) - 48; // drrobot_ir_# where # is the number we want, the prefix is defined in the drrobot_player.cpp file
+
+            switch (sensorID)
+            {
+                // add angle and distance from centroid in this switchcase
+                // angle based on front (so straight ahead = 0 degrees)
+
+                case 0: // front left
+                    angleFromCenterDegrees = 33.75; //in degrees
+                    distanceFromCenterMM = 190.82; // in mm
+                    yOffsetFromCenterMM = -6.57;
+                    break;
+                case 1: // front left mid
+                    angleFromCenterDegrees = 11.25;
+                    distanceFromCenterMM = 186.76;
+                    yOffsetFromCenterMM = 4.34;
+                    break;
+                case 2: // front right mid
+                    angleFromCenterDegrees = -11.25;
+                    distanceFromCenterMM = 186.76;
+                    yOffsetFromCenterMM = -4.34;
+                    break;
+                case 3: // front right
+                    angleFromCenterDegrees = -33.75;
+                    distanceFromCenterMM = 190.82;
+                    yOffsetFromCenterMM = 6.57;
+                    break;
+                case 4: // right side
+                    angleFromCenterDegrees = -90;
+                    distanceFromCenterMM = 121;
+                    yOffsetFromCenterMM = 0;
+                    break;
+                case 5: // back side
+                    angleFromCenterDegrees = -180;
+                    distanceFromCenterMM = 186;
+                    yOffsetFromCenterMM = 0;
+                    break;
+                case 6: // left side
+                    angleFromCenterDegrees = 90;
+                    distanceFromCenterMM = 121;
+                    yOffsetFromCenterMM = 0;
+                    break;
+                default:
+                    ROS_ERROR("invalid IR sensor ID found: %u", sensorID);
+                    return;
+            }
+        }
+        else
+        {
+            ROS_ERROR("invalid or NYI sensor type found");
+        }
+
+        // skip if not within limits:
+        if (range.range > range.min_range && range.range < range.max_range)
+        { 
+            float angleFromCenter = angleFromCenterDegrees / 180 * M_PI; // save as rads
+            float distanceFromCenter = distanceFromCenterMM / 1000; // save as meters
+            float yOffsetFromCenter = yOffsetFromCenterMM / 1000; // as meters
+            
+            double alpha = angleFromCenter; // sensor angle + current pose angle
+            double distance = distanceFromCenter + range.range; // sensor range + offset from center
+
+            geometry_msgs::Point32 p;
+            p.x = (cos(alpha) * distance); // add current pose x
+            p.y = (sin(alpha) * distance) + yOffsetFromCenter; // y
+
+            pointCloud.points.push_back(p);
+        }
+    }
 }
+
+
+

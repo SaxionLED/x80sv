@@ -30,9 +30,12 @@ base_local_planner: "dwa_local_planner/DWAPlannerROS"
 #base_local_planner: "smooth_local_planner/SmoothLocalPlanner"
 
 
-recovery_behaviors:
-  - name: 'rotate_clear'
-    type: 'rotate_recovery/RotateRecovery'
+# Stick to the default:
+#recovery_behaviors:
+#  - name: 'rotate_clear'
+#    type: 'rotate_recovery/RotateRecovery'
+#  - name: 'aggressive_reset'
+#    type: 'clear_costmap_recovery/ClearCostmapRecovery'
 
 # For DWA local planner:
 DWAPlannerROS:

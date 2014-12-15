@@ -16,8 +16,6 @@ add_message_files(
   PowerInfo.msg
   StandardSensor.msg
   RangeArray.msg
-  RangeDefined.msg
-  RangeDefinedArray.msg
 )
 
 generate_messages(
@@ -51,11 +49,6 @@ add_executable(neato_laser_publisher src/revo_lds/neato_laser_publisher.cpp)
 target_link_libraries(neato_laser_publisher xv11_laser_driver)
 target_link_libraries(neato_laser_publisher ${Boost_LIBRARIES})
 target_link_libraries(neato_laser_publisher ${catkin_LIBRARIES})
-
-# robot wrapper
-add_executable(robot_wrapper src/robot_wrapper.cpp)
-target_link_libraries(robot_wrapper ${catkin_LIBRARIES})
-add_dependencies(robot_wrapper x80sv_driver_gencpp)
 
 catkin_add_gtest(laser_driver_test test/test_laser.cpp)
 target_link_libraries(laser_driver_test xv11_laser_driver)

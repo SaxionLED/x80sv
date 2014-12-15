@@ -48,6 +48,7 @@ namespace DrRobot
             ros::Publisher powerInfo_pub_;
             ros::Publisher ir_pub_;
             ros::Publisher sonar_pub_;
+            ros::Publisher range_cloud_pub_;
             ros::Publisher standardSensor_pub_;
             ros::Publisher customSensor_pub_;
 
@@ -86,7 +87,7 @@ namespace DrRobot
             ros::Subscriber cmd_wheel_velocities_sub_;
             ros::Publisher actual_wheel_velocities_pub_;
             ros::Publisher requested_wheel_velocities_pub_;
-	ros::Publisher actual_wheel_positions_pub_;
+            ros::Publisher actual_wheel_positions_pub_;
             ros::Publisher smoothed_wheel_velocities_pub_;
             SignalProcessing::IirFilter _left_wheel_filter;
             SignalProcessing::IirFilter _right_wheel_filter;
@@ -118,6 +119,7 @@ namespace DrRobot
             double ad2Dis(int adValue);
             void calculateMovementDelta(x80sv_driver::MotorInfo& mtr, int& encoderPrevious, double& movementDelta, double& joint_angle);
             double encoder2rad(int enc_value);
+            void addRangeToCloud(const sensor_msgs::Range& range, sensor_msgs::PointCloud& pointCloud);
 
     };
 

@@ -107,7 +107,7 @@ It may be handy to add this export to your bashrc.
 - Log into the x80sv laptop by using ssh:
 >_hostpc:~/catkin_ws $ ssh x80sv_
 
-This is convenient, but not required. You can also start the software on the laptop by using the laptop itself!
+This is recommended, but not required. You can also start the software on the laptop by using the laptop itself!
 
 - Press the red button to power the baseboard. There should be leds blinking on the baseboard. Connect the laser
  scanner with the usb port. It should start to rotate.

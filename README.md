@@ -94,7 +94,7 @@ and if not, set this environment variable:
 It may be handy to add this export to your bashrc.
 
 - Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup
-  such that hostnames are resolved correctly. _http://en.wikipedia.org/wiki/Hosts_%28file%29_
+  such that hostnames are resolved correctly.
 
 - Launch the robot drivers on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_

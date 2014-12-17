@@ -60,14 +60,21 @@ Simulation
 - Run the simulated version of the robot:
 >_:~/catkin_ws $ roslaunch x80sv_bringup sim_world.launch_
 
-- Launch rviz and add views to visualize the robot:
+- Launch the navigation system for the x80sv:
+>_:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
+
+- Launch rviz (_http://wiki.ros.org/rviz_):
 >_:~/catkin_ws $ rviz_
+  and visualize the following topics:
+  - /map
+  - /laser/scan
+  and visualize the following objects:
+  - robot model
+  - tf
 
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_
 
-- Launch the navigation system for the x80sv:
->_:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
 
 ----------
 Quick demo

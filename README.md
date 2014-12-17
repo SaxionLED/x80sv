@@ -118,5 +118,7 @@ Robot steering
   
  alternatively you can open the file "rviz_config.rviz"
 
+  - Now in rviz select 2D Nav Goal and select a point on the map where you want the robot to move.
+
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_

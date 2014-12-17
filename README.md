@@ -42,7 +42,7 @@ _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_
 >_:~/catkin_ws $ catkin_make run_tests_
 
 - It is convenient to add the following line to your .bashrc:
->_ _
+>_source ~/catkin_ws/devel/setup.bash_
   
 - Only the x80sv laptop:
   - Setup serial ports to right setup and add useraccount to 'dialout' group   
@@ -66,9 +66,12 @@ Simulation
 - Launch rviz (_http://wiki.ros.org/rviz_):
 >_:~/catkin_ws $ rviz_
   and visualize the following topics:
+
   - /map
   - /laser/scan
+  
   and visualize the following objects:
+
   - robot model
   - tf
 
@@ -82,12 +85,6 @@ Quick demo
 
 - Install all software (as described above) on the x80sv laptop (if not already done).
 
-- Launch the robot drivers on the robot laptop:
->_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
-
-- Launch the navigation system for the x80sv on the robot laptop:
->_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
-
 - On the host pc make sure that the ROS_MASTER_URI is set to point to the robot:
 >_hostpc:~/catkin_ws $ env | grep ROS_MASTER_URI_
 and if not, set this environment variable:
@@ -95,4 +92,10 @@ and if not, set this environment variable:
 It may be handy to add this export to your bashrc.
 
 - Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup
-  such that hostnames are resolved correctly.
+  such that hostnames are resolved correctly. _http://en.wikipedia.org/wiki/Hosts_%28file%29_
+
+- Launch the robot drivers on the robot laptop:
+>_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
+
+- Launch the navigation system for the x80sv on the robot laptop:
+>_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_

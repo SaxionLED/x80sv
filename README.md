@@ -11,6 +11,9 @@ Container for x80sv description, simulation and drivers
 quick install notes
 -------------------
 
+This section describes how to install this software package on a new machine. If the software
+was already present, you can skip this section.
+
 - Install ubuntu 14.04-LTS  
 _http://www.ubuntu.com/_
 
@@ -57,26 +60,14 @@ _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_
 Simulation
 ----------
 
+This section describes how to run the simulation of the x80sv robot. For this, only a single
+PC is required.
+
 - Run the simulated version of the robot:
 >_:~/catkin_ws $ roslaunch x80sv_bringup sim_world.launch_
 
 - Launch the navigation system for the x80sv:
 >_:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
-
-- Launch rviz (_http://wiki.ros.org/rviz_):
->_:~/catkin_ws $ rviz_
-  and visualize the following topics:
-
-  - /map
-  - /laser/scan
-  
-  and visualize the following objects:
-
-  - robot model
-  - tf
-
-- Launch rqt and use the robot steering plugin to steer the robot:
->_:~/catkin_ws $ rqt_
 
 
 ----------
@@ -101,3 +92,22 @@ It may be handy to add this export to your bashrc.
 
 - Launch the navigation system for the x80sv on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
+
+--------------
+Robot steering
+--------------
+
+- Launch rviz (_http://wiki.ros.org/rviz_):
+>_:~/catkin_ws $ rviz_
+  and visualize the following topics:
+
+  - /map
+  - /laser/scan
+  
+  and visualize the following objects:
+
+  - robot model
+  - tf
+
+- Launch rqt and use the robot steering plugin to steer the robot:
+>_:~/catkin_ws $ rqt_

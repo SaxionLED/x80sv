@@ -63,14 +63,14 @@ Simulation
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_
 
+- Launch the navigation system for the x80sv:
+>_:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
 ----------
 Quick demo
 ----------
 
-- RUN
-  - For launching the robot drivers   
->_:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_  
- 
-  - Or launch the full skynav navigation package and the gmapping and x80 drivers for full robot navigational control 
->_:~/catkin_ws $ roslaunch x80sv_bringup skynav_real_robot.launch_
-	
+- Install all software (as described above) on the x80sv laptop.
+
+- Launch the robot drivers on the robot laptop:
+>_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_  
+

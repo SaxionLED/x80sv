@@ -76,6 +76,7 @@ PC is required.
 
   This launches the gmapping node and the move base node.
 
+- To steer the robot see section robot steering.
 
 ----------
 Quick demo

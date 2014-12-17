@@ -106,6 +106,7 @@ Robot steering
 
 - Launch rviz (_http://wiki.ros.org/rviz_):
 >_:~/catkin_ws $ rviz_
+
   and visualize the following topics:
 
   - /map

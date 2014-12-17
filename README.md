@@ -113,7 +113,7 @@ This is convenient, but not required. You can also start the software on the lap
  scanner with the usb port. It should start to rotate.
 
 - Launch the robot drivers on the robot laptop:
->_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
+>_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot_driver.launch_
 
 If everything is well, the usb led should be blinking.
 

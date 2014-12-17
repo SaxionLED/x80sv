@@ -76,10 +76,13 @@ PC is required.
 
   This launches the gmapping node and the move base node.
 
+- To steer the robot see section robot steering.
 
 ----------
 Quick demo
 ----------
+ This section describes how to start the software on the robot laptop.
+ 
 - Make sure that the hostpc and the x80sv laptop are in the same local network by
   using a router.
 
@@ -94,22 +97,36 @@ Quick demo
 and if not, set this environment variable:
 >_hostpc:~/catkin_ws $ export ROS_MASTER_URI=http://x80sv:11311/_
 
-It may be handy to add this export to your bashrc.
+It may be handy to add this export to your bashrc. bashrc is the config file that is run when a new terminal opens.
+So after editing this file, all shells must be restarted for this setting to take effect.
 
 - Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup
   such that hostnames are resolved correctly. If all is correct, it must be possible to
   do this:
 >_x80sv:~/catkin_ws $ ping x80sv_
 
+- Log into the x80sv laptop by using ssh:
+>_hostpc:~/catkin_ws $ ssh x80sv_
+
+This is recommended, but not required. You can also start the software on the laptop by using the laptop itself!
+
+- Press the red button to power the baseboard. There should be leds blinking on the baseboard. Connect the laser
+ scanner with the usb port. It should start to rotate.
+
 - Launch the robot drivers on the robot laptop:
->_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
+>_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot_driver.launch_
+
+If everything is well, the usb led should be blinking.
 
 - Launch the navigation system for the x80sv on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
 
+If anything goes wrong, just press the red button to poweroff the robot again.
+
 --------------
 Robot steering
 --------------
+This section describes how to control the robot.
 
 - Launch rviz (_http://wiki.ros.org/rviz_):
 >_:~/catkin_ws $ rviz_
@@ -130,3 +147,18 @@ Robot steering
 
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_
+
+-------------
+Shutting down
+-------------
+
+- Terminate all shells, by pressing CTRL-C and typing exit or closing the window.
+- Press the red button on the robot to power off the controller board.
+- Shut down the laptop on the x80sv
+
+----------------
+Trouble shooting
+----------------
+
+- When the robot has slipped and the map is corrupted, restart the x80sv_navigation.
+- The robot cannot scan obstacles lower than the laser scanner, remove those obstacles from the room.

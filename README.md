@@ -80,11 +80,16 @@ PC is required.
 ----------
 Quick demo
 ----------
+- Make sure that the hostpc and the x80sv laptop are in the same local network by
+  using a router.
 
-- Install all software (as described above) on the x80sv laptop (if not already done).
+- Install all software (as described above) on both the hostpc and the x80sv laptop (if not already done).
 
-- On the host pc make sure that the ROS_MASTER_URI is set to point to the robot:
+- On the host pc make sure that the ROS_MASTER_URI is set to point to the x80sv laptop. The command:
 >_hostpc:~/catkin_ws $ env | grep ROS_MASTER_URI_
+
+  should return:
+>_ROS_MASTER_URI=http://x80sv:11311/_
 
 and if not, set this environment variable:
 >_hostpc:~/catkin_ws $ export ROS_MASTER_URI=http://x80sv:11311/_
@@ -92,7 +97,9 @@ and if not, set this environment variable:
 It may be handy to add this export to your bashrc.
 
 - Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup
-  such that hostnames are resolved correctly.
+  such that hostnames are resolved correctly. If all is correct, it must be possible to
+  do this:
+>_x80sv:~/catkin_ws $ ping x80sv_
 
 - Launch the robot drivers on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_

@@ -87,8 +87,10 @@ Quick demo
 
 - On the host pc make sure that the ROS_MASTER_URI is set to point to the robot:
 >_hostpc:~/catkin_ws $ env | grep ROS_MASTER_URI_
+
 and if not, set this environment variable:
 >_hostpc:~/catkin_ws $ export ROS_MASTER_URI=http://x80sv:11311/_
+
 It may be handy to add this export to your bashrc.
 
 - Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup

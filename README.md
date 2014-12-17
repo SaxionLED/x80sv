@@ -97,7 +97,8 @@ Quick demo
 and if not, set this environment variable:
 >_hostpc:~/catkin_ws $ export ROS_MASTER_URI=http://x80sv:11311/_
 
-It may be handy to add this export to your bashrc.
+It may be handy to add this export to your bashrc. bashrc is the config file that is run when a new terminal opens.
+So after editing this file, all shells must be restarted for this setting to take effect.
 
 - Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup
   such that hostnames are resolved correctly. If all is correct, it must be possible to
@@ -146,6 +147,14 @@ This section describes how to control the robot.
 
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_
+
+-------------
+Shutting down
+-------------
+
+- Terminate all shells, by pressing CTRL-C and typing exit or closing the window.
+- Press the red button on the robot to power off the controller board.
+- Shut down the laptop on the x80sv
 
 ----------------
 Trouble shooting

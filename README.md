@@ -65,12 +65,20 @@ Simulation
 
 - Launch the navigation system for the x80sv:
 >_:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
+
 ----------
 Quick demo
 ----------
 
-- Install all software (as described above) on the x80sv laptop.
+- Install all software (as described above) on the x80sv laptop (if not already done).
 
 - Launch the robot drivers on the robot laptop:
->_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_  
+>_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
+
+- Launch the navigation system for the x80sv on the robot laptop:
+>_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
+
+- On the host pc make sure that the ROS_MASTER_URI is set to point to the robot
+>_hostpc:~/catkin_ws $ env | grep ROS_MASTER_URI_
+
 

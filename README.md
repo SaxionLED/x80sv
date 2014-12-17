@@ -8,7 +8,7 @@ Container for x80sv description, simulation and drivers
 
 
 -------------------
-quick install notes:
+quick install notes
 -------------------
 
 - Install ubuntu 14.04-LTS  
@@ -34,23 +34,38 @@ _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_
 	
   - for the x80sv robot drivers: 
 >_:~/catkin_ws/src $ git clone https://github.com/SaxionLED/x80sv.git_  
+
+- Build the project  
+>_:~/catkin_ws $ catkin_make_  
+ 
+- (Optional) Build and run the gtests and rostests (only if you want to run the testsuite)
+>_:~/catkin_ws $ catkin_make run_tests_   
   
 - Only the x80sv laptop:
   - Setup serial ports to right setup and add useraccount to 'dialout' group   
 >_$ useradd -G dialout [USER]_    
   
-  - Export the files from __x80sv/x80sv_driver/udev__ folder to __/etc/udev/rules.d__   
-	  for resolving the robot specific USB connections. These include usb to serial for controllerboard
-      and the lrs. Also the blink1 status led.
+  - Copy the files from __x80sv/x80sv_driver/udev__ to __/etc/udev/rules.d__ (if not already present)
+      this is required for resolving the robot specific USB connections. These include usb to serial 
+      for controllerboard,
+      the laser range sensor and the blink1 status led.
 
-- RUN
-  - To build the project  
->_:~/catkin_ws $ catkin_make_  
- 
-  - To build and run the gtests and rostests (only if you want to run the testsuite)
->_:~/catkin_ws $ catkin_make run_tests_   
- 
-- Connect the robot and laser via usb,  or run a robot simulator in gazebo  
+----------
+Simulation
+----------
+
+- Run the simulated version of the robot:
+>_:~/catkin_ws $ roslaunch x80sv_bringup sim_world.launch_
+
+- Launch rviz and add views to visualize the robot:
+>_:~/catkin_ws $ rviz_
+
+- Launch rqt and use the robot steering plugin to steer the robot:
+>_:~/catkin_ws $ rqt_
+
+----------
+Quick demo
+----------
 
 - RUN
   - For launching the robot drivers   

@@ -80,6 +80,8 @@ PC is required.
 ----------
 Quick demo
 ----------
+ This section describes how to start the software on the robot laptop.
+ 
 - Make sure that the hostpc and the x80sv laptop are in the same local network by
   using a router.
 
@@ -112,12 +114,17 @@ This is convenient, but not required. You can also start the software on the lap
 - Launch the robot drivers on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
 
+If everything is well, the usb led should be blinking.
+
 - Launch the navigation system for the x80sv on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
+
+If anything goes wrong, just press the red button to poweroff the robot again.
 
 --------------
 Robot steering
 --------------
+This section describes how to control the robot.
 
 - Launch rviz (_http://wiki.ros.org/rviz_):
 >_:~/catkin_ws $ rviz_

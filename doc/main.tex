@@ -36,7 +36,9 @@ linewidth=12.1cm
 \begin{abstract}
 This document describes the application of navigation software
 as available in ROS to the modified x80sv robot. Different ROS
-packages were evaluated on the robot.
+packages were evaluated on the robot. The move-base package was
+tuned for the x80sv and was tested on both real world
+and simulated environments.
 \end{abstract}
 
 \tableofcontents
@@ -100,8 +102,10 @@ The task of navigation can be split up into the following tasks (see figure \ref
 
 \begin{itemize}
   \item Robot control. This task is concerned with controlling the seperate wheels of the robot.
-  Typically this is done using PID control or something alike.
-  \item Odometry calculation. By keeping track of wheel motions, the robot position can be
+  Typically this is done using PID control or something alike. On the x80sv this is done two times, for the left and right wheel.
+  \item Kinematics takes care of odometry and translation from robot
+  velocity to wheel velocity. By keeping track of wheel motions, the 
+  robot position can be
 calculated. This method is subjective to drift.
   \item Position and mapping, also known as SLAM, is the task of determining location of the robot in 
   the world, and at the same time reconstructing the world.
@@ -329,7 +333,8 @@ of the robot in world coordinates.
 
 The velocity control is done by the controllerboard of the robot. The commands to
 the controllerboard are wheel velocities in encoder ticks. A conversion from linear
-and angular velocities to wheel velocities is required.
+and angular velocities of the robot ($v$ and $\omega$) to wheel velocities
+($\omega_{left}$ and $\omega_{right}$) is required.
 
 \begin{equation}
         \omega_{left} = \frac{v - \frac{1}{2} * \omega * l_{base}}{r_{wheel}}

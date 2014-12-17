@@ -63,6 +63,11 @@ Simulation
 This section describes how to run the simulation of the x80sv robot. For this, only a single
 PC is required.
 
+- Note: If you have used the real robot, make sure that the roscore is running on the x80sv laptop.
+  If you do not have the x80sv robot, make sure to comment out this line:
+   export ROS_MASTER_URI=http://x80sv:11311/
+  in your ~/.bashrc file.
+
 - Run the simulated version of the robot:
 >_:~/catkin_ws $ roslaunch x80sv_bringup sim_world.launch_
 

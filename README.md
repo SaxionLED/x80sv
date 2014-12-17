@@ -102,7 +102,7 @@ It may be handy to add this export to your bashrc.
 >_x80sv:~/catkin_ws $ ping x80sv_
 
 - Log into the x80sv laptop by using ssh:
->_hostpc:~/catkin_ws $ ssh x80sv _
+>_hostpc:~/catkin_ws $ ssh x80sv_
 
 This is convenient, but not required. You can also start the software on the laptop by using the laptop itself!
 

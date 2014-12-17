@@ -39,7 +39,10 @@ _http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment_
 >_:~/catkin_ws $ catkin_make_  
  
 - (Optional) Build and run the gtests and rostests (only if you want to run the testsuite)
->_:~/catkin_ws $ catkin_make run_tests_   
+>_:~/catkin_ws $ catkin_make run_tests_
+
+- It is convenient to add the following line to your .bashrc:
+>_ _
   
 - Only the x80sv laptop:
   - Setup serial ports to right setup and add useraccount to 'dialout' group   
@@ -78,7 +81,11 @@ Quick demo
 - Launch the navigation system for the x80sv on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
 
-- On the host pc make sure that the ROS_MASTER_URI is set to point to the robot
+- On the host pc make sure that the ROS_MASTER_URI is set to point to the robot:
 >_hostpc:~/catkin_ws $ env | grep ROS_MASTER_URI_
+and if not, set this environment variable:
+>_hostpc:~/catkin_ws $ export ROS_MASTER_URI=http://x80sv:11311/_
+It may be handy to add this export to your bashrc.
 
-
+- Make sure that on both hostpc and x80sv laptop, the /etc/hosts file is setup
+  such that hostnames are resolved correctly.

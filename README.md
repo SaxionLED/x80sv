@@ -74,6 +74,8 @@ PC is required.
 - Launch the navigation system for the x80sv:
 >_:~/catkin_ws $ roslaunch x80sv_navigation x80sv_navigation.launch_
 
+  This launches the gmapping node and the move base node.
+
 
 ----------
 Quick demo
@@ -113,6 +115,8 @@ Robot steering
 
   - robot model
   - tf
+  
+ alternatively you can open the file "rviz_config.rviz"
 
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_

@@ -106,6 +106,9 @@ It may be handy to add this export to your bashrc.
 
 This is convenient, but not required. You can also start the software on the laptop by using the laptop itself!
 
+- Press the red button to power the baseboard. There should be leds blinking on the baseboard. Connect the laser
+ scanner with the usb port. It should start to rotate.
+
 - Launch the robot drivers on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
 

@@ -742,11 +742,40 @@ was the best evaluated local planner.
 \appendix
 
 \section{Demo manual}
+Install ros indigo the software from github \cite{x80sv} onto the robot laptop and the host pc.
+
+Make sure the networking settings are setup correct. This means the the file
+\url{/etc/hosts} must contain something like this:
+
+\begin{lstlisting}
+127.0.0.1   localhost
+192.168.10.102 x80sv
+\end{lstlisting}
+
+Test this by doing a ping command from the host pc to the x80sv laptop and
+vice versa:
+
+\begin{lstlisting}
+user@hostpc$ ping x80sv
+\end{lstlisting}
+
+To run the demo, the roscore program must be started on the robot:
+\begin{lstlisting}
+user@x80sv$ roscore
+\end{lstlisting}
+
+On the host pc make sure that the \url{ROS_MASTER_URI} environment variable is
+set.
+
+\begin{lstlisting}
+user@hostpc$ export ROS_MASTER_URI=http://x80sv:11311/
+\end{lstlisting}
+
 To demo the robot with the navigation software, follow the following steps:
 
-Launch the robot driver on the robot:
+Launch the robot driver in a new terminal window on the robot:
 \begin{lstlisting}
-roslaunch x80sv_bringup real_robot_driver.launch
+user@x80sv$ roslaunch x80sv_bringup real_robot_driver.launch
 \end{lstlisting}
 
 Now open rqt and use the robot steering plugin to verify that the robot moves.
@@ -754,14 +783,17 @@ Now open rqt and use the robot steering plugin to verify that the robot moves.
 If the robot moves correctly, launch the navigation stack (either on the robot itself
 or another laptop or PC in the case of ros multimaster mode):
 \begin{lstlisting}
-roslaunch x80sv_navigation x80sv_navigation.launch
+user@x80sv$ roslaunch x80sv_navigation x80sv_navigation.launch
 \end{lstlisting}
 
 Now open rviz and give a navigation goal by using the 2d nav goal tool in rviz.
 To visualize different topics rviz, in the view panel click add, and add the robot
 model, the laserscan message and the map.
 
+\begin{lstlisting}
+user@hostpc$ rviz
+\end{lstlisting}
+
 
 \end{document}
-
 

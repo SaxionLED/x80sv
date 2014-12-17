@@ -101,6 +101,11 @@ It may be handy to add this export to your bashrc.
   do this:
 >_x80sv:~/catkin_ws $ ping x80sv_
 
+- Log into the x80sv laptop by using ssh:
+>_hostpc:~/catkin_ws $ ssh x80sv _
+
+This is convenient, but not required. You can also start the software on the laptop by using the laptop itself!
+
 - Launch the robot drivers on the robot laptop:
 >_x80sv:~/catkin_ws $ roslaunch x80sv_bringup real_robot.launch_
 

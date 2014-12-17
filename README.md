@@ -146,3 +146,10 @@ This section describes how to control the robot.
 
 - Launch rqt and use the robot steering plugin to steer the robot:
 >_:~/catkin_ws $ rqt_
+
+----------------
+Trouble shooting
+----------------
+
+- When the robot has slipped and the map is corrupted, restart the x80sv_navigation.
+- The robot cannot scan obstacles lower than the laser scanner, remove those obstacles from the room.

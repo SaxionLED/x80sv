@@ -50,9 +50,10 @@ class AlphaBeta:
         # Check parameters:
         assert 0 < alpha and alpha < 1
         assert 0 < beta and beta < 2
-        assert 0 < 4 - 2*alpha - beta
+        assert 0 < 4 - 2 * alpha - beta
 
     def add_sample(self, x):
+        """ Feed one sample through the estimator """
         # Update estimations:
         self.x_est += self.dt * self.v_est
 
@@ -83,10 +84,34 @@ pos = read_csv('pos.csv', index_col=0)
 pos.index = pd.to_datetime(pos.index)
 vel = read_csv('vel.csv', index_col=0)
 vel.index = pd.to_datetime(vel.index)
+cmd_vel = read_csv('cmd_vel.csv', index_col=0)
+cmd_vel.index = pd.to_datetime(cmd_vel.index)
+
+# Construct numpy arrays:
+pos_val = pos['field.right'].values
 
 # Apply alpha beta filter:
-alpha_beta = AlphaBeta(alpha=0.5, beta=0.1)
+# alpha_beta = AlphaBeta(alpha=0.5, beta=0.1)
+alpha_beta = AlphaBeta(alpha=0.6, beta=0.1)
 p_est, v_est = alpha_beta.filter_data(pos['field.right'].values)
+
+# Fit polynomial function, and derive this one:
+# np.polyfit()
+def poly_derivation():
+    fit_v = []
+    N = 3
+    M = 6
+    for i in range(pos_val.size - M):
+        slize = pos_val[i:i+M]
+        print(slize)
+        coeffs = np.polyfit(slize, np.arange(M), N)
+        p1 = np.poly1d(coeffs)
+        p_v = p1.deriv()
+        v = p_v(M - 2)
+        print(p_v, v)
+        # print(v)
+        fit_v.append(v)
+
 
 # Create new and old arrays:
 vel_new = np.array(v_est)
@@ -97,10 +122,13 @@ plt.figure()
 plt.hold(True)
 plt.plot(vel_new)
 plt.plot(vel_old)
+# plt.plot(fit_v)
 #vel.plot()
 #pos.plot()
 
+cmd_vel.plot()
+
 # End:
-#ipdb.set_trace()
+ipdb.set_trace()
 plt.show()
 
